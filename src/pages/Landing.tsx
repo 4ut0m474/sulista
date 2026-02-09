@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, MapPin, Check, Shield } from "lucide-react";
+import { ChevronDown, MapPin, Shield } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,7 +10,6 @@ import LandingHeader from "@/components/LandingHeader";
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
-  const [confirmed, setConfirmed] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ const Landing = () => {
     return citiesByState[selectedState] || [];
   }, [selectedState]);
 
-  const canLogin = selectedCity !== "" && confirmed;
+  const canLogin = selectedCity !== "";
 
   const handleGoogleLogin = () => {
     if (!canLogin) return;
@@ -141,19 +140,6 @@ const Landing = () => {
                   </div>
                 )}
               </div>
-
-              {/* Human confirmation */}
-              <button
-                onClick={() => setConfirmed(!confirmed)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background/80 backdrop-blur-sm hover:border-primary/30 hover:bg-background transition-all shadow-sm"
-              >
-                <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all ${
-                  confirmed ? "bg-primary border-primary shadow-md" : "border-muted-foreground/40"
-                }`}>
-                  {confirmed && <Check className="w-4 h-4 text-primary-foreground" />}
-                </div>
-                <span className={`font-medium text-foreground ${textSizeClass}`}>{t("confirmHuman")}</span>
-              </button>
 
               {/* Google Login Button */}
               <button

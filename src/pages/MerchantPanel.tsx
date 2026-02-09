@@ -46,8 +46,14 @@ const MerchantPanel = () => {
   };
 
   const handleAdminLogin = () => {
-    const storedPass = localStorage.getItem("admin_password") || "123456";
-    if (adminLogin === "EERB1976" && adminPass === storedPass) {
+    const storedUser = localStorage.getItem("admin_username");
+    const storedPass = localStorage.getItem("admin_password");
+    if (!storedUser || !storedPass) {
+      setAdminError("Nenhuma conta de administrador configurada.");
+      return;
+    }
+    if (adminLogin === storedUser && adminPass === storedPass) {
+      sessionStorage.setItem("admin_authenticated", "true");
       navigate(`${base}/admin`);
     } else {
       setAdminError("Login ou senha incorretos");

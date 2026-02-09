@@ -36,7 +36,8 @@ const MerchantPanel = () => {
   };
 
   const handleAdminLogin = () => {
-    if (adminLogin === "EERB1976" && adminPass === "EERB197666") {
+    const storedPass = localStorage.getItem("admin_password") || "123456";
+    if (adminLogin === "EERB1976" && adminPass === storedPass) {
       navigate(`${base}/admin`);
     } else {
       setAdminError("Login ou senha incorretos");
@@ -112,7 +113,7 @@ const MerchantPanel = () => {
               Ver Planos
             </button>
             <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
-              <Phone className="w-3 h-3" /> (41) 99235-5421
+              <Phone className="w-3 h-3" /> (41) 99235-4211
             </p>
           </div>
 

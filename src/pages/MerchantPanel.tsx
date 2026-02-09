@@ -26,10 +26,20 @@ const MerchantPanel = () => {
       setError("Preencha todos os campos");
       return;
     }
-    // Demo: accept any name with code format XXXX
-    if (stallCode.length < 4) {
-      setError("Código inválido");
+    if (stallCode.length !== 12) {
+      setError("O código secreto deve ter 12 dígitos");
       return;
+    }
+    // Check against stored stall codes
+    const stallsKey = `admin_${state}_${city ? decodeURIComponent(city) : ""}_stalls`;
+    const storedStalls = localStorage.getItem(stallsKey);
+    if (storedStalls) {
+      const stalls = JSON.parse(storedStalls);
+      const match = stalls.find((s: any) => s.secretCode === stallCode.toUpperCase() && s.name && s.active);
+      if (!match) {
+        setError("Código secreto inválido ou barraca não encontrada");
+        return;
+      }
     }
     setLoggedIn(true);
     setError("");
@@ -64,7 +74,7 @@ const MerchantPanel = () => {
               <LogIn className="w-8 h-8 text-primary" />
             </div>
             <h2 className="font-display text-xl font-bold text-foreground">Login do Comerciante</h2>
-            <p className="text-sm text-muted-foreground">Entre com seu nome e o código secreto da sua barraca</p>
+            <p className="text-sm text-muted-foreground">Entre com seu nome e o código secreto de 12 dígitos da sua barraca</p>
 
             <div className="space-y-3 text-left">
               <div>
@@ -78,19 +88,21 @@ const MerchantPanel = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Código Secreto da Barraca</label>
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">Código Secreto (12 dígitos)</label>
                 <div className="relative">
                   <input
                     type={showCode ? "text" : "password"}
                     value={stallCode}
-                    onChange={e => setStallCode(e.target.value)}
-                    placeholder="Código recebido na compra"
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none pr-12"
+                    onChange={e => setStallCode(e.target.value.toUpperCase().slice(0, 12))}
+                    placeholder="Ex: A1B2C3D4E5F6"
+                    maxLength={12}
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none pr-12 font-mono tracking-wider"
                   />
                   <button onClick={() => setShowCode(!showCode)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     {showCode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <p className="text-[10px] text-muted-foreground mt-1">{stallCode.length}/12 caracteres</p>
               </div>
 
               {error && <p className="text-xs text-destructive font-semibold">{error}</p>}

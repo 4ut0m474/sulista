@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X } from "lucide-react";
+import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
-import { states, citiesByState } from "@/data/cities";
+import { states, citiesByState, getCityData } from "@/data/cities";
 
 // Helper to get/set admin data per city
 const getAdminData = (stateAbbr: string, cityName: string, section: string) => {
@@ -15,6 +15,38 @@ const setAdminData = (stateAbbr: string, cityName: string, section: string, data
   localStorage.setItem(key, JSON.stringify(data));
 };
 
+// Notifications helper
+const getNotifications = (): Notification[] => {
+  const stored = localStorage.getItem("admin_notifications");
+  return stored ? JSON.parse(stored) : defaultNotifications;
+};
+
+const saveNotifications = (notifs: Notification[]) => {
+  localStorage.setItem("admin_notifications", JSON.stringify(notifs));
+};
+
+export const addNotification = (notif: Omit<Notification, "id" | "timestamp" | "read">) => {
+  const notifs = getNotifications();
+  const newNotif: Notification = {
+    ...notif,
+    id: Date.now(),
+    timestamp: new Date().toLocaleString("pt-BR"),
+    read: false,
+  };
+  saveNotifications([newNotif, ...notifs]);
+};
+
+interface Notification {
+  id: number;
+  type: "purchase" | "city_update" | "merchant_update";
+  title: string;
+  description: string;
+  timestamp: string;
+  read: boolean;
+  city?: string;
+  state?: string;
+}
+
 interface EditableItem {
   id: number;
   name: string;
@@ -27,13 +59,31 @@ interface EditableItem {
   prize?: string;
   difficulty?: string;
   active?: boolean;
+  secretCode?: string;
 }
+
+const generateSecretCode = (): string => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 12; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+};
+
+const defaultNotifications: Notification[] = [
+  { id: 1, type: "purchase", title: "Nova compra de propaganda", description: "Comerciante João solicitou Plano Combo para Barraca 6 em Gramado-RS", timestamp: "09/02/2026 10:30", read: false, city: "Gramado", state: "RS" },
+  { id: 2, type: "merchant_update", title: "Comerciante atualizou produtos", description: "Comerciante 1 atualizou fotos da Barraca 1 em Morretes-PR", timestamp: "08/02/2026 15:20", read: true, city: "Morretes", state: "PR" },
+  { id: 3, type: "city_update", title: "Informações da cidade atualizadas", description: "Descrição de Florianópolis-SC foi alterada pelo admin", timestamp: "07/02/2026 09:00", read: true, city: "Florianópolis", state: "SC" },
+  { id: 4, type: "purchase", title: "Nova compra de propaganda", description: "Comerciante Maria solicitou Plano VIP para Barraca 10 em Curitiba-PR", timestamp: "06/02/2026 14:45", read: false, city: "Curitiba", state: "PR" },
+];
 
 const defaultStalls = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
   name: i <= 4 ? `Comerciante ${i + 1}` : "",
   description: i <= 4 ? "Produtos artesanais da região" : "",
   active: i <= 4,
+  secretCode: generateSecretCode(),
 }));
 
 const defaultCarousel = [
@@ -75,11 +125,15 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
 
-  const [activeTab, setActiveTab] = useState("stalls");
+  const [activeTab, setActiveTab] = useState("notifications");
   const [selectedState, setSelectedState] = useState(state || "");
   const [selectedCity, setSelectedCity] = useState(city ? decodeURIComponent(city) : "");
   const [editingItem, setEditingItem] = useState<EditableItem | null>(null);
   const [saveMsg, setSaveMsg] = useState("");
+
+  // Notification filter
+  const [notifFilter, setNotifFilter] = useState<"all" | "purchase" | "city_update" | "merchant_update">("all");
+  const [notifications, setNotifications] = useState<Notification[]>(getNotifications());
 
   // Password
   const [currentPass, setCurrentPass] = useState("");
@@ -88,6 +142,16 @@ const AdminPanel = () => {
   const [passMsg, setPassMsg] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+
+  // City settings
+  const [cityBirthday, setCityBirthday] = useState("");
+  const [cityDescription, setCityDescription] = useState("");
+  const [cityHistory, setCityHistory] = useState("");
+  const [cityFestivities, setCityFestivities] = useState("");
+  const [cityMsg, setCityMsg] = useState("");
+
+  // Copied code feedback
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   // Section data
   const [stalls, setStalls] = useState<EditableItem[]>([]);
@@ -110,6 +174,21 @@ const AdminPanel = () => {
     setExplore(getAdminData(selectedState, selectedCity, "explore") || defaultExplore);
     setTreasure(getAdminData(selectedState, selectedCity, "treasure") || defaultTreasure);
     setTrails(getAdminData(selectedState, selectedCity, "trails") || defaultTrails);
+
+    // Load city settings
+    const citySettings = getAdminData(selectedState, selectedCity, "city_settings");
+    if (citySettings) {
+      setCityBirthday(citySettings.birthday || "");
+      setCityDescription(citySettings.description || "");
+      setCityHistory(citySettings.history || "");
+      setCityFestivities(citySettings.festivities || "");
+    } else {
+      const defaultData = getCityData(selectedCity, selectedState);
+      setCityBirthday(defaultData.birthday);
+      setCityDescription(defaultData.description);
+      setCityHistory(defaultData.history);
+      setCityFestivities(defaultData.festivities);
+    }
   }, [selectedState, selectedCity]);
 
   const saveSection = (section: string, data: EditableItem[]) => {
@@ -119,9 +198,35 @@ const AdminPanel = () => {
     setTimeout(() => setSaveMsg(""), 2000);
   };
 
+  const saveCitySettings = () => {
+    if (!selectedState || !selectedCity) return;
+    setAdminData(selectedState, selectedCity, "city_settings", {
+      birthday: cityBirthday,
+      description: cityDescription,
+      history: cityHistory,
+      festivities: cityFestivities,
+    });
+    addNotification({
+      type: "city_update",
+      title: "Informações da cidade atualizadas",
+      description: `Configurações de ${selectedCity}-${selectedState} foram alteradas pelo admin`,
+      city: selectedCity,
+      state: selectedState,
+    });
+    setNotifications(getNotifications());
+    setCityMsg("Configurações da cidade salvas!");
+    setTimeout(() => setCityMsg(""), 2000);
+  };
+
   const addItem = (section: string, items: EditableItem[], setItems: (v: EditableItem[]) => void) => {
     const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
-    const newItem: EditableItem = { id: newId, name: "", description: "", active: true };
+    const newItem: EditableItem = {
+      id: newId,
+      name: "",
+      description: "",
+      active: true,
+      ...(section === "stalls" ? { secretCode: generateSecretCode() } : {}),
+    };
     const updated = [...items, newItem];
     setItems(updated);
     setEditingItem(newItem);
@@ -142,6 +247,26 @@ const AdminPanel = () => {
     saveSection(section, newItems);
   };
 
+  const regenerateCode = (stallId: number) => {
+    const updated = stalls.map(s => s.id === stallId ? { ...s, secretCode: generateSecretCode() } : s);
+    setStalls(updated);
+    saveSection("stalls", updated);
+    addNotification({
+      type: "merchant_update",
+      title: "Código secreto regenerado",
+      description: `Código da Barraca ${stallId} em ${selectedCity}-${selectedState} foi alterado`,
+      city: selectedCity,
+      state: selectedState,
+    });
+    setNotifications(getNotifications());
+  };
+
+  const copyCode = (code: string, stallId: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedId(stallId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const handlePasswordChange = () => {
     const storedPass = localStorage.getItem("admin_password") || "123456";
     if (currentPass !== storedPass) { setPassMsg("Senha atual incorreta"); return; }
@@ -152,7 +277,17 @@ const AdminPanel = () => {
     setCurrentPass(""); setNewPass(""); setConfirmPass("");
   };
 
+  const markAllRead = () => {
+    const updated = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(updated);
+    saveNotifications(updated);
+  };
+
+  const filteredNotifications = notifFilter === "all" ? notifications : notifications.filter(n => n.type === notifFilter);
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   const tabs = [
+    { id: "notifications", label: "Notificações", icon: Bell, badge: unreadCount },
     { id: "stalls", label: "Barracas", icon: Store },
     { id: "carousel", label: "Carrossel", icon: Image },
     { id: "promotions", label: "Promoções", icon: Tag },
@@ -160,9 +295,17 @@ const AdminPanel = () => {
     { id: "explore", label: "Explorar", icon: Compass },
     { id: "treasure", label: "Caça Tesouro", icon: Map },
     { id: "trails", label: "Trilhas", icon: TreePine },
-    { id: "cities", label: "Cidades", icon: MapPin },
+    { id: "city_settings", label: "Cidade", icon: FileText },
+    { id: "cities", label: "Lista Cidades", icon: MapPin },
     { id: "password", label: "Senha", icon: Lock },
     { id: "settings", label: "Config", icon: Settings },
+  ];
+
+  const notifFilterLabels = [
+    { id: "all", label: "Todas" },
+    { id: "purchase", label: "Compras" },
+    { id: "city_update", label: "Cidades" },
+    { id: "merchant_update", label: "Comerciantes" },
   ];
 
   // Edit modal
@@ -191,7 +334,7 @@ const AdminPanel = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setEditingItem(null)}>
-        <div className="w-full max-w-md bg-card rounded-2xl border border-border shadow-card p-5 space-y-3" onClick={e => e.stopPropagation()}>
+        <div className="w-full max-w-md bg-card rounded-2xl border border-border shadow-card p-5 space-y-3 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between">
             <h3 className="font-display text-lg font-bold text-foreground">Editar Item</h3>
             <button onClick={() => setEditingItem(null)}><X className="w-5 h-5 text-muted-foreground" /></button>
@@ -298,6 +441,55 @@ const AdminPanel = () => {
     </div>
   );
 
+  // Stalls list with secret codes
+  const renderStallsList = () => (
+    <div className="space-y-2">
+      {stalls.map((stall) => (
+        <div key={stall.id} className="bg-card rounded-xl border border-border p-3 shadow-card space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground truncate">Barraca #{stall.id} - {stall.name || "(sem nome)"}</p>
+              {stall.description && <p className="text-[10px] text-muted-foreground truncate">{stall.description}</p>}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button onClick={() => setEditingItem(stall)} className="p-1.5 rounded-lg hover:bg-muted"><Edit2 className="w-3.5 h-3.5 text-primary" /></button>
+              <button onClick={() => deleteItem("stalls", stall.id, stalls, setStalls)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+            </div>
+          </div>
+          {/* Secret code section */}
+          <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
+            <Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            <code className="text-xs font-mono font-bold text-foreground tracking-wider flex-1">
+              {stall.secretCode || "—"}
+            </code>
+            <button
+              onClick={() => stall.secretCode && copyCode(stall.secretCode, stall.id)}
+              className="p-1 rounded hover:bg-muted"
+              title="Copiar código"
+            >
+              {copiedId === stall.id ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
+            </button>
+            <button
+              onClick={() => regenerateCode(stall.id)}
+              className="p-1 rounded hover:bg-muted"
+              title="Gerar novo código"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-primary" />
+            </button>
+          </div>
+        </div>
+      ))}
+      <button onClick={() => addItem("stalls", stalls, setStalls)}
+        className="w-full py-2 rounded-lg border-2 border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1">
+        <Plus className="w-4 h-4" /> Adicionar Barraca
+      </button>
+      <button onClick={() => saveSection("stalls", stalls)}
+        className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2">
+        <Save className="w-4 h-4" /> Salvar Alterações
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-foreground text-background px-4 py-4">
@@ -339,16 +531,70 @@ const AdminPanel = () => {
         <div className="flex gap-1 overflow-x-auto p-3 border-b border-border bg-card">
           {tabs.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+              className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
                 activeTab === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
               }`}>
               <tab.icon className="w-4 h-4" /> {tab.label}
+              {tab.badge && tab.badge > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {tab.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
         <div className="p-4 space-y-4">
-          {!selectedCity && !["cities","password","settings"].includes(activeTab) && (
+          {/* NOTIFICATIONS TAB */}
+          {activeTab === "notifications" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-display text-lg font-bold text-foreground">Notificações</h2>
+                <button onClick={markAllRead} className="text-xs text-primary font-bold hover:underline">Marcar todas como lidas</button>
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-1.5 overflow-x-auto">
+                {notifFilterLabels.map(f => (
+                  <button key={f.id} onClick={() => setNotifFilter(f.id as any)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                      notifFilter === f.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}>
+                    <Filter className="w-3 h-3" /> {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Notification list */}
+              {filteredNotifications.length === 0 ? (
+                <div className="bg-card rounded-xl border border-border p-6 text-center">
+                  <Bell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhuma notificação</p>
+                </div>
+              ) : (
+                filteredNotifications.map(notif => (
+                  <div key={notif.id} className={`bg-card rounded-xl border p-3 shadow-card ${notif.read ? "border-border" : "border-primary/40 bg-primary/5"}`}>
+                    <div className="flex items-start gap-2">
+                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                        notif.type === "purchase" ? "bg-secondary" : notif.type === "city_update" ? "bg-primary" : "bg-accent-foreground"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-foreground">{notif.title}</p>
+                          {!notif.read && <span className="text-[8px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-bold">NOVA</span>}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{notif.description}</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">{notif.timestamp}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Content tabs that need city selection */}
+          {!selectedCity && !["notifications","cities","password","settings"].includes(activeTab) && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">
               <MapPin className="w-10 h-10 text-primary mx-auto mb-2" />
               <p className="text-sm font-bold text-foreground">Selecione um Estado e Cidade acima</p>
@@ -356,55 +602,91 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {(selectedCity || ["cities","password","settings"].includes(activeTab)) && (
+          {(selectedCity || ["notifications","cities","password","settings"].includes(activeTab)) && (
             <>
-              {activeTab === "stalls" && (
+              {activeTab === "stalls" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Barracas Digitais - {selectedCity}</h2>
-                  <p className="text-sm text-muted-foreground">Gerencie as 40 barracas digitais. Edite nome, descrição e status.</p>
-                  {renderList("stalls", stalls, setStalls)}
+                  <p className="text-sm text-muted-foreground">Gerencie barracas, códigos secretos de 12 dígitos e informações.</p>
+                  {renderStallsList()}
                 </div>
               )}
-              {activeTab === "carousel" && (
+              {activeTab === "carousel" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Carrossel de Propagandas - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Configure as propagandas do carrossel da página inicial.</p>
                   {renderList("carousel", carousel, setCarousel)}
                 </div>
               )}
-              {activeTab === "promotions" && (
+              {activeTab === "promotions" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Promoções - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Gerencie promoções e ofertas.</p>
                   {renderList("promotions", promotions, setPromotions)}
                 </div>
               )}
-              {activeTab === "events" && (
+              {activeTab === "events" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Eventos - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Gerencie eventos e atividades.</p>
                   {renderList("events", events, setEvents)}
                 </div>
               )}
-              {activeTab === "explore" && (
+              {activeTab === "explore" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Explorar - Ordem de Exibição - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Defina a ordem dos comércios. Use ▲▼ para reordenar.</p>
                   {renderList("explore", explore, setExplore, true)}
                 </div>
               )}
-              {activeTab === "treasure" && (
+              {activeTab === "treasure" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Caça ao Tesouro - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Configure pistas e prêmios.</p>
                   {renderList("treasure", treasure, setTreasure)}
                 </div>
               )}
-              {activeTab === "trails" && (
+              {activeTab === "trails" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Trilhas - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Gerencie trilhas e rotas turísticas.</p>
                   {renderList("trails", trails, setTrails)}
+                </div>
+              )}
+
+              {/* City Settings */}
+              {activeTab === "city_settings" && selectedCity && (
+                <div className="space-y-3">
+                  <h2 className="font-display text-lg font-bold text-foreground">Configurações da Cidade - {selectedCity}</h2>
+                  <p className="text-sm text-muted-foreground">Edite o resumo, aniversário, história e festividades da cidade.</p>
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground block mb-1">Aniversário da Cidade</label>
+                      <input value={cityBirthday} onChange={e => setCityBirthday(e.target.value)}
+                        placeholder="Ex: 12/03"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground block mb-1">Descrição da Cidade</label>
+                      <textarea value={cityDescription} onChange={e => setCityDescription(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground h-24 resize-none" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground block mb-1">História da Cidade</label>
+                      <textarea value={cityHistory} onChange={e => setCityHistory(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground h-24 resize-none" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground block mb-1">Festividades</label>
+                      <textarea value={cityFestivities} onChange={e => setCityFestivities(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground h-20 resize-none" />
+                    </div>
+                    {cityMsg && <p className="text-xs font-semibold text-primary">{cityMsg}</p>}
+                    <button onClick={saveCitySettings}
+                      className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2">
+                      <Save className="w-4 h-4" /> Salvar Configurações da Cidade
+                    </button>
+                  </div>
                 </div>
               )}
             </>
@@ -418,7 +700,7 @@ const AdminPanel = () => {
                   <h3 className="font-bold text-foreground mb-2">{st.name} ({citiesByState[st.abbr].length} cidades)</h3>
                   <div className="grid grid-cols-2 gap-1">
                     {citiesByState[st.abbr].map(c => (
-                      <button key={c} onClick={() => { setSelectedState(st.abbr); setSelectedCity(c); setActiveTab("stalls"); }}
+                      <button key={c} onClick={() => { setSelectedState(st.abbr); setSelectedCity(c); setActiveTab("city_settings"); }}
                         className="text-xs text-left text-muted-foreground hover:text-primary transition-colors">{c}</button>
                     ))}
                   </div>

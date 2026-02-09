@@ -125,6 +125,34 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
 
+  // Auth gate state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("admin_authenticated") === "true");
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const handleAdminAuth = () => {
+    const storedUser = localStorage.getItem("admin_username");
+    const storedPass = localStorage.getItem("admin_password");
+    if (!storedUser || !storedPass) {
+      setLoginError("Nenhuma conta de administrador configurada. Configure via Lovable Cloud.");
+      return;
+    }
+    if (loginUser === storedUser && loginPass === storedPass) {
+      sessionStorage.setItem("admin_authenticated", "true");
+      setIsAuthenticated(true);
+      setLoginError("");
+    } else {
+      setLoginError("Login ou senha incorretos");
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("admin_authenticated");
+    setIsAuthenticated(false);
+    navigate(base);
+  };
+
   const [activeTab, setActiveTab] = useState("notifications");
   const [selectedState, setSelectedState] = useState(state || "");
   const [selectedCity, setSelectedCity] = useState(city ? decodeURIComponent(city) : "");
@@ -268,7 +296,8 @@ const AdminPanel = () => {
   };
 
   const handlePasswordChange = () => {
-    const storedPass = localStorage.getItem("admin_password") || "123456";
+    const storedPass = localStorage.getItem("admin_password");
+    if (!storedPass) { setPassMsg("Nenhuma senha configurada"); return; }
     if (currentPass !== storedPass) { setPassMsg("Senha atual incorreta"); return; }
     if (newPass.length < 4) { setPassMsg("Nova senha deve ter pelo menos 4 caracteres"); return; }
     if (newPass !== confirmPass) { setPassMsg("As senhas não coincidem"); return; }
@@ -490,6 +519,48 @@ const AdminPanel = () => {
     </div>
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-card rounded-2xl border border-border p-6 shadow-card space-y-4">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full bg-foreground/10 flex items-center justify-center mx-auto mb-3">
+              <Lock className="w-8 h-8 text-foreground" />
+            </div>
+            <h1 className="font-display text-xl font-bold text-foreground">Painel Admin</h1>
+            <p className="text-sm text-muted-foreground mt-1">Faça login para acessar o painel</p>
+          </div>
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={loginUser}
+              onChange={e => setLoginUser(e.target.value)}
+              placeholder="Login"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+            />
+            <input
+              type="password"
+              value={loginPass}
+              onChange={e => setLoginPass(e.target.value)}
+              placeholder="Senha"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+            />
+            {loginError && <p className="text-xs text-destructive font-semibold">{loginError}</p>}
+            <button
+              onClick={handleAdminAuth}
+              className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all"
+            >
+              Entrar
+            </button>
+          </div>
+          <button onClick={() => navigate(base)} className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2">
+            ← Voltar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-foreground text-background px-4 py-4">
@@ -498,7 +569,7 @@ const AdminPanel = () => {
             <button onClick={() => navigate(`${base}/merchant`)} className="p-1 -ml-1"><ChevronLeft className="w-5 h-5" /></button>
             <h1 className="font-display text-xl font-bold">Painel Admin</h1>
           </div>
-          <button onClick={() => navigate(`${base}/merchant`)} className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
+          <button onClick={handleLogout} className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
             <LogOut className="w-4 h-4" /> Sair
           </button>
         </div>

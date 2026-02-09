@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { FontSizeProvider } from "@/contexts/FontSizeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Landing from "./pages/Landing";
 import CityHome from "./pages/CityHome";
 import DigitalMarket from "./pages/DigitalMarket";
@@ -21,27 +24,33 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/city/:state/:city" element={<CityHome />} />
-          <Route path="/city/:state/:city/market" element={<DigitalMarket />} />
-          <Route path="/city/:state/:city/market/:stallId" element={<StallDetail />} />
-          <Route path="/city/:state/:city/plans" element={<Plans />} />
-          <Route path="/city/:state/:city/treasure" element={<TreasureHunt />} />
-          <Route path="/city/:state/:city/opinion" element={<Opinion />} />
-          <Route path="/city/:state/:city/promotions" element={<Promotions />} />
-          <Route path="/city/:state/:city/events" element={<Events />} />
-          <Route path="/city/:state/:city/trails" element={<Trails />} />
-          <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
-          <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <FontSizeProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/city/:state/:city" element={<CityHome />} />
+                <Route path="/city/:state/:city/market" element={<DigitalMarket />} />
+                <Route path="/city/:state/:city/market/:stallId" element={<StallDetail />} />
+                <Route path="/city/:state/:city/plans" element={<Plans />} />
+                <Route path="/city/:state/:city/treasure" element={<TreasureHunt />} />
+                <Route path="/city/:state/:city/opinion" element={<Opinion />} />
+                <Route path="/city/:state/:city/promotions" element={<Promotions />} />
+                <Route path="/city/:state/:city/events" element={<Events />} />
+                <Route path="/city/:state/:city/trails" element={<Trails />} />
+                <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
+                <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </FontSizeProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -1,0 +1,49 @@
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+
+type FontSize = "normal" | "large" | "extra-large";
+
+interface FontSizeContextType {
+  fontSize: FontSize;
+  cycleFontSize: () => void;
+  fontClass: string;
+}
+
+const FontSizeContext = createContext<FontSizeContextType | undefined>(undefined);
+
+const fontClasses: Record<FontSize, string> = {
+  normal: "",
+  large: "text-lg",
+  "extra-large": "text-xl",
+};
+
+export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
+  const [fontSize, setFontSize] = useState<FontSize>(() => {
+    const stored = localStorage.getItem("sulista-font-size");
+    return (stored as FontSize) || "normal";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sulista-font-size", fontSize);
+    document.documentElement.dataset.fontSize = fontSize;
+  }, [fontSize]);
+
+  const cycleFontSize = () => {
+    setFontSize(prev => {
+      if (prev === "normal") return "large";
+      if (prev === "large") return "extra-large";
+      return "normal";
+    });
+  };
+
+  return (
+    <FontSizeContext.Provider value={{ fontSize, fontClass: fontClasses[fontSize], cycleFontSize }}>
+      {children}
+    </FontSizeContext.Provider>
+  );
+};
+
+export const useFontSize = () => {
+  const context = useContext(FontSizeContext);
+  if (!context) throw new Error("useFontSize must be used within FontSizeProvider");
+  return context;
+};

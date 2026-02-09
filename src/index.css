@@ -89,6 +89,15 @@
   h1, h2, h3 {
     font-family: 'Playfair Display', serif;
   }
+
+  /* Font size adjustments for accessibility */
+  [data-font-size="large"] {
+    font-size: 110%;
+  }
+
+  [data-font-size="extra-large"] {
+    font-size: 125%;
+  }
 }
 
 @layer utilities {

@@ -82,7 +82,7 @@ const CityHome = () => {
       </div>
 
       <div className="relative z-10">
-        <header className="px-4 py-4">
+        <header className="px-4 py-4 relative z-30">
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">

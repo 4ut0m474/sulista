@@ -1,5 +1,5 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { Home, Compass, Settings } from "lucide-react";
+import { Home, Compass, Settings, CloudSun } from "lucide-react";
 
 interface FooterNavProps {
   stateAbbr: string;
@@ -13,6 +13,7 @@ const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
   const items = [
     { label: "Início", icon: Home, path: base },
     { label: "Explorar", icon: Compass, path: `${base}/commerce` },
+    { label: "Tempo", icon: CloudSun, path: `${base}/weather` },
     { label: "Comerciante", icon: Settings, path: `${base}/merchant` },
   ];
 

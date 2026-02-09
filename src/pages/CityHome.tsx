@@ -173,11 +173,11 @@ const CityHome = () => {
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-2">{t("contact")}</h3>
               <div className="space-y-1.5">
-                <a href="https://wa.me/5541992355421" className={`flex items-center gap-2 text-primary font-semibold hover:underline ${textSizeClass}`}>
-                  <Phone className="w-4 h-4" /> (41) 99235-5421
+                <a href="https://wa.me/5541992354211" className={`flex items-center gap-2 text-primary font-semibold hover:underline ${textSizeClass}`}>
+                  <Phone className="w-4 h-4" /> (41) 99235-4211
                 </a>
-                <a href="mailto:contato@sulista.com" className={`flex items-center gap-2 text-primary font-semibold hover:underline ${textSizeClass}`}>
-                  <Mail className="w-4 h-4" /> contato@sulista.com
+                <a href="mailto:eerb1976@gmail.com" className={`flex items-center gap-2 text-primary font-semibold hover:underline ${textSizeClass}`}>
+                  <Mail className="w-4 h-4" /> eerb1976@gmail.com
                 </a>
               </div>
             </div>

@@ -20,6 +20,7 @@ import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
+import Weather from "./pages/Weather";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
                 <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
+                <Route path="/city/:state/:city/weather" element={<Weather />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

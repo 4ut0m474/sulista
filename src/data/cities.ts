@@ -16,37 +16,47 @@ export const states = [
   { name: "Rio Grande do Sul", abbr: "RS" },
 ];
 
+// Tourist cities first, then alphabetical
 export const citiesByState: Record<string, string[]> = {
   PR: [
-    "Curitiba", "Londrina", "Maringá", "Ponta Grossa", "Cascavel", "Foz do Iguaçu",
-    "São José dos Pinhais", "Colombo", "Guarapuava", "Paranaguá", "Araucária",
-    "Toledo", "Apucarana", "Campo Largo", "Pinhais", "Arapongas", "Almirante Tamandaré",
-    "Umuarama", "Piraquara", "Cambé", "Campo Mourão", "Fazenda Rio Grande",
-    "Paranavaí", "Sarandi", "Francisco Beltrão", "Pato Branco", "Cianorte",
-    "Telêmaco Borba", "Castro", "Rolândia", "Irati", "União da Vitória",
-    "Lapa", "Prudentópolis", "Palmas", "Ivaiporã", "Cornélio Procópio",
-    "Matinhos", "Morretes", "Antonina", "Guaratuba", "Ilha do Mel",
+    // Tourist cities
+    "Foz do Iguaçu", "Curitiba", "Morretes", "Ilha do Mel", "Antonina",
+    "Guaratuba", "Matinhos", "Paranaguá", "Lapa", "Castro", "Prudentópolis",
+    // Other cities
+    "Almirante Tamandaré", "Apucarana", "Arapongas", "Araucária",
+    "Cambé", "Campo Largo", "Campo Mourão", "Cascavel", "Cianorte",
+    "Colombo", "Cornélio Procópio", "Fazenda Rio Grande", "Francisco Beltrão",
+    "Guarapuava", "Irati", "Ivaiporã", "Londrina", "Maringá",
+    "Palmas", "Paranavaí", "Pato Branco", "Pinhais", "Piraquara",
+    "Ponta Grossa", "Rolândia", "São José dos Pinhais", "Sarandi",
+    "Telêmaco Borba", "Toledo", "Umuarama", "União da Vitória",
   ],
   SC: [
-    "Florianópolis", "Joinville", "Blumenau", "São José", "Chapecó", "Criciúma",
-    "Itajaí", "Jaraguá do Sul", "Palhoça", "Lages", "Balneário Camboriú",
-    "Brusque", "Tubarão", "São Bento do Sul", "Caçador", "Concórdia",
-    "Navegantes", "Rio do Sul", "Araranguá", "Gaspar", "Mafra",
-    "Camboriú", "Canoinhas", "Biguaçu", "Tijucas", "Imbituba",
-    "Bombinhas", "Penha", "Piçarras", "Garopaba", "Urussanga",
-    "Pomerode", "Treze Tílias", "São Joaquim", "Urubici", "Praia Grande",
-    "Governador Celso Ramos", "Porto Belo", "Itapema", "Nova Trento",
+    // Tourist cities
+    "Florianópolis", "Balneário Camboriú", "Bombinhas", "Blumenau",
+    "Pomerode", "Penha", "Garopaba", "São Joaquim", "Urubici",
+    "Treze Tílias", "Praia Grande", "Porto Belo", "Itapema",
+    // Other cities
+    "Araranguá", "Biguaçu", "Brusque", "Caçador", "Camboriú",
+    "Canoinhas", "Chapecó", "Concórdia", "Criciúma", "Gaspar",
+    "Governador Celso Ramos", "Imbituba", "Itajaí", "Jaraguá do Sul",
+    "Joinville", "Lages", "Mafra", "Navegantes", "Nova Trento",
+    "Palhoça", "Piçarras", "Rio do Sul", "São Bento do Sul",
+    "São José", "Tijucas", "Tubarão", "Urussanga",
   ],
   RS: [
-    "Porto Alegre", "Caxias do Sul", "Pelotas", "Canoas", "Santa Maria",
-    "Gravataí", "Viamão", "Novo Hamburgo", "São Leopoldo", "Rio Grande",
-    "Alvorada", "Passo Fundo", "Sapucaia do Sul", "Uruguaiana", "Cachoeirinha",
-    "Bagé", "Bento Gonçalves", "Erechim", "Guaíba", "Cachoeira do Sul",
-    "Santa Cruz do Sul", "Lajeado", "Ijuí", "Sapiranga", "Alegrete",
-    "Santo Ângelo", "Esteio", "Cruz Alta", "Venâncio Aires", "Santana do Livramento",
-    "Gramado", "Canela", "Torres", "Capão da Canoa", "Tramandaí",
-    "Garibaldi", "Carlos Barbosa", "São Francisco de Paula", "Cambará do Sul",
-    "Flores da Cunha", "Nova Petrópolis", "Farroupilha",
+    // Tourist cities
+    "Gramado", "Canela", "Bento Gonçalves", "Torres", "Cambará do Sul",
+    "São Francisco de Paula", "Nova Petrópolis", "Garibaldi", "Carlos Barbosa",
+    "Flores da Cunha", "Porto Alegre", "Capão da Canoa",
+    // Other cities
+    "Alegrete", "Alvorada", "Bagé", "Cachoeira do Sul", "Cachoeirinha",
+    "Canoas", "Caxias do Sul", "Cruz Alta", "Erechim", "Esteio",
+    "Farroupilha", "Gravataí", "Guaíba", "Ijuí", "Lajeado",
+    "Novo Hamburgo", "Passo Fundo", "Pelotas", "Rio Grande",
+    "Santa Cruz do Sul", "Santa Maria", "Santana do Livramento",
+    "Santo Ângelo", "São Leopoldo", "Sapiranga", "Sapucaia do Sul",
+    "Tramandaí", "Uruguaiana", "Venâncio Aires", "Viamão",
   ],
 };
 
@@ -82,15 +92,58 @@ function getFestivities(city: string): string {
   return festivities[city] || "Festas tradicionais locais, feiras gastronômicas";
 }
 
+// Product images for stalls
+const productImages = [
+  "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", // bread
+  "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80", // chocolate
+  "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80", // cheese
+  "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80", // food plate
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80", // gourmet
+  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80", // bbq
+  "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&q=80", // food art
+  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", // pizza
+  "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80", // pancakes
+  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&q=80", // salad
+];
+
+const productNames = [
+  "Pão Artesanal Colonial", "Chocolate Caseiro", "Queijo Colonial",
+  "Prato Típico Regional", "Bolo de Mel", "Churrasco Sulista",
+  "Geleia Artesanal", "Vinho Colonial", "Erva-mate Premium",
+  "Doce de Leite Caseiro",
+];
+
 export const stallsData = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
   name: `Barraca ${i + 1}`,
-  available: i > 4, // first 5 are taken for demo
+  available: i > 4,
   owner: i <= 4 ? `Comerciante ${i + 1}` : null,
   products: i <= 4
     ? [
-        { name: "Produto Artesanal", price: 29.9, description: "Produto artesanal feito com carinho", image: "" },
-        { name: "Especialidade Local", price: 45.0, description: "O melhor da culinária local", image: "" },
+        {
+          name: productNames[i % productNames.length],
+          price: 19.9 + (i * 7.5),
+          description: "Produto artesanal feito com carinho e ingredientes selecionados da região sul",
+          image: productImages[i % productImages.length],
+        },
+        {
+          name: productNames[(i + 3) % productNames.length],
+          price: 25.0 + (i * 5),
+          description: "Especialidade local, receita tradicional passada de geração em geração",
+          image: productImages[(i + 3) % productImages.length],
+        },
+        {
+          name: productNames[(i + 5) % productNames.length],
+          price: 35.0 + (i * 3),
+          description: "O melhor da culinária sulista, com sabor autêntico e qualidade premium",
+          image: productImages[(i + 5) % productImages.length],
+        },
+        {
+          name: productNames[(i + 7) % productNames.length],
+          price: 15.0 + (i * 4),
+          description: "Produção artesanal em pequenos lotes para garantir a máxima qualidade",
+          image: productImages[(i + 7) % productImages.length],
+        },
       ]
     : [],
 }));

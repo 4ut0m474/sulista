@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, ShoppingBag, ChevronLeft, Phone, Mail, Moon } from "lucide-react";
+import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon } from "lucide-react";
 import { getCityData, type CityData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
+import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
@@ -16,13 +17,12 @@ const weatherIcons: Record<string, typeof Sun> = {
 };
 
 const carouselAds = [
-  { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", color: "bg-gradient-primary" },
-  { title: "Pousada Serra Verde", subtitle: "Conforto e natureza", color: "bg-gradient-gold" },
-  { title: "Artesanato Local", subtitle: "Peças únicas feitas à mão", color: "bg-gradient-primary" },
-  { title: "Café & Confeitaria", subtitle: "Sabores que aquecem", color: "bg-gradient-gold" },
+  { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", color: "bg-gradient-primary", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" },
+  { title: "Pousada Serra Verde", subtitle: "Conforto e natureza", color: "bg-gradient-gold", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80" },
+  { title: "Artesanato Local", subtitle: "Peças únicas feitas à mão", color: "bg-gradient-primary", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80" },
+  { title: "Café & Confeitaria", subtitle: "Sabores que aquecem", color: "bg-gradient-gold", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80" },
 ];
 
-// Tourist backgrounds for cities
 const cityBackgrounds: Record<string, string> = {
   "Curitiba": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
   "Foz do Iguaçu": "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&q=80",
@@ -31,6 +31,16 @@ const cityBackgrounds: Record<string, string> = {
   "Porto Alegre": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
   "default": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
 };
+
+// Color themes for each icon button
+const iconThemes = [
+  { bg: "from-primary/20 to-primary/5", hoverBg: "from-primary/30 to-primary/10", text: "text-primary" },
+  { bg: "from-secondary/20 to-secondary/5", hoverBg: "from-secondary/30 to-secondary/10", text: "text-secondary" },
+  { bg: "from-accent/20 to-accent/5", hoverBg: "from-accent/30 to-accent/10", text: "text-accent" },
+  { bg: "from-destructive/20 to-destructive/5", hoverBg: "from-destructive/30 to-destructive/10", text: "text-destructive" },
+  { bg: "from-gold/20 to-gold/5", hoverBg: "from-gold/30 to-gold/10", text: "text-secondary" },
+  { bg: "from-teal/20 to-teal/5", hoverBg: "from-teal/30 to-teal/10", text: "text-accent" },
+];
 
 const CityHome = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -57,7 +67,7 @@ const CityHome = () => {
     { label: t("events"), icon: Calendar, path: "events" },
     { label: t("yourOpinion"), icon: MessageSquare, path: "opinion" },
     { label: t("treasureHunt"), icon: Map, path: "treasure" },
-    { label: t("trails"), icon: ShoppingBag, path: "trails" },
+    { label: t("trails"), icon: TreePine, path: "trails" },
   ];
 
   const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
@@ -67,45 +77,30 @@ const CityHome = () => {
     <div className="min-h-screen pb-20 relative">
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
-        <img 
-          src={backgroundUrl} 
-          alt={`${cityData.name} paisagem`}
-          className="w-full h-full object-cover"
-        />
+        <img src={backgroundUrl} alt={`${cityData.name} paisagem`} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-background/95 to-background" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10">
-        {/* Header */}
         <header className="px-4 py-4">
           <div className="max-w-md mx-auto">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <button onClick={() => navigate("/")} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
-                  <ChevronLeft className="w-5 h-5 text-foreground" />
+                  <svg className="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-card/80 backdrop-blur-sm px-2 py-1 rounded-full">{cityData.state}</span>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={toggleTheme}
-                  className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"
-                  aria-label="Alternar tema"
-                >
+                <button onClick={toggleTheme} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card" aria-label="Alternar tema">
                   {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
                 </button>
-                <button
-                  onClick={cycleFontSize}
-                  className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"
-                  aria-label="Aumentar fonte"
-                >
+                <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card" aria-label="Aumentar fonte">
                   <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
                 </button>
               </div>
             </div>
             <div className="flex items-center justify-between bg-card/90 backdrop-blur-sm rounded-2xl p-4 border border-border/50 shadow-card">
-              <h1 className="font-display text-2xl font-bold text-foreground">{cityData.name}</h1>
+              <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
               <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
                 <WeatherIcon className="w-5 h-5 text-primary" />
                 <span className="text-lg font-bold text-foreground">{cityData.temperature}°C</span>
@@ -115,50 +110,50 @@ const CityHome = () => {
         </header>
 
         <div className="max-w-md mx-auto">
-          {/* Carousel */}
+          {/* Carousel with images */}
           <div className="px-4 py-4">
-            <div className="relative overflow-hidden rounded-2xl h-36 shadow-card border border-border/30">
+            <div className="relative overflow-hidden rounded-2xl h-44 shadow-card border border-border/30">
               {carouselAds.map((ad, i) => (
                 <div
                   key={i}
-                  className={`absolute inset-0 ${ad.color} flex flex-col items-center justify-center text-primary-foreground transition-all duration-500 rounded-2xl ${
+                  className={`absolute inset-0 transition-all duration-500 ${
                     i === currentSlide ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
                   }`}
                 >
-                  <h3 className="font-display text-xl font-bold">{ad.title}</h3>
-                  <p className={`opacity-90 ${textSizeClass}`}>{ad.subtitle}</p>
-                  <span className="text-[10px] mt-2 px-2 py-0.5 bg-card/20 rounded-full">Propaganda</span>
+                  <img src={ad.image} alt={ad.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <h3 className="font-display text-xl font-bold">{ad.title}</h3>
+                    <p className={`opacity-90 ${textSizeClass}`}>{ad.subtitle}</p>
+                    <span className="text-[10px] mt-1 inline-block px-2 py-0.5 bg-white/20 rounded-full backdrop-blur-sm">Propaganda</span>
+                  </div>
                 </div>
               ))}
-              {/* Dots */}
-              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+              <div className="absolute bottom-2 right-3 flex gap-1.5 z-10">
                 {carouselAds.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentSlide(i)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      i === currentSlide ? "bg-primary-foreground w-4" : "bg-primary-foreground/40"
-                    }`}
-                  />
+                  <button key={i} onClick={() => setCurrentSlide(i)} className={`w-2 h-2 rounded-full transition-all ${i === currentSlide ? "bg-white w-4" : "bg-white/40"}`} />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Icon Buttons */}
+          {/* Icon Buttons - Colorful */}
           <div className="px-4 grid grid-cols-3 gap-3 mb-6">
-            {iconButtons.map(item => (
-              <button
-                key={item.label}
-                onClick={() => navigate(`/city/${state}/${city}/${item.path}`)}
-                className="group flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border border-border/50 shadow-card hover:border-primary/50 hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95"
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center group-hover:from-primary/30 group-hover:to-primary/10 transition-colors">
-                  <item.icon className="w-6 h-6 text-primary" />
-                </div>
-                <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
-              </button>
-            ))}
+            {iconButtons.map((item, idx) => {
+              const theme = iconThemes[idx];
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => navigate(`/city/${state}/${city}/${item.path}`)}
+                  className="group flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border border-border/50 shadow-card hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95"
+                >
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${theme.bg} group-hover:${theme.hoverBg} flex items-center justify-center transition-colors`}>
+                    <item.icon className={`w-7 h-7 ${theme.text}`} />
+                  </div>
+                  <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* City Info */}
@@ -167,18 +162,14 @@ const CityHome = () => {
               <h2 className="font-display text-lg font-bold text-foreground mb-2">{cityData.name}</h2>
               <p className={`text-muted-foreground leading-relaxed ${textSizeClass}`}>{cityData.description}</p>
             </div>
-            
             <div className="grid grid-cols-2 gap-3">
               <InfoCard title={t("birthday")} content={cityData.birthday} fontSize={fontSize} />
               <InfoCard title={t("festivities")} content={cityData.festivities} fontSize={fontSize} />
             </div>
-            
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-1">{t("history")}</h3>
               <p className={`text-muted-foreground leading-relaxed ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>{cityData.history}</p>
             </div>
-
-            {/* Contact */}
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-2">{t("contact")}</h3>
               <div className="space-y-1.5">

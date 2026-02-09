@@ -18,6 +18,7 @@ import Events from "./pages/Events";
 import Trails from "./pages/Trails";
 import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/city/:state/:city/trails" element={<Trails />} />
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
+                <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

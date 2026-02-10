@@ -3,6 +3,7 @@ import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Lock, Eye, EyeOff } f
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState } from "react";
+import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 
 const MerchantPanel = () => {
   const { state, city } = useParams<{ state: string; city: string }>();

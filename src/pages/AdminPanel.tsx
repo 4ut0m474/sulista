@@ -898,6 +898,33 @@ const AdminPanel = () => {
       </div>
 
       <EditModal />
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="w-full max-w-sm bg-card rounded-2xl border border-border shadow-card p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-3">
+                <Trash2 className="w-6 h-6 text-destructive" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground">Confirmar Exclusão</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Deseja realmente excluir <strong>"{deleteConfirm.name}"</strong>? Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-2.5 rounded-lg border border-border text-sm font-bold text-foreground hover:bg-muted transition-colors">
+                Cancelar
+              </button>
+              <button onClick={executeDelete}
+                className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-all">
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

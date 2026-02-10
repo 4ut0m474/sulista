@@ -872,16 +872,25 @@ const AdminPanel = () => {
           {activeTab === "settings" && (
             <div className="space-y-3">
               <h2 className="font-display text-lg font-bold text-foreground">Configurações Gerais</h2>
+              <p className="text-sm text-muted-foreground">Estas informações aparecem em todas as páginas do app.</p>
               <div className="bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground block mb-1">WhatsApp de contato</label>
-                  <input defaultValue="(41) 99235-4211" className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+                  <input value={configWhatsapp} onChange={e => setConfigWhatsapp(e.target.value)}
+                    placeholder="(41) 99235-4211"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-muted-foreground block mb-1">E-mail de contato</label>
-                  <input defaultValue="eerb1976@gmail.com" className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+                  <input value={configEmail} onChange={e => setConfigEmail(e.target.value)}
+                    placeholder="email@exemplo.com"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
                 </div>
-                <button className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm">Salvar Configurações</button>
+                {configMsg && <p className="text-xs font-semibold text-primary">{configMsg}</p>}
+                <button onClick={saveGlobalConfig}
+                  className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2">
+                  <Save className="w-4 h-4" /> Salvar Configurações
+                </button>
               </div>
             </div>
           )}

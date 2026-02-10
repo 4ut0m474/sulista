@@ -284,10 +284,40 @@ const AdminPanel = () => {
     setEditingItem(newItem);
   };
 
-  const deleteItem = (section: string, id: number, items: EditableItem[], setItems: (v: EditableItem[]) => void) => {
-    const updated = items.filter(i => i.id !== id);
-    setItems(updated);
+  const confirmDeleteItem = (section: string, id: number, items: EditableItem[], name: string) => {
+    setDeleteConfirm({ section, id, name });
+  };
+
+  const executeDelete = () => {
+    if (!deleteConfirm) return;
+    const { section, id } = deleteConfirm;
+    const sectionMap: Record<string, { items: EditableItem[]; setter: (v: EditableItem[]) => void }> = {
+      stalls: { items: stalls, setter: setStalls },
+      carousel: { items: carousel, setter: setCarousel },
+      promotions: { items: promotions, setter: setPromotions },
+      events: { items: events, setter: setEvents },
+      explore: { items: explore, setter: setExplore },
+      treasure: { items: treasure, setter: setTreasure },
+      trails: { items: trails, setter: setTrails },
+    };
+    const s = sectionMap[section];
+    if (!s) return;
+    const updated = s.items.filter(i => i.id !== id);
+    s.setter(updated);
     saveSection(section, updated);
+    setDeleteConfirm(null);
+  };
+
+  const saveGlobalConfig = () => {
+    const whatsappNumber = configWhatsapp.replace(/\D/g, "");
+    localStorage.setItem("admin_global_config", JSON.stringify({
+      whatsapp: configWhatsapp,
+      whatsappNumber: whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`,
+      email: configEmail,
+    }));
+    setConfigMsg("Configurações salvas com sucesso!");
+    setTimeout(() => setConfigMsg(""), 2000);
+  };
   };
 
   const moveItem = (items: EditableItem[], setItems: (v: EditableItem[]) => void, section: string, index: number, direction: "up" | "down") => {

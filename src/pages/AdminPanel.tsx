@@ -393,8 +393,9 @@ const AdminPanel = () => {
 
   // Edit modal
   const EditModal = () => {
+    const [form, setForm] = useState({ ...editingItem! });
+
     if (!editingItem) return null;
-    const [form, setForm] = useState({ ...editingItem });
 
     const handleSave = () => {
       const sectionMap: Record<string, { items: EditableItem[]; setter: (v: EditableItem[]) => void; key: string }> = {

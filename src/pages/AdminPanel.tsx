@@ -509,7 +509,7 @@ const AdminPanel = () => {
               </>
             )}
             <button onClick={() => setEditingItem(item)} className="p-1.5 rounded-lg hover:bg-muted"><Edit2 className="w-3.5 h-3.5 text-primary" /></button>
-            <button onClick={() => deleteItem(section, item.id, items, setItems)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+            <button onClick={() => confirmDeleteItem(section, item.id, items, item.name || "(sem nome)")} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
           </div>
         </div>
       ))}

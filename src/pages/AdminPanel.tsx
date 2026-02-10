@@ -174,6 +174,14 @@ const AdminPanel = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
+  // Global config
+  const [configWhatsapp, setConfigWhatsapp] = useState("");
+  const [configEmail, setConfigEmail] = useState("");
+  const [configMsg, setConfigMsg] = useState("");
+
+  // Delete confirmation
+  const [deleteConfirm, setDeleteConfirm] = useState<{ section: string; id: number; name: string } | null>(null);
+
   // City settings
   const [cityBirthday, setCityBirthday] = useState("");
   const [cityDescription, setCityDescription] = useState("");

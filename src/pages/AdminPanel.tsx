@@ -203,6 +203,19 @@ const AdminPanel = () => {
 
   const availableCities = selectedState ? citiesByState[selectedState] || [] : [];
 
+  // Load global config
+  useEffect(() => {
+    const stored = localStorage.getItem("admin_global_config");
+    if (stored) {
+      const cfg = JSON.parse(stored);
+      setConfigWhatsapp(cfg.whatsapp || "(41) 99235-4211");
+      setConfigEmail(cfg.email || "eerb1976@gmail.com");
+    } else {
+      setConfigWhatsapp("(41) 99235-4211");
+      setConfigEmail("eerb1976@gmail.com");
+    }
+  }, []);
+
   // Load data when city changes
   useEffect(() => {
     if (!selectedState || !selectedCity) return;

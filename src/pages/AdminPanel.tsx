@@ -132,12 +132,15 @@ const AdminPanel = () => {
   const [loginError, setLoginError] = useState("");
 
   const handleAdminAuth = () => {
+    // Initialize default credentials if none exist
+    if (!localStorage.getItem("admin_username")) {
+      localStorage.setItem("admin_username", "EERB1976");
+    }
+    if (!localStorage.getItem("admin_password")) {
+      localStorage.setItem("admin_password", "123456");
+    }
     const storedUser = localStorage.getItem("admin_username");
     const storedPass = localStorage.getItem("admin_password");
-    if (!storedUser || !storedPass) {
-      setLoginError("Nenhuma conta de administrador configurada. Configure via Lovable Cloud.");
-      return;
-    }
     if (loginUser === storedUser && loginPass === storedPass) {
       sessionStorage.setItem("admin_authenticated", "true");
       setIsAuthenticated(true);

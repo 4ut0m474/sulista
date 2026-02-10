@@ -536,7 +536,7 @@ const AdminPanel = () => {
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
               <button onClick={() => setEditingItem(stall)} className="p-1.5 rounded-lg hover:bg-muted"><Edit2 className="w-3.5 h-3.5 text-primary" /></button>
-              <button onClick={() => deleteItem("stalls", stall.id, stalls, setStalls)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+              <button onClick={() => confirmDeleteItem("stalls", stall.id, stalls, stall.name || `Barraca #${stall.id}`)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
             </div>
           </div>
           {/* Secret code section */}

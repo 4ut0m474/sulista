@@ -174,6 +174,14 @@ const AdminPanel = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
+  // Global config
+  const [configWhatsapp, setConfigWhatsapp] = useState("");
+  const [configEmail, setConfigEmail] = useState("");
+  const [configMsg, setConfigMsg] = useState("");
+
+  // Delete confirmation
+  const [deleteConfirm, setDeleteConfirm] = useState<{ section: string; id: number; name: string } | null>(null);
+
   // City settings
   const [cityBirthday, setCityBirthday] = useState("");
   const [cityDescription, setCityDescription] = useState("");
@@ -194,6 +202,19 @@ const AdminPanel = () => {
   const [trails, setTrails] = useState<EditableItem[]>([]);
 
   const availableCities = selectedState ? citiesByState[selectedState] || [] : [];
+
+  // Load global config
+  useEffect(() => {
+    const stored = localStorage.getItem("admin_global_config");
+    if (stored) {
+      const cfg = JSON.parse(stored);
+      setConfigWhatsapp(cfg.whatsapp || "(41) 99235-4211");
+      setConfigEmail(cfg.email || "eerb1976@gmail.com");
+    } else {
+      setConfigWhatsapp("(41) 99235-4211");
+      setConfigEmail("eerb1976@gmail.com");
+    }
+  }, []);
 
   // Load data when city changes
   useEffect(() => {
@@ -263,10 +284,40 @@ const AdminPanel = () => {
     setEditingItem(newItem);
   };
 
-  const deleteItem = (section: string, id: number, items: EditableItem[], setItems: (v: EditableItem[]) => void) => {
-    const updated = items.filter(i => i.id !== id);
-    setItems(updated);
+  const confirmDeleteItem = (section: string, id: number, items: EditableItem[], name: string) => {
+    setDeleteConfirm({ section, id, name });
+  };
+
+  const executeDelete = () => {
+    if (!deleteConfirm) return;
+    const { section, id } = deleteConfirm;
+    const sectionMap: Record<string, { items: EditableItem[]; setter: (v: EditableItem[]) => void }> = {
+      stalls: { items: stalls, setter: setStalls },
+      carousel: { items: carousel, setter: setCarousel },
+      promotions: { items: promotions, setter: setPromotions },
+      events: { items: events, setter: setEvents },
+      explore: { items: explore, setter: setExplore },
+      treasure: { items: treasure, setter: setTreasure },
+      trails: { items: trails, setter: setTrails },
+    };
+    const s = sectionMap[section];
+    if (!s) return;
+    const updated = s.items.filter(i => i.id !== id);
+    s.setter(updated);
     saveSection(section, updated);
+    setDeleteConfirm(null);
+  };
+
+  const saveGlobalConfig = () => {
+    const whatsappNumber = configWhatsapp.replace(/\D/g, "");
+    localStorage.setItem("admin_global_config", JSON.stringify({
+      whatsapp: configWhatsapp,
+      whatsappNumber: whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`,
+      email: configEmail,
+    }));
+    setConfigMsg("Configurações salvas com sucesso!");
+    setTimeout(() => setConfigMsg(""), 2000);
+  };
   };
 
   const moveItem = (items: EditableItem[], setItems: (v: EditableItem[]) => void, section: string, index: number, direction: "up" | "down") => {
@@ -342,8 +393,9 @@ const AdminPanel = () => {
 
   // Edit modal
   const EditModal = () => {
+    const [form, setForm] = useState({ ...editingItem! });
+
     if (!editingItem) return null;
-    const [form, setForm] = useState({ ...editingItem });
 
     const handleSave = () => {
       const sectionMap: Record<string, { items: EditableItem[]; setter: (v: EditableItem[]) => void; key: string }> = {
@@ -458,7 +510,7 @@ const AdminPanel = () => {
               </>
             )}
             <button onClick={() => setEditingItem(item)} className="p-1.5 rounded-lg hover:bg-muted"><Edit2 className="w-3.5 h-3.5 text-primary" /></button>
-            <button onClick={() => deleteItem(section, item.id, items, setItems)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+            <button onClick={() => confirmDeleteItem(section, item.id, items, item.name || "(sem nome)")} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
           </div>
         </div>
       ))}
@@ -485,7 +537,7 @@ const AdminPanel = () => {
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
               <button onClick={() => setEditingItem(stall)} className="p-1.5 rounded-lg hover:bg-muted"><Edit2 className="w-3.5 h-3.5 text-primary" /></button>
-              <button onClick={() => deleteItem("stalls", stall.id, stalls, setStalls)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+              <button onClick={() => confirmDeleteItem("stalls", stall.id, stalls, stall.name || `Barraca #${stall.id}`)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
             </div>
           </div>
           {/* Secret code section */}
@@ -821,16 +873,25 @@ const AdminPanel = () => {
           {activeTab === "settings" && (
             <div className="space-y-3">
               <h2 className="font-display text-lg font-bold text-foreground">Configurações Gerais</h2>
+              <p className="text-sm text-muted-foreground">Estas informações aparecem em todas as páginas do app.</p>
               <div className="bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground block mb-1">WhatsApp de contato</label>
-                  <input defaultValue="(41) 99235-4211" className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+                  <input value={configWhatsapp} onChange={e => setConfigWhatsapp(e.target.value)}
+                    placeholder="(41) 99235-4211"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-muted-foreground block mb-1">E-mail de contato</label>
-                  <input defaultValue="eerb1976@gmail.com" className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+                  <input value={configEmail} onChange={e => setConfigEmail(e.target.value)}
+                    placeholder="email@exemplo.com"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
                 </div>
-                <button className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm">Salvar Configurações</button>
+                {configMsg && <p className="text-xs font-semibold text-primary">{configMsg}</p>}
+                <button onClick={saveGlobalConfig}
+                  className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2">
+                  <Save className="w-4 h-4" /> Salvar Configurações
+                </button>
               </div>
             </div>
           )}
@@ -838,6 +899,33 @@ const AdminPanel = () => {
       </div>
 
       <EditModal />
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="w-full max-w-sm bg-card rounded-2xl border border-border shadow-card p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-3">
+                <Trash2 className="w-6 h-6 text-destructive" />
+              </div>
+              <h3 className="font-display text-lg font-bold text-foreground">Confirmar Exclusão</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Deseja realmente excluir <strong>"{deleteConfirm.name}"</strong>? Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-2.5 rounded-lg border border-border text-sm font-bold text-foreground hover:bg-muted transition-colors">
+                Cancelar
+              </button>
+              <button onClick={executeDelete}
+                className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-all">
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

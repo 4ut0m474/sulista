@@ -134,7 +134,7 @@ const MerchantPanel = () => {
               Ver Planos
             </button>
             <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
-              <Phone className="w-3 h-3" /> (41) 99235-4211
+              <Phone className="w-3 h-3" /> {getAdminConfig().whatsapp}
             </p>
           </div>
 

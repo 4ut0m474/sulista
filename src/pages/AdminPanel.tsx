@@ -16,18 +16,18 @@ const setAdminData = (stateAbbr: string, cityName: string, section: string, data
 };
 
 // Notifications helper
-const getNotifications = (): Notification[] => {
+const getNotifications = (): AdminNotification[] => {
   const stored = localStorage.getItem("admin_notifications");
   return stored ? JSON.parse(stored) : defaultNotifications;
 };
 
-const saveNotifications = (notifs: Notification[]) => {
+const saveNotifications = (notifs: AdminNotification[]) => {
   localStorage.setItem("admin_notifications", JSON.stringify(notifs));
 };
 
-export const addNotification = (notif: Omit<Notification, "id" | "timestamp" | "read">) => {
+export const addNotification = (notif: Omit<AdminNotification, "id" | "timestamp" | "read">) => {
   const notifs = getNotifications();
-  const newNotif: Notification = {
+  const newNotif: AdminNotification = {
     ...notif,
     id: Date.now(),
     timestamp: new Date().toLocaleString("pt-BR"),
@@ -36,7 +36,7 @@ export const addNotification = (notif: Omit<Notification, "id" | "timestamp" | "
   saveNotifications([newNotif, ...notifs]);
 };
 
-interface Notification {
+interface AdminNotification {
   id: number;
   type: "purchase" | "city_update" | "merchant_update";
   title: string;
@@ -71,7 +71,7 @@ const generateSecretCode = (): string => {
   return code;
 };
 
-const defaultNotifications: Notification[] = [
+const defaultNotifications: AdminNotification[] = [
   { id: 1, type: "purchase", title: "Nova compra de propaganda", description: "Comerciante João solicitou Plano Combo para Barraca 6 em Gramado-RS", timestamp: "09/02/2026 10:30", read: false, city: "Gramado", state: "RS" },
   { id: 2, type: "merchant_update", title: "Comerciante atualizou produtos", description: "Comerciante 1 atualizou fotos da Barraca 1 em Morretes-PR", timestamp: "08/02/2026 15:20", read: true, city: "Morretes", state: "PR" },
   { id: 3, type: "city_update", title: "Informações da cidade atualizadas", description: "Descrição de Florianópolis-SC foi alterada pelo admin", timestamp: "07/02/2026 09:00", read: true, city: "Florianópolis", state: "SC" },
@@ -164,7 +164,7 @@ const AdminPanel = () => {
 
   // Notification filter
   const [notifFilter, setNotifFilter] = useState<"all" | "purchase" | "city_update" | "merchant_update">("all");
-  const [notifications, setNotifications] = useState<Notification[]>(getNotifications());
+  const [notifications, setNotifications] = useState<AdminNotification[]>(getNotifications());
 
   // Password
   const [currentPass, setCurrentPass] = useState("");

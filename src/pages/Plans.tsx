@@ -97,7 +97,7 @@ const Plans = () => {
                   </ul>
 
                   <a
-                    href={`https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(`Olá! Quero adquirir o plano ${plan.name} do Sulista.`)}`}
+                    href={`https://web.whatsapp.com/send?phone=${config.whatsappNumber}&text=${encodeURIComponent(`Olá! Quero adquirir o plano *${plan.name}* do Sulista.\n\n💰 Valor: R$ ${displayPrice.toFixed(2)}/mês${annual ? ` (plano anual - R$ ${annualPrice.toFixed(2)}/ano com ${plan.annualDiscount}% de desconto)` : ' (plano mensal)'}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`block w-full text-center py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 ${

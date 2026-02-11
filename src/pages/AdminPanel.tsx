@@ -3,39 +3,7 @@ import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Com
 import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
 
-// Helper to get/set admin data per city
-const getAdminData = (stateAbbr: string, cityName: string, section: string) => {
-  const key = `admin_${stateAbbr}_${cityName}_${section}`;
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : null;
-};
-
-const setAdminData = (stateAbbr: string, cityName: string, section: string, data: any) => {
-  const key = `admin_${stateAbbr}_${cityName}_${section}`;
-  localStorage.setItem(key, JSON.stringify(data));
-};
-
-// Notifications helper
-const getNotifications = (): AdminNotification[] => {
-  const stored = localStorage.getItem("admin_notifications");
-  return stored ? JSON.parse(stored) : defaultNotifications;
-};
-
-const saveNotifications = (notifs: AdminNotification[]) => {
-  localStorage.setItem("admin_notifications", JSON.stringify(notifs));
-};
-
-export const addNotification = (notif: Omit<AdminNotification, "id" | "timestamp" | "read">) => {
-  const notifs = getNotifications();
-  const newNotif: AdminNotification = {
-    ...notif,
-    id: Date.now(),
-    timestamp: new Date().toLocaleString("pt-BR"),
-    read: false,
-  };
-  saveNotifications([newNotif, ...notifs]);
-};
-
+// Types
 interface AdminNotification {
   id: number;
   type: "purchase" | "city_update" | "merchant_update";
@@ -77,6 +45,40 @@ const defaultNotifications: AdminNotification[] = [
   { id: 3, type: "city_update", title: "Informações da cidade atualizadas", description: "Descrição de Florianópolis-SC foi alterada pelo admin", timestamp: "07/02/2026 09:00", read: true, city: "Florianópolis", state: "SC" },
   { id: 4, type: "purchase", title: "Nova compra de propaganda", description: "Comerciante Maria solicitou Plano VIP para Barraca 10 em Curitiba-PR", timestamp: "06/02/2026 14:45", read: false, city: "Curitiba", state: "PR" },
 ];
+
+// Helper to get/set admin data per city
+const getAdminData = (stateAbbr: string, cityName: string, section: string) => {
+  const key = `admin_${stateAbbr}_${cityName}_${section}`;
+  const stored = localStorage.getItem(key);
+  return stored ? JSON.parse(stored) : null;
+};
+
+const setAdminData = (stateAbbr: string, cityName: string, section: string, data: any) => {
+  const key = `admin_${stateAbbr}_${cityName}_${section}`;
+  localStorage.setItem(key, JSON.stringify(data));
+};
+
+// Notifications helper
+const getNotifications = (): AdminNotification[] => {
+  const stored = localStorage.getItem("admin_notifications");
+  return stored ? JSON.parse(stored) : defaultNotifications;
+};
+
+const saveNotifications = (notifs: AdminNotification[]) => {
+  localStorage.setItem("admin_notifications", JSON.stringify(notifs));
+};
+
+export const addNotification = (notif: Omit<AdminNotification, "id" | "timestamp" | "read">) => {
+  const notifs = getNotifications();
+  const newNotif: AdminNotification = {
+    ...notif,
+    id: Date.now(),
+    timestamp: new Date().toLocaleString("pt-BR"),
+    read: false,
+  };
+  saveNotifications([newNotif, ...notifs]);
+};
+
 
 const defaultStalls = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
@@ -317,7 +319,6 @@ const AdminPanel = () => {
     }));
     setConfigMsg("Configurações salvas com sucesso!");
     setTimeout(() => setConfigMsg(""), 2000);
-  };
   };
 
   const moveItem = (items: EditableItem[], setItems: (v: EditableItem[]) => void, section: string, index: number, direction: "up" | "down") => {
@@ -931,3 +932,4 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+

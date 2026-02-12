@@ -4,6 +4,7 @@ import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
+import { sanitizeText, MAX_NAME } from "@/lib/validation";
 
 const MerchantPanel = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -23,11 +24,17 @@ const MerchantPanel = () => {
   const [adminError, setAdminError] = useState("");
 
   const handleMerchantLogin = () => {
-    if (!stallName.trim() || !stallCode.trim()) {
+    const name = sanitizeText(stallName);
+    const code = sanitizeText(stallCode);
+    if (!name || !code) {
       setError("Preencha todos os campos");
       return;
     }
-    if (stallCode.length !== 12) {
+    if (name.length > MAX_NAME) {
+      setError(`Nome deve ter no máximo ${MAX_NAME} caracteres`);
+      return;
+    }
+    if (code.length !== 12) {
       setError("O código secreto deve ter 12 dígitos");
       return;
     }
@@ -36,12 +43,13 @@ const MerchantPanel = () => {
     const storedStalls = localStorage.getItem(stallsKey);
     if (storedStalls) {
       const stalls = JSON.parse(storedStalls);
-      const match = stalls.find((s: any) => s.secretCode === stallCode.toUpperCase() && s.name && s.active);
+      const match = stalls.find((s: any) => s.secretCode === code.toUpperCase() && s.name && s.active);
       if (!match) {
         setError("Código secreto inválido ou barraca não encontrada");
         return;
       }
     }
+    setStallName(name);
     setLoggedIn(true);
     setError("");
   };
@@ -93,6 +101,7 @@ const MerchantPanel = () => {
                   value={stallName}
                   onChange={e => setStallName(e.target.value)}
                   placeholder="Seu nome"
+                  maxLength={MAX_NAME}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
               </div>

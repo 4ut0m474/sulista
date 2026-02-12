@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
+import { sanitizeText, isValidUrl, isValidEmail, isValidPhone, MAX_NAME, MAX_DESCRIPTION, MAX_URL, MAX_DATE, MAX_CATEGORY, MAX_PRIZE, MAX_PHONE, MAX_EMAIL, MAX_PASSWORD } from "@/lib/validation";
 
 // Types
 interface AdminNotification {
@@ -254,11 +255,17 @@ const AdminPanel = () => {
 
   const saveCitySettings = () => {
     if (!selectedState || !selectedCity) return;
+    const sanitizedBirthday = sanitizeText(cityBirthday);
+    const sanitizedDesc = sanitizeText(cityDescription);
+    const sanitizedHistory = sanitizeText(cityHistory);
+    const sanitizedFestivities = sanitizeText(cityFestivities);
+    if (sanitizedDesc.length > 2000) { setCityMsg("Descrição muito longa (máx. 2000 caracteres)"); setTimeout(() => setCityMsg(""), 3000); return; }
+    if (sanitizedHistory.length > 5000) { setCityMsg("História muito longa (máx. 5000 caracteres)"); setTimeout(() => setCityMsg(""), 3000); return; }
     setAdminData(selectedState, selectedCity, "city_settings", {
-      birthday: cityBirthday,
-      description: cityDescription,
-      history: cityHistory,
-      festivities: cityFestivities,
+      birthday: sanitizedBirthday,
+      description: sanitizedDesc,
+      history: sanitizedHistory,
+      festivities: sanitizedFestivities,
     });
     addNotification({
       type: "city_update",
@@ -311,11 +318,15 @@ const AdminPanel = () => {
   };
 
   const saveGlobalConfig = () => {
-    const whatsappNumber = configWhatsapp.replace(/\D/g, "");
+    const phone = sanitizeText(configWhatsapp);
+    const email = sanitizeText(configEmail);
+    if (!isValidPhone(phone)) { setConfigMsg("Formato de telefone inválido"); setTimeout(() => setConfigMsg(""), 3000); return; }
+    if (!isValidEmail(email)) { setConfigMsg("Formato de e-mail inválido"); setTimeout(() => setConfigMsg(""), 3000); return; }
+    const whatsappNumber = phone.replace(/\D/g, "");
     localStorage.setItem("admin_global_config", JSON.stringify({
-      whatsapp: configWhatsapp,
+      whatsapp: phone,
       whatsappNumber: whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`,
-      email: configEmail,
+      email: email,
     }));
     setConfigMsg("Configurações salvas com sucesso!");
     setTimeout(() => setConfigMsg(""), 2000);
@@ -354,9 +365,10 @@ const AdminPanel = () => {
     const storedPass = localStorage.getItem("admin_password");
     if (!storedPass) { setPassMsg("Nenhuma senha configurada"); return; }
     if (currentPass !== storedPass) { setPassMsg("Senha atual incorreta"); return; }
-    if (newPass.length < 4) { setPassMsg("Nova senha deve ter pelo menos 4 caracteres"); return; }
+    if (newPass.length < 6) { setPassMsg("Nova senha deve ter pelo menos 6 caracteres"); return; }
+    if (newPass.length > MAX_PASSWORD) { setPassMsg(`Senha deve ter no máximo ${MAX_PASSWORD} caracteres`); return; }
     if (newPass !== confirmPass) { setPassMsg("As senhas não coincidem"); return; }
-    localStorage.setItem("admin_password", newPass);
+    localStorage.setItem("admin_password", sanitizeText(newPass));
     setPassMsg("Senha alterada com sucesso!");
     setCurrentPass(""); setNewPass(""); setConfirmPass("");
   };
@@ -398,7 +410,27 @@ const AdminPanel = () => {
 
     if (!editingItem) return null;
 
+    const [formError, setFormError] = useState("");
+
     const handleSave = () => {
+      // Sanitize inputs
+      const sanitized = {
+        ...form,
+        name: sanitizeText(form.name),
+        description: form.description ? sanitizeText(form.description) : form.description,
+        category: form.category ? sanitizeText(form.category) : form.category,
+        prize: form.prize ? sanitizeText(form.prize) : form.prize,
+        date: form.date ? sanitizeText(form.date) : form.date,
+        image: form.image ? sanitizeText(form.image) : form.image,
+      };
+
+      // Validate lengths
+      if (sanitized.name.length > MAX_NAME) { setFormError(`Nome deve ter no máximo ${MAX_NAME} caracteres`); return; }
+      if ((sanitized.description || "").length > MAX_DESCRIPTION) { setFormError(`Descrição deve ter no máximo ${MAX_DESCRIPTION} caracteres`); return; }
+      if (sanitized.image && !isValidUrl(sanitized.image)) { setFormError("URL da imagem inválida (deve começar com http:// ou https://)"); return; }
+      if (sanitized.image && sanitized.image.length > MAX_URL) { setFormError(`URL deve ter no máximo ${MAX_URL} caracteres`); return; }
+
+      setFormError("");
       const sectionMap: Record<string, { items: EditableItem[]; setter: (v: EditableItem[]) => void; key: string }> = {
         stalls: { items: stalls, setter: setStalls, key: "stalls" },
         carousel: { items: carousel, setter: setCarousel, key: "carousel" },
@@ -410,8 +442,8 @@ const AdminPanel = () => {
       };
       const section = sectionMap[activeTab];
       if (!section) return;
-      const updated = section.items.map(i => i.id === form.id ? form : i);
-      if (!section.items.find(i => i.id === form.id)) updated.push(form);
+      const updated = section.items.map(i => i.id === sanitized.id ? sanitized : i);
+      if (!section.items.find(i => i.id === sanitized.id)) updated.push(sanitized);
       section.setter(updated);
       saveSection(section.key, updated);
       setEditingItem(null);
@@ -424,35 +456,36 @@ const AdminPanel = () => {
             <h3 className="font-display text-lg font-bold text-foreground">Editar Item</h3>
             <button onClick={() => setEditingItem(null)}><X className="w-5 h-5 text-muted-foreground" /></button>
           </div>
+          {formError && <p className="text-xs text-destructive font-semibold">{formError}</p>}
           <div>
             <label className="text-xs font-bold text-muted-foreground block mb-1">Nome</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} maxLength={MAX_NAME}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
           </div>
           <div>
             <label className="text-xs font-bold text-muted-foreground block mb-1">Descrição</label>
-            <textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })}
+            <textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })} maxLength={MAX_DESCRIPTION}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground h-20 resize-none" />
           </div>
           {(activeTab === "carousel") && (
             <div>
               <label className="text-xs font-bold text-muted-foreground block mb-1">URL da Imagem</label>
-              <input value={form.image || ""} onChange={e => setForm({ ...form, image: e.target.value })}
+              <input value={form.image || ""} onChange={e => setForm({ ...form, image: e.target.value })} maxLength={MAX_URL}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
             </div>
           )}
           {activeTab === "events" && (
             <div>
               <label className="text-xs font-bold text-muted-foreground block mb-1">Data</label>
-              <input value={form.date || ""} onChange={e => setForm({ ...form, date: e.target.value })}
+              <input value={form.date || ""} onChange={e => setForm({ ...form, date: e.target.value })} maxLength={MAX_DATE}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="DD/MM/AAAA" />
             </div>
           )}
           {activeTab === "explore" && (
             <>
               <div>
-                <label className="text-xs font-bold text-muted-foreground block mb-1">Categoria</label>
-                <input value={form.category || ""} onChange={e => setForm({ ...form, category: e.target.value })}
+              <label className="text-xs font-bold text-muted-foreground block mb-1">Categoria</label>
+                <input value={form.category || ""} onChange={e => setForm({ ...form, category: e.target.value })} maxLength={MAX_CATEGORY}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
               </div>
               <div>
@@ -467,7 +500,7 @@ const AdminPanel = () => {
           {activeTab === "treasure" && (
             <div>
               <label className="text-xs font-bold text-muted-foreground block mb-1">Prêmio</label>
-              <input value={form.prize || ""} onChange={e => setForm({ ...form, prize: e.target.value })}
+              <input value={form.prize || ""} onChange={e => setForm({ ...form, prize: e.target.value })} maxLength={MAX_PRIZE}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
             </div>
           )}

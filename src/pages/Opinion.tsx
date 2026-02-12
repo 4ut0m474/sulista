@@ -3,6 +3,7 @@ import { ChevronLeft, MessageSquare, Send, Star } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import { useState } from "react";
 import { pageBackgrounds } from "@/lib/adminData";
+import { MAX_COMMENT, sanitizeText } from "@/lib/validation";
 
 const Opinion = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -15,7 +16,9 @@ const Opinion = () => {
   const bgUrl = pageBackgrounds.opinion;
 
   const handleSubmit = () => {
-    if (rating > 0 && comment.trim()) {
+    const sanitized = sanitizeText(comment);
+    if (rating > 0 && sanitized.length > 0 && sanitized.length <= MAX_COMMENT) {
+      setComment(sanitized);
       setSubmitted(true);
     }
   };
@@ -74,8 +77,10 @@ const Opinion = () => {
                   value={comment}
                   onChange={e => setComment(e.target.value)}
                   placeholder="O que você acha do comércio e produtos locais?"
+                  maxLength={MAX_COMMENT}
                   className="w-full h-28 rounded-xl border border-border bg-background/80 backdrop-blur-sm px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
+                <p className="text-[10px] text-muted-foreground mt-1">{comment.length}/{MAX_COMMENT} caracteres</p>
               </div>
               <button
                 onClick={handleSubmit}

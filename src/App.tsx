@@ -19,6 +19,7 @@ import Trails from "./pages/Trails";
 import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
 import AdminPanel from "./pages/AdminPanel";
+import NotificationSetup from "./pages/NotificationSetup";
 import NotFound from "./pages/NotFound";
 import Weather from "./pages/Weather";
 
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
                 <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
+                <Route path="/city/:state/:city/notifications" element={<NotificationSetup />} />
                 <Route path="/city/:state/:city/weather" element={<Weather />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

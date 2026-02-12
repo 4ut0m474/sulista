@@ -27,12 +27,7 @@ const Landing = () => {
 
   const handleGoogleLogin = () => {
     if (!canLogin) return;
-    const setupDone = localStorage.getItem("sulista-notification-setup-done");
-    if (!setupDone) {
-      navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}/notifications`);
-    } else {
-      navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}`);
-    }
+    navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}`);
   };
 
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";

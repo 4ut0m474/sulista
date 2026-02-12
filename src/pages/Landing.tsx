@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, MapPin, Shield } from "lucide-react";
+import { ChevronDown, MapPin, Shield, Star } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
@@ -15,6 +16,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { fontSize } = useFontSize();
+  const { favorites } = useFavorites();
 
   const cities = useMemo(() => {
     if (!selectedState) return [];
@@ -25,7 +27,12 @@ const Landing = () => {
 
   const handleGoogleLogin = () => {
     if (!canLogin) return;
-    navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}`);
+    const setupDone = localStorage.getItem("sulista-notification-setup-done");
+    if (!setupDone) {
+      navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}/notifications`);
+    } else {
+      navigate(`/city/${selectedState}/${encodeURIComponent(selectedCity)}`);
+    }
   };
 
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
@@ -40,6 +47,24 @@ const Landing = () => {
 
       {/* Header */}
       <LandingHeader />
+
+      {/* Favorites quick access */}
+      {favorites.length > 0 && (
+        <div className="relative z-10 px-4 pt-16">
+          <div className="max-w-md mx-auto flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {favorites.map(fav => (
+              <button
+                key={`${fav.state}:${fav.city}`}
+                onClick={() => navigate(`/city/${fav.state}/${encodeURIComponent(fav.city)}`)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-secondary/40 shadow-card whitespace-nowrap hover:bg-card transition-colors"
+              >
+                <Star className="w-3.5 h-3.5 fill-secondary text-secondary" />
+                <span className="text-xs font-bold text-foreground">{fav.city}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">

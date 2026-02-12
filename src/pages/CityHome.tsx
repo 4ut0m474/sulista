@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon } from "lucide-react";
+import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star } from "lucide-react";
 import { getCityData, type CityData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
@@ -8,6 +8,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const weatherIcons: Record<string, typeof Sun> = {
   sunny: Sun, cloudy: Cloud, rainy: CloudRain, "partly-cloudy": CloudSun, stormy: CloudLightning,
@@ -48,6 +49,8 @@ const CityHome = () => {
   const { fontSize, cycleFontSize } = useFontSize();
   const { t } = useLanguage();
   const config = getAdminConfig();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const starred = isFavorite(state || "", cityName);
 
   // Read admin-configured city settings
   const citySettings = getAdminCityData(state || "", cityName, "city_settings");
@@ -110,6 +113,13 @@ const CityHome = () => {
                 </button>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleFavorite(state || "", cityName)}
+                  className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"
+                  aria-label="Favoritar cidade"
+                >
+                  <Star className={`w-4 h-4 transition-colors ${starred ? "fill-secondary text-secondary" : "text-muted-foreground"}`} />
+                </button>
                 <button onClick={toggleTheme} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card" aria-label="Alternar tema">
                   {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
                 </button>

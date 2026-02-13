@@ -21,6 +21,8 @@ import MerchantPanel from "./pages/MerchantPanel";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import Weather from "./pages/Weather";
+import SubLocationsList from "./pages/SubLocationsList";
+import SubLocationDetail from "./pages/SubLocationDetail";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,8 @@ const App = () => (
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
                 <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
                 <Route path="/city/:state/:city/weather" element={<Weather />} />
+                <Route path="/city/:state/:city/locations" element={<SubLocationsList />} />
+                <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

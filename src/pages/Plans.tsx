@@ -4,11 +4,13 @@ import { plans } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useState } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
+import PlanContractModal from "@/components/PlanContractModal";
 
 const Plans = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const [annual, setAnnual] = useState(true);
+  const [contractModal, setContractModal] = useState<{ planName: string; displayPrice: string; priceDetail: string } | null>(null);
   const base = `/city/${state}/${city}`;
   const config = getAdminConfig();
   const bgUrl = pageBackgrounds.plans;
@@ -96,10 +98,11 @@ const Plans = () => {
                     ))}
                   </ul>
 
-                  <a
-                    href={`https://web.whatsapp.com/send?phone=${config.whatsappNumber}&text=${encodeURIComponent(`Olá! Quero adquirir o plano *${plan.name}* do Sulista.\n\n💰 Valor: R$ ${displayPrice.toFixed(2)}/mês${annual ? ` (plano anual - R$ ${annualPrice.toFixed(2)}/ano com ${plan.annualDiscount}% de desconto)` : ' (plano mensal)'}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => {
+                      const detail = `Valor: R$ ${displayPrice.toFixed(2)}/mês${annual ? ` (plano anual - R$ ${annualPrice.toFixed(2)}/ano com ${plan.annualDiscount}% de desconto)` : ' (plano mensal)'}`;
+                      setContractModal({ planName: plan.name, displayPrice: displayPrice.toFixed(2), priceDetail: detail });
+                    }}
                     className={`block w-full text-center py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 ${
                       isVip
                         ? "bg-gradient-vip text-primary-foreground shadow-gold"
@@ -109,7 +112,7 @@ const Plans = () => {
                     }`}
                   >
                     Contratar via WhatsApp
-                  </a>
+                  </button>
                 </div>
               );
             })}
@@ -120,6 +123,16 @@ const Plans = () => {
           </p>
         </div>
       </div>
+      {contractModal && (
+        <PlanContractModal
+          open={!!contractModal}
+          onClose={() => setContractModal(null)}
+          planName={contractModal.planName}
+          displayPrice={contractModal.displayPrice}
+          priceDetail={contractModal.priceDetail}
+          whatsappNumber={config.whatsappNumber || ""}
+        />
+      )}
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>

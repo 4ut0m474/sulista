@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText } from "lucide-react";
+import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText, Star, ShoppingCart, TreePalm } from "lucide-react";
 import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
+import { getCitySubLocations, type SubLocation } from "@/data/subLocations";
 import { sanitizeText, isValidUrl, isValidEmail, isValidPhone, MAX_NAME, MAX_DESCRIPTION, MAX_URL, MAX_DATE, MAX_CATEGORY, MAX_PRIZE, MAX_PHONE, MAX_EMAIL, MAX_PASSWORD } from "@/lib/validation";
 
 // Types
@@ -29,6 +30,14 @@ interface EditableItem {
   difficulty?: string;
   active?: boolean;
   secretCode?: string;
+  // Group buy fields
+  originalPrice?: string;
+  discountPrice?: string;
+  minBuyers?: number;
+  currentBuyers?: number;
+  // Sub-location fields
+  district?: string;
+  highlights?: string[];
 }
 
 const generateSecretCode = (): string => {
@@ -80,7 +89,6 @@ export const addNotification = (notif: Omit<AdminNotification, "id" | "timestamp
   saveNotifications([newNotif, ...notifs]);
 };
 
-
 const defaultStalls = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
   name: i <= 4 ? `Comerciante ${i + 1}` : "",
@@ -123,6 +131,11 @@ const defaultTrails = [
   { id: 2, name: "Caminho das Cachoeiras", description: "3km - Nível fácil", difficulty: "Fácil", active: true },
 ];
 
+const defaultGroupBuy = [
+  { id: 1, name: "Passeio de Barco - Grupo", description: "Passeio coletivo com desconto", originalPrice: "R$ 150", discountPrice: "R$ 90", minBuyers: 10, currentBuyers: 3, active: true },
+  { id: 2, name: "Jantar Colonial - 20 pessoas", description: "Jantar com menu completo", originalPrice: "R$ 120", discountPrice: "R$ 75", minBuyers: 20, currentBuyers: 8, active: true },
+];
+
 const AdminPanel = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
@@ -135,7 +148,6 @@ const AdminPanel = () => {
   const [loginError, setLoginError] = useState("");
 
   const handleAdminAuth = () => {
-    // Initialize default credentials if none exist
     if (!localStorage.getItem("admin_username")) {
       localStorage.setItem("admin_username", "EERB1976");
     }
@@ -203,8 +215,13 @@ const AdminPanel = () => {
   const [explore, setExplore] = useState<EditableItem[]>([]);
   const [treasure, setTreasure] = useState<EditableItem[]>([]);
   const [trails, setTrails] = useState<EditableItem[]>([]);
+  const [groupBuy, setGroupBuy] = useState<EditableItem[]>([]);
+  const [subLocations, setSubLocations] = useState<EditableItem[]>([]);
 
   const availableCities = selectedState ? citiesByState[selectedState] || [] : [];
+
+  // Check if selected city has sub-locations
+  const citySubLocs = selectedCity && selectedState ? getCitySubLocations(selectedCity, selectedState) : undefined;
 
   // Load global config
   useEffect(() => {
@@ -229,6 +246,28 @@ const AdminPanel = () => {
     setExplore(getAdminData(selectedState, selectedCity, "explore") || defaultExplore);
     setTreasure(getAdminData(selectedState, selectedCity, "treasure") || defaultTreasure);
     setTrails(getAdminData(selectedState, selectedCity, "trails") || defaultTrails);
+    setGroupBuy(getAdminData(selectedState, selectedCity, "groupBuy") || defaultGroupBuy);
+
+    // Load sub-locations from admin data or from defaults
+    const adminSubLocs = getAdminData(selectedState, selectedCity, "subLocations");
+    if (adminSubLocs) {
+      setSubLocations(adminSubLocs);
+    } else {
+      const defaultSubLocs = getCitySubLocations(selectedCity, selectedState);
+      if (defaultSubLocs) {
+        setSubLocations(defaultSubLocs.subLocations.map((sl, i) => ({
+          id: i + 1,
+          name: sl.name,
+          description: sl.description,
+          image: sl.image,
+          district: sl.district,
+          highlights: sl.highlights,
+          active: true,
+        })));
+      } else {
+        setSubLocations([]);
+      }
+    }
 
     // Load city settings
     const citySettings = getAdminData(selectedState, selectedCity, "city_settings");
@@ -287,6 +326,8 @@ const AdminPanel = () => {
       description: "",
       active: true,
       ...(section === "stalls" ? { secretCode: generateSecretCode() } : {}),
+      ...(section === "groupBuy" ? { originalPrice: "", discountPrice: "", minBuyers: 10, currentBuyers: 0 } : {}),
+      ...(section === "subLocations" ? { district: "", image: "", highlights: [] } : {}),
     };
     const updated = [...items, newItem];
     setItems(updated);
@@ -308,6 +349,8 @@ const AdminPanel = () => {
       explore: { items: explore, setter: setExplore },
       treasure: { items: treasure, setter: setTreasure },
       trails: { items: trails, setter: setTrails },
+      groupBuy: { items: groupBuy, setter: setGroupBuy },
+      subLocations: { items: subLocations, setter: setSubLocations },
     };
     const s = sectionMap[section];
     if (!s) return;
@@ -386,11 +429,13 @@ const AdminPanel = () => {
     { id: "notifications", label: "Notificações", icon: Bell, badge: unreadCount },
     { id: "stalls", label: "Barracas", icon: Store },
     { id: "carousel", label: "Carrossel", icon: Image },
-    { id: "promotions", label: "Promoções", icon: Tag },
-    { id: "events", label: "Eventos", icon: Calendar },
     { id: "explore", label: "Explorar", icon: Compass },
+    { id: "topRated", label: "Mais Votados", icon: Star },
+    { id: "promosEvents", label: "Promos & Eventos", icon: Calendar },
     { id: "treasure", label: "Caça Tesouro", icon: Map },
     { id: "trails", label: "Trilhas", icon: TreePine },
+    { id: "groupBuy", label: "Compra Coletiva", icon: ShoppingCart },
+    ...(citySubLocs ? [{ id: "subLocations", label: citySubLocs.label, icon: TreePalm }] : []),
     { id: "city_settings", label: "Cidade", icon: FileText },
     { id: "cities", label: "Lista Cidades", icon: MapPin },
     { id: "password", label: "Senha", icon: Lock },
@@ -413,7 +458,6 @@ const AdminPanel = () => {
     const [formError, setFormError] = useState("");
 
     const handleSave = () => {
-      // Sanitize inputs
       const sanitized = {
         ...form,
         name: sanitizeText(form.name),
@@ -424,7 +468,6 @@ const AdminPanel = () => {
         image: form.image ? sanitizeText(form.image) : form.image,
       };
 
-      // Validate lengths
       if (sanitized.name.length > MAX_NAME) { setFormError(`Nome deve ter no máximo ${MAX_NAME} caracteres`); return; }
       if ((sanitized.description || "").length > MAX_DESCRIPTION) { setFormError(`Descrição deve ter no máximo ${MAX_DESCRIPTION} caracteres`); return; }
       if (sanitized.image && !isValidUrl(sanitized.image)) { setFormError("URL da imagem inválida (deve começar com http:// ou https://)"); return; }
@@ -436,9 +479,13 @@ const AdminPanel = () => {
         carousel: { items: carousel, setter: setCarousel, key: "carousel" },
         promotions: { items: promotions, setter: setPromotions, key: "promotions" },
         events: { items: events, setter: setEvents, key: "events" },
+        promosEvents: { items: promotions, setter: setPromotions, key: "promotions" },
         explore: { items: explore, setter: setExplore, key: "explore" },
         treasure: { items: treasure, setter: setTreasure, key: "treasure" },
         trails: { items: trails, setter: setTrails, key: "trails" },
+        groupBuy: { items: groupBuy, setter: setGroupBuy, key: "groupBuy" },
+        topRated: { items: explore, setter: setExplore, key: "explore" },
+        subLocations: { items: subLocations, setter: setSubLocations, key: "subLocations" },
       };
       const section = sectionMap[activeTab];
       if (!section) return;
@@ -467,14 +514,14 @@ const AdminPanel = () => {
             <textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })} maxLength={MAX_DESCRIPTION}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground h-20 resize-none" />
           </div>
-          {(activeTab === "carousel") && (
+          {(activeTab === "carousel" || activeTab === "subLocations") && (
             <div>
               <label className="text-xs font-bold text-muted-foreground block mb-1">URL da Imagem</label>
               <input value={form.image || ""} onChange={e => setForm({ ...form, image: e.target.value })} maxLength={MAX_URL}
                 className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
             </div>
           )}
-          {activeTab === "events" && (
+          {(activeTab === "promosEvents" || activeTab === "events") && (
             <div>
               <label className="text-xs font-bold text-muted-foreground block mb-1">Data</label>
               <input value={form.date || ""} onChange={e => setForm({ ...form, date: e.target.value })} maxLength={MAX_DATE}
@@ -484,7 +531,7 @@ const AdminPanel = () => {
           {activeTab === "explore" && (
             <>
               <div>
-              <label className="text-xs font-bold text-muted-foreground block mb-1">Categoria</label>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Categoria</label>
                 <input value={form.category || ""} onChange={e => setForm({ ...form, category: e.target.value })} maxLength={MAX_CATEGORY}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
               </div>
@@ -513,6 +560,32 @@ const AdminPanel = () => {
               </select>
             </div>
           )}
+          {activeTab === "groupBuy" && (
+            <>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Preço Original</label>
+                <input value={form.originalPrice || ""} onChange={e => setForm({ ...form, originalPrice: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="R$ 150" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Preço com Desconto</label>
+                <input value={form.discountPrice || ""} onChange={e => setForm({ ...form, discountPrice: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="R$ 90" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Mínimo de Compradores</label>
+                <input type="number" value={form.minBuyers || 10} onChange={e => setForm({ ...form, minBuyers: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" />
+              </div>
+            </>
+          )}
+          {activeTab === "subLocations" && (
+            <div>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">Distrito/Região</label>
+              <input value={form.district || ""} onChange={e => setForm({ ...form, district: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground" placeholder="Ex: Norte, Sul, Centro" />
+            </div>
+          )}
           <button onClick={handleSave} className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2">
             <Save className="w-4 h-4" /> Salvar
           </button>
@@ -534,6 +607,12 @@ const AdminPanel = () => {
               <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
                 item.plan === "VIP" ? "bg-secondary/10 text-secondary" : item.plan === "Combo" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
               }`}>{item.plan}</span>
+            )}
+            {item.district && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-accent/10 text-accent ml-1">{item.district}</span>}
+            {item.originalPrice && (
+              <span className="text-[9px] text-muted-foreground ml-1">
+                <span className="line-through">{item.originalPrice}</span> → <span className="text-primary font-bold">{item.discountPrice}</span>
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -574,24 +653,15 @@ const AdminPanel = () => {
               <button onClick={() => confirmDeleteItem("stalls", stall.id, stalls, stall.name || `Barraca #${stall.id}`)} className="p-1.5 rounded-lg hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
             </div>
           </div>
-          {/* Secret code section */}
           <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
             <Lock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
             <code className="text-xs font-mono font-bold text-foreground tracking-wider flex-1">
               {stall.secretCode || "—"}
             </code>
-            <button
-              onClick={() => stall.secretCode && copyCode(stall.secretCode, stall.id)}
-              className="p-1 rounded hover:bg-muted"
-              title="Copiar código"
-            >
+            <button onClick={() => stall.secretCode && copyCode(stall.secretCode, stall.id)} className="p-1 rounded hover:bg-muted" title="Copiar código">
               {copiedId === stall.id ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
             </button>
-            <button
-              onClick={() => regenerateCode(stall.id)}
-              className="p-1 rounded hover:bg-muted"
-              title="Gerar novo código"
-            >
+            <button onClick={() => regenerateCode(stall.id)} className="p-1 rounded hover:bg-muted" title="Gerar novo código">
               <RefreshCw className="w-3.5 h-3.5 text-primary" />
             </button>
           </div>
@@ -620,25 +690,12 @@ const AdminPanel = () => {
             <p className="text-sm text-muted-foreground mt-1">Faça login para acessar o painel</p>
           </div>
           <div className="space-y-3">
-            <input
-              type="text"
-              value={loginUser}
-              onChange={e => setLoginUser(e.target.value)}
-              placeholder="Login"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-            />
-            <input
-              type="password"
-              value={loginPass}
-              onChange={e => setLoginPass(e.target.value)}
-              placeholder="Senha"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-            />
+            <input type="text" value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="Login"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none" />
+            <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Senha"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none" />
             {loginError && <p className="text-xs text-destructive font-semibold">{loginError}</p>}
-            <button
-              onClick={handleAdminAuth}
-              className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all"
-            >
+            <button onClick={handleAdminAuth} className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all">
               Entrar
             </button>
           </div>
@@ -695,9 +752,9 @@ const AdminPanel = () => {
                 activeTab === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
               }`}>
               <tab.icon className="w-4 h-4" /> {tab.label}
-              {tab.badge && tab.badge > 0 && (
+              {"badge" in tab && (tab as any).badge > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {tab.badge}
+                  {(tab as any).badge}
                 </span>
               )}
             </button>
@@ -712,8 +769,6 @@ const AdminPanel = () => {
                 <h2 className="font-display text-lg font-bold text-foreground">Notificações</h2>
                 <button onClick={markAllRead} className="text-xs text-primary font-bold hover:underline">Marcar todas como lidas</button>
               </div>
-
-              {/* Filters */}
               <div className="flex gap-1.5 overflow-x-auto">
                 {notifFilterLabels.map(f => (
                   <button key={f.id} onClick={() => setNotifFilter(f.id as any)}
@@ -724,8 +779,6 @@ const AdminPanel = () => {
                   </button>
                 ))}
               </div>
-
-              {/* Notification list */}
               {filteredNotifications.length === 0 ? (
                 <div className="bg-card rounded-xl border border-border p-6 text-center">
                   <Bell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
@@ -778,25 +831,37 @@ const AdminPanel = () => {
                   {renderList("carousel", carousel, setCarousel)}
                 </div>
               )}
-              {activeTab === "promotions" && selectedCity && (
-                <div className="space-y-3">
-                  <h2 className="font-display text-lg font-bold text-foreground">Promoções - {selectedCity}</h2>
-                  <p className="text-sm text-muted-foreground">Gerencie promoções e ofertas.</p>
-                  {renderList("promotions", promotions, setPromotions)}
-                </div>
-              )}
-              {activeTab === "events" && selectedCity && (
-                <div className="space-y-3">
-                  <h2 className="font-display text-lg font-bold text-foreground">Eventos - {selectedCity}</h2>
-                  <p className="text-sm text-muted-foreground">Gerencie eventos e atividades.</p>
-                  {renderList("events", events, setEvents)}
-                </div>
-              )}
               {activeTab === "explore" && selectedCity && (
                 <div className="space-y-3">
                   <h2 className="font-display text-lg font-bold text-foreground">Explorar - Ordem de Exibição - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Defina a ordem dos comércios. Use ▲▼ para reordenar.</p>
                   {renderList("explore", explore, setExplore, true)}
+                </div>
+              )}
+              {activeTab === "topRated" && selectedCity && (
+                <div className="space-y-3">
+                  <h2 className="font-display text-lg font-bold text-foreground">⭐ Mais Votados - {selectedCity}</h2>
+                  <p className="text-sm text-muted-foreground">Ranking dos comércios mais bem avaliados pelos usuários. A ordem reflete a classificação por estrelas.</p>
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-card">
+                    <p className="text-xs text-muted-foreground mb-3">Os comércios com mais avaliações positivas aparecem primeiro na seção "Mais Votados" do app. Reordene conforme a classificação real.</p>
+                    {renderList("explore", explore, setExplore, true)}
+                  </div>
+                </div>
+              )}
+              {activeTab === "promosEvents" && selectedCity && (
+                <div className="space-y-3">
+                  <h2 className="font-display text-lg font-bold text-foreground">📅 Promoções & Eventos - {selectedCity}</h2>
+                  <p className="text-sm text-muted-foreground">Gerencie promoções e eventos em um só lugar.</p>
+                  
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
+                    <h3 className="font-bold text-sm text-foreground flex items-center gap-2"><Tag className="w-4 h-4 text-primary" /> Promoções</h3>
+                    {renderList("promotions", promotions, setPromotions)}
+                  </div>
+
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
+                    <h3 className="font-bold text-sm text-foreground flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> Eventos</h3>
+                    {renderList("events", events, setEvents)}
+                  </div>
                 </div>
               )}
               {activeTab === "treasure" && selectedCity && (
@@ -811,6 +876,20 @@ const AdminPanel = () => {
                   <h2 className="font-display text-lg font-bold text-foreground">Trilhas - {selectedCity}</h2>
                   <p className="text-sm text-muted-foreground">Gerencie trilhas e rotas turísticas.</p>
                   {renderList("trails", trails, setTrails)}
+                </div>
+              )}
+              {activeTab === "groupBuy" && selectedCity && (
+                <div className="space-y-3">
+                  <h2 className="font-display text-lg font-bold text-foreground">🛒 Compra Coletiva - {selectedCity}</h2>
+                  <p className="text-sm text-muted-foreground">Gerencie ofertas de compra coletiva com desconto progressivo.</p>
+                  {renderList("groupBuy", groupBuy, setGroupBuy)}
+                </div>
+              )}
+              {activeTab === "subLocations" && selectedCity && citySubLocs && (
+                <div className="space-y-3">
+                  <h2 className="font-display text-lg font-bold text-foreground">🌴 {citySubLocs.label} - {selectedCity}</h2>
+                  <p className="text-sm text-muted-foreground">Gerencie as {citySubLocs.label.toLowerCase()} e distritos de {selectedCity}. Cada uma terá sua própria página no app.</p>
+                  {renderList("subLocations", subLocations, setSubLocations)}
                 </div>
               )}
 
@@ -859,10 +938,16 @@ const AdminPanel = () => {
                 <div key={st.abbr} className="bg-card rounded-xl border border-border p-4 shadow-card">
                   <h3 className="font-bold text-foreground mb-2">{st.name} ({citiesByState[st.abbr].length} cidades)</h3>
                   <div className="grid grid-cols-2 gap-1">
-                    {citiesByState[st.abbr].map(c => (
-                      <button key={c} onClick={() => { setSelectedState(st.abbr); setSelectedCity(c); setActiveTab("city_settings"); }}
-                        className="text-xs text-left text-muted-foreground hover:text-primary transition-colors">{c}</button>
-                    ))}
+                    {citiesByState[st.abbr].map(c => {
+                      const hasSubLocs = getCitySubLocations(c, st.abbr);
+                      return (
+                        <button key={c} onClick={() => { setSelectedState(st.abbr); setSelectedCity(c); setActiveTab("city_settings"); }}
+                          className="text-xs text-left text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                          {c}
+                          {hasSubLocs && <TreePalm className="w-3 h-3 text-accent" />}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -965,4 +1050,3 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
-

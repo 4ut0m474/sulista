@@ -2,8 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ShoppingBag, Crown } from "lucide-react";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
-import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { pageBackgrounds } from "@/lib/adminData";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const stallImages = [
   "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
@@ -16,11 +16,30 @@ const stallImages = [
   "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80",
 ];
 
+const STALLS_PER_PAGE = 10;
+
 const DigitalMarket = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.market;
+  const [visibleCount, setVisibleCount] = useState(STALLS_PER_PAGE);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(() => {
+    setVisibleCount(prev => Math.min(prev + STALLS_PER_PAGE, stallsData.length));
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const visibleStalls = stallsData.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen pb-20 relative">
@@ -40,16 +59,12 @@ const DigitalMarket = () => {
         </header>
 
         <div className="max-w-md mx-auto px-4 py-4">
-          <div className="mb-4 bg-card/90 backdrop-blur-sm rounded-xl border border-border/50 p-3 shadow-card">
-            <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-          </div>
-
           <p className="text-sm text-muted-foreground mb-4 bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-border/50">
             Toque em uma barraca para ver os produtos!
           </p>
 
           <div className="grid grid-cols-2 gap-3">
-            {stallsData.map(stall => {
+            {visibleStalls.map(stall => {
               const isVip = stall.id <= 2;
               const hasProducts = !stall.available && stall.products.length > 0;
               const coverImage = hasProducts
@@ -96,6 +111,12 @@ const DigitalMarket = () => {
               );
             })}
           </div>
+
+          {visibleCount < stallsData.length && (
+            <div ref={loaderRef} className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
 
           <button
             onClick={() => navigate(`${base}/plans`)}

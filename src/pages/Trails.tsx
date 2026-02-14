@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, TreePine, Clock, MapPin, Users, Shield, Backpack } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
-import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState } from "react";
 
 const trails = [
@@ -67,9 +66,6 @@ const Trails = () => {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-        <div className="bg-card/90 rounded-xl border border-border p-3 shadow-card">
-          <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-        </div>
 
         {trails.map((trail, i) => (
           <div key={i} className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">

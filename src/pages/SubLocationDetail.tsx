@@ -1,8 +1,29 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map } from "lucide-react";
+import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map, TreePine, ShoppingCart } from "lucide-react";
 import { getCitySubLocations } from "@/data/subLocations";
+import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+const stallImages = [
+  "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+  "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80",
+  "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80",
+  "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80",
+];
+
+const iconThemes = [
+  { bg: "from-primary/20 to-primary/5", text: "text-primary" },
+  { bg: "from-secondary/20 to-secondary/5", text: "text-secondary" },
+  { bg: "from-accent/20 to-accent/5", text: "text-accent" },
+  { bg: "from-destructive/20 to-destructive/5", text: "text-destructive" },
+  { bg: "from-gold/20 to-gold/5", text: "text-secondary" },
+  { bg: "from-teal/20 to-teal/5", text: "text-accent" },
+];
+
+const STALLS_PER_PAGE = 8;
 
 const SubLocationDetail = () => {
   const { state, city, subLocation } = useParams<{ state: string; city: string; subLocation: string }>();
@@ -10,9 +31,27 @@ const SubLocationDetail = () => {
   const cityName = decodeURIComponent(city || "");
   const subLocName = decodeURIComponent(subLocation || "");
   const { theme, toggleTheme } = useTheme();
+  const { activeIncentive, isPulsing } = useIconIncentives();
+  const base = `/city/${state}/${city}`;
 
   const cityData = getCitySubLocations(cityName, state || "");
   const loc = cityData?.subLocations.find(s => s.name === subLocName);
+
+  const [visibleCount, setVisibleCount] = useState(STALLS_PER_PAGE);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(() => {
+    setVisibleCount(prev => Math.min(prev + STALLS_PER_PAGE, stallsData.length));
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   if (!loc) {
     return (
@@ -26,12 +65,16 @@ const SubLocationDetail = () => {
     );
   }
 
-  const quickLinks = [
-    { label: "Comércios", icon: Store, path: "market" },
-    { label: "Promoções", icon: Tag, path: "promotions" },
-    { label: "Eventos", icon: Calendar, path: "events" },
+  const iconButtons = [
+    { label: "Barracas Digitais", icon: Store, path: "market" },
+    { label: "Mais Votados", icon: Star, path: "opinion" },
+    { label: "Promoções e Eventos", icon: Calendar, path: "promotions" },
     { label: "Caça ao Tesouro", icon: Map, path: "treasure" },
+    { label: "Trilhas", icon: TreePine, path: "trails" },
+    { label: "Compra Coletiva", icon: ShoppingCart, path: "group-buy" },
   ];
+
+  const visibleStalls = stallsData.filter(s => !s.available).slice(0, visibleCount);
 
   return (
     <div className="min-h-screen pb-20 bg-background">
@@ -40,7 +83,7 @@ const SubLocationDetail = () => {
         <img src={loc.image} alt={loc.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <button onClick={() => navigate(`/city/${state}/${city}/locations`)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
+          <button onClick={() => navigate(`${base}/locations`)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
           <button onClick={toggleTheme} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
@@ -75,21 +118,57 @@ const SubLocationDetail = () => {
           </div>
         </div>
 
-        {/* Quick links to city services */}
+        {/* Icon buttons - same as city */}
+        <div className="grid grid-cols-3 gap-3">
+          {iconButtons.map((item, idx) => {
+            const thm = iconThemes[idx];
+            const pulsing = isPulsing(item.path);
+            return (
+              <div key={item.label} className="relative">
+                {pulsing && activeIncentive && <IncentiveBubble phrase={activeIncentive.phrase} />}
+                <button
+                  onClick={() => navigate(`${base}/${item.path}`)}
+                  className={`w-full group flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-card hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95 ${
+                    pulsing ? "border-primary/50 ring-2 ring-primary/20" : "border-border/50"
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center ${pulsing ? "animate-pulse scale-110" : ""}`}>
+                    <item.icon className={`w-6 h-6 ${thm.text}`} />
+                  </div>
+                  <span className="font-bold text-foreground text-center leading-tight text-[10px]">{item.label}</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Stalls section */}
         <div className="bg-card rounded-2xl border border-border/50 p-4 shadow-card">
-          <h3 className="font-bold text-sm text-foreground mb-3">Serviços em {cityName}</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {quickLinks.map(link => (
-              <button
-                key={link.path}
-                onClick={() => navigate(`/city/${state}/${city}/${link.path}`)}
-                className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
-              >
-                <link.icon className="w-5 h-5 text-primary" />
-                <span className="text-xs font-bold text-foreground">{link.label}</span>
-              </button>
-            ))}
+          <h3 className="font-bold text-sm text-foreground mb-3">Barracas em {loc.name}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {visibleStalls.map(stall => {
+              const coverImage = stall.products[0]?.image || stallImages[stall.id % stallImages.length];
+              return (
+                <button
+                  key={stall.id}
+                  onClick={() => navigate(`${base}/market/${stall.id}`)}
+                  className="relative rounded-2xl overflow-hidden shadow-card border border-border/50 transition-all active:scale-95 hover:shadow-lg aspect-square"
+                >
+                  <img src={coverImage} alt={stall.owner || stall.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    <p className="text-white text-xs font-bold truncate">{stall.owner || stall.name}</p>
+                    <p className="text-white/70 text-[10px]">{stall.products.length} produtos</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
+          {visibleCount < stallsData.filter(s => !s.available).length && (
+            <div ref={loaderRef} className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
       </div>
 

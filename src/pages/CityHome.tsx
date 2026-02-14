@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, TreePalm } from "lucide-react";
+import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, TreePalm, ShoppingCart } from "lucide-react";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
 import { getCityData, type CityData } from "@/data/cities";
@@ -94,11 +94,11 @@ const CityHome = () => {
 
   const iconButtons = [
     { label: t("digitalStalls"), icon: Store, path: "market" },
-    { label: t("promotions"), icon: Tag, path: "promotions" },
-    { label: t("events"), icon: Calendar, path: "events" },
-    { label: t("yourOpinion"), icon: MessageSquare, path: "opinion" },
+    { label: t("topRated"), icon: Star, path: "opinion" },
+    { label: t("promosEvents"), icon: Calendar, path: "promotions" },
     { label: t("treasureHunt"), icon: Map, path: "treasure" },
     { label: t("trails"), icon: TreePine, path: "trails" },
+    { label: t("groupBuy"), icon: ShoppingCart, path: "group-buy" },
   ];
 
   const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";

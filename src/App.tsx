@@ -20,6 +20,7 @@ import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
+import GroupBuy from "./pages/GroupBuy";
 import Weather from "./pages/Weather";
 import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/city/:state/:city/promotions" element={<Promotions />} />
                 <Route path="/city/:state/:city/events" element={<Events />} />
                 <Route path="/city/:state/:city/trails" element={<Trails />} />
+                <Route path="/city/:state/:city/group-buy" element={<GroupBuy />} />
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
                 <Route path="/city/:state/:city/admin" element={<AdminPanel />} />

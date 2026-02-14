@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Map, Trophy, Gift, Phone } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
-import CityStateSwitcher from "@/components/CityStateSwitcher";
 
 const TreasureHunt = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -26,11 +25,7 @@ const TreasureHunt = () => {
         </div>
       </header>
 
-      <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-        <div className="bg-card/90 rounded-xl border border-border p-3 shadow-card">
-          <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-        </div>
-
+        <div className="max-w-md mx-auto px-4 py-4 space-y-4">
         {/* Mini map placeholder */}
         <div className="rounded-2xl overflow-hidden shadow-card border border-border">
           <div className="relative h-48">

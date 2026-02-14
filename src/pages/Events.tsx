@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Calendar, MapPin, Clock } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
-import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { getAdminCityData, pageBackgrounds } from "@/lib/adminData";
 
 const defaultEvents = [
@@ -39,9 +38,6 @@ const Events = () => {
         </header>
 
         <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-          <div className="bg-card/90 backdrop-blur-sm rounded-xl border border-border/50 p-3 shadow-card">
-            <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-          </div>
 
           {events.map((evt: any, i: number) => (
             <div key={i} className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 shadow-card overflow-hidden">

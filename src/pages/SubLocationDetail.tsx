@@ -4,8 +4,17 @@ import { getCitySubLocations } from "@/data/subLocations";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useFontSize } from "@/contexts/FontSizeContext";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import { useState, useEffect, useRef, useCallback } from "react";
+
+const defaultCarouselAds = [
+  { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" },
+  { title: "Pousada Serra Verde", subtitle: "Conforto e natureza", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80" },
+  { title: "Artesanato Local", subtitle: "Peças únicas feitas à mão", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80" },
+];
 
 const stallImages = [
   "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
@@ -31,14 +40,24 @@ const SubLocationDetail = () => {
   const cityName = decodeURIComponent(city || "");
   const subLocName = decodeURIComponent(subLocation || "");
   const { theme, toggleTheme } = useTheme();
+  const { fontSize, cycleFontSize } = useFontSize();
+  const { t } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { activeIncentive, isPulsing } = useIconIncentives();
   const base = `/city/${state}/${city}`;
+
+  // Use sub-location name as a "virtual city" for favorites
+  const favKey = `${cityName}:${subLocName}`;
+  const starred = isFavorite(state || "", favKey);
 
   const cityData = getCitySubLocations(cityName, state || "");
   const loc = cityData?.subLocations.find(s => s.name === subLocName);
 
   const [visibleCount, setVisibleCount] = useState(STALLS_PER_PAGE);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const loaderRef = useRef<HTMLDivElement>(null);
+
+  const carouselAds = defaultCarouselAds;
 
   const loadMore = useCallback(() => {
     setVisibleCount(prev => Math.min(prev + STALLS_PER_PAGE, stallsData.length));
@@ -53,6 +72,14 @@ const SubLocationDetail = () => {
     return () => observer.disconnect();
   }, [loadMore]);
 
+  useEffect(() => {
+    if (carouselAds.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % carouselAds.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [carouselAds.length]);
+
   if (!loc) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -66,15 +93,17 @@ const SubLocationDetail = () => {
   }
 
   const iconButtons = [
-    { label: "Barracas Digitais", icon: Store, path: "market" },
-    { label: "Mais Votados", icon: Star, path: "opinion" },
-    { label: "Promoções e Eventos", icon: Calendar, path: "promotions" },
-    { label: "Caça ao Tesouro", icon: Map, path: "treasure" },
-    { label: "Trilhas", icon: TreePine, path: "trails" },
-    { label: "Compra Coletiva", icon: ShoppingCart, path: "group-buy" },
+    { label: t("digitalStalls"), icon: Store, path: "market" },
+    { label: t("topRated"), icon: Star, path: "opinion" },
+    { label: t("promosEvents"), icon: Calendar, path: "promotions" },
+    { label: t("treasureHunt"), icon: Map, path: "treasure" },
+    { label: t("trails"), icon: TreePine, path: "trails" },
+    { label: t("groupBuy"), icon: ShoppingCart, path: "group-buy" },
   ];
 
   const visibleStalls = stallsData.filter(s => !s.available).slice(0, visibleCount);
+  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   return (
     <div className="min-h-screen pb-20 bg-background">
@@ -86,9 +115,21 @@ const SubLocationDetail = () => {
           <button onClick={() => navigate(`${base}/locations`)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
-          <button onClick={toggleTheme} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
-            {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => toggleFavorite(state || "", favKey)}
+              className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"
+              aria-label="Favoritar local"
+            >
+              <Star className={`w-4 h-4 transition-colors ${starred ? "fill-secondary text-secondary" : "text-muted-foreground"}`} />
+            </button>
+            <button onClick={toggleTheme} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card">
+              {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
+            </button>
+            <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card">
+              <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
+            </button>
+          </div>
         </div>
         <div className="absolute bottom-4 left-4 right-4">
           <div className="flex items-center gap-1.5 mb-1">
@@ -102,7 +143,7 @@ const SubLocationDetail = () => {
       <div className="max-w-md mx-auto px-4 space-y-4 mt-4">
         {/* Description */}
         <div className="bg-card rounded-2xl border border-border/50 p-4 shadow-card">
-          <p className="text-sm text-muted-foreground leading-relaxed">{loc.description}</p>
+          <p className={`text-muted-foreground leading-relaxed ${textSizeClass}`}>{loc.description}</p>
         </div>
 
         {/* Highlights */}
@@ -117,6 +158,28 @@ const SubLocationDetail = () => {
             ))}
           </div>
         </div>
+
+        {/* Carousel - same as city page */}
+        {carouselAds.length > 0 && (
+          <div className="relative overflow-hidden rounded-2xl h-44 shadow-card border border-border/30">
+            {carouselAds.map((ad, i) => (
+              <div key={i} className={`absolute inset-0 transition-all duration-500 ${i === currentSlide ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"}`}>
+                {ad.image && <img src={ad.image} alt={ad.title} className="w-full h-full object-cover" />}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                  <h3 className="font-display text-xl font-bold">{ad.title}</h3>
+                  <p className={`opacity-90 ${textSizeClass}`}>{ad.subtitle}</p>
+                  <span className="text-[10px] mt-1 inline-block px-2 py-0.5 bg-white/20 rounded-full backdrop-blur-sm">Propaganda</span>
+                </div>
+              </div>
+            ))}
+            <div className="absolute bottom-2 right-3 flex gap-1.5 z-10">
+              {carouselAds.map((_, i) => (
+                <button key={i} onClick={() => setCurrentSlide(i)} className={`w-2 h-2 rounded-full transition-all ${i === currentSlide ? "bg-white w-4" : "bg-white/40"}`} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Icon buttons - same as city */}
         <div className="grid grid-cols-3 gap-3">
@@ -135,7 +198,7 @@ const SubLocationDetail = () => {
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center ${pulsing ? "animate-pulse scale-110" : ""}`}>
                     <item.icon className={`w-6 h-6 ${thm.text}`} />
                   </div>
-                  <span className="font-bold text-foreground text-center leading-tight text-[10px]">{item.label}</span>
+                  <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
                 </button>
               </div>
             );

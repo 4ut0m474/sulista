@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, TreePalm, ShoppingCart } from "lucide-react";
+import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, ShoppingCart } from "lucide-react";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
 import { getCityData, type CityData } from "@/data/cities";
-import { getCitySubLocations } from "@/data/subLocations";
+
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
@@ -55,7 +55,7 @@ const CityHome = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const starred = isFavorite(state || "", cityName);
   const { activeIncentive, isPulsing } = useIconIncentives();
-  const subLocations = getCitySubLocations(cityName, state || "");
+  
   const [showNotifModal, setShowNotifModal] = useState(() => {
     return !localStorage.getItem("sulista-notification-setup-done");
   });
@@ -137,18 +137,7 @@ const CityHome = () => {
               </div>
             </div>
             <div className="flex items-center justify-between bg-card/90 backdrop-blur-sm rounded-2xl p-4 border border-border/50 shadow-card">
-              <div className="flex items-center gap-2">
-                <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-                {subLocations && (
-                  <button
-                    onClick={() => navigate(`/city/${state}/${city}/locations`)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/15 hover:bg-accent/25 text-accent rounded-full transition-all text-xs font-bold border border-accent/30"
-                  >
-                    <TreePalm className="w-3.5 h-3.5" />
-                    {subLocations.label}
-                  </button>
-                )}
-              </div>
+              <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
               <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
                 <WeatherIcon className="w-5 h-5 text-primary" />
                 <span className="text-lg font-bold text-foreground">{cityData.temperature}°C</span>

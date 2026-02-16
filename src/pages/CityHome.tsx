@@ -12,6 +12,7 @@ import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
+import TopRatedCarousel from "@/components/TopRatedCarousel";
 
 const weatherIcons: Record<string, typeof Sun> = {
   sunny: Sun, cloudy: Cloud, rainy: CloudRain, "partly-cloudy": CloudSun, stormy: CloudLightning,
@@ -194,6 +195,8 @@ const CityHome = () => {
               );
             })}
           </div>
+
+          <TopRatedCarousel city={cityName} stateAbbr={state || ""} />
 
           <div className="px-4 space-y-4 mb-6">
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">

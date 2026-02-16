@@ -14,7 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      establishments: {
+        Row: {
+          address: string | null
+          avg_rating: number | null
+          category: string
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          is_vip: boolean | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          state_abbr: string
+          sub_location: string | null
+          total_votes: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string
+          city: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_vip?: boolean | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          state_abbr: string
+          sub_location?: string | null
+          total_votes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_vip?: boolean | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          state_abbr?: string
+          sub_location?: string | null
+          total_votes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          comment: string | null
+          created_at: string
+          device_fingerprint: string
+          establishment_id: string
+          id: string
+          rating: number
+          voter_name: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          device_fingerprint: string
+          establishment_id: string
+          id?: string
+          rating: number
+          voter_name?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          device_fingerprint?: string
+          establishment_id?: string
+          id?: string
+          rating?: number
+          voter_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -3,7 +3,7 @@ import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Lock, Eye, EyeOff } f
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
-import { getAdminConfig, getAdminCityData, pageBackgrounds } from "@/lib/adminData";
+import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import { sanitizeText, MAX_NAME } from "@/lib/validation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,19 +65,31 @@ const MerchantPanel = () => {
       return;
     }
     setLoginLoading(true);
-    // Check against stored stall codes from database
-    const stallsData = await getAdminCityData(state || "", city ? decodeURIComponent(city) : "", "stalls");
-    if (Array.isArray(stallsData)) {
-      const match = stallsData.find((s: any) => s.secretCode === code.toUpperCase() && s.name && s.active);
-      if (!match) {
-        setError("Código secreto inválido ou barraca não encontrada");
+    try {
+      // Server-side validation via Edge Function
+      const { data, error: fnError } = await supabase.functions.invoke("verify-merchant-code", {
+        body: {
+          stateAbbr: state || "",
+          cityName: city ? decodeURIComponent(city) : "",
+          code: code.toUpperCase(),
+        },
+      });
+      if (fnError) {
+        setError("Erro ao verificar código. Tente novamente.");
         setLoginLoading(false);
         return;
       }
+      if (!data?.valid) {
+        setError(data?.error || "Código secreto inválido ou barraca não encontrada");
+        setLoginLoading(false);
+        return;
+      }
+      setStallName(data.stallName || name);
+      setLoggedIn(true);
+      setError("");
+    } catch {
+      setError("Erro de conexão. Tente novamente.");
     }
-    setStallName(name);
-    setLoggedIn(true);
-    setError("");
     setLoginLoading(false);
   };
 

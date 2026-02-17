@@ -44,11 +44,9 @@ interface EditableItem {
 
 const generateSecretCode = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "";
-  for (let i = 0; i < 12; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
+  const array = new Uint8Array(12);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => chars[byte % chars.length]).join("");
 };
 
 const defaultNotifications: AdminNotification[] = [

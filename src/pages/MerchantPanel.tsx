@@ -5,6 +5,7 @@ import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import { sanitizeText, MAX_NAME } from "@/lib/validation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const MerchantPanel = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -22,6 +23,23 @@ const MerchantPanel = () => {
   const [adminPass, setAdminPass] = useState("");
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminError, setAdminError] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
+  const { signIn: adminSignIn } = useAdminAuth();
+
+  const handleAdminLogin = async () => {
+    if (!adminLogin || !adminPass) {
+      setAdminError("Preencha todos os campos");
+      return;
+    }
+    setAdminLoading(true);
+    const { error } = await adminSignIn(adminLogin, adminPass);
+    setAdminLoading(false);
+    if (error) {
+      setAdminError(error);
+    } else {
+      navigate(`${base}/admin`);
+    }
+  };
 
   const handleMerchantLogin = () => {
     const name = sanitizeText(stallName);
@@ -54,22 +72,7 @@ const MerchantPanel = () => {
     setError("");
   };
 
-  const handleAdminLogin = () => {
-    if (!localStorage.getItem("admin_username")) {
-      localStorage.setItem("admin_username", "EERB1976");
-    }
-    if (!localStorage.getItem("admin_password")) {
-      localStorage.setItem("admin_password", "123456");
-    }
-    const storedUser = localStorage.getItem("admin_username");
-    const storedPass = localStorage.getItem("admin_password");
-    if (adminLogin === storedUser && adminPass === storedPass) {
-      sessionStorage.setItem("admin_authenticated", "true");
-      navigate(`${base}/admin`);
-    } else {
-      setAdminError("Login ou senha incorretos");
-    }
-  };
+  // Old handleAdminLogin removed - using useAdminAuth hook instead
 
   if (!loggedIn) {
     return (
@@ -158,10 +161,10 @@ const MerchantPanel = () => {
             {showAdminLogin && (
               <div className="mt-3 bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
                 <input
-                  type="text"
+                  type="email"
                   value={adminLogin}
                   onChange={e => setAdminLogin(e.target.value)}
-                  placeholder="Login"
+                  placeholder="E-mail"
                   className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                 />
                 <input
@@ -174,9 +177,10 @@ const MerchantPanel = () => {
                 {adminError && <p className="text-xs text-destructive font-semibold">{adminError}</p>}
                 <button
                   onClick={handleAdminLogin}
-                  className="w-full py-2.5 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all"
+                  disabled={adminLoading}
+                  className="w-full py-2.5 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50"
                 >
-                  Entrar como Admin
+                  {adminLoading ? "Entrando..." : "Entrar como Admin"}
                 </button>
               </div>
             )}

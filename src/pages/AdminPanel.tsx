@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
 import { getCitySubLocations, type SubLocation } from "@/data/subLocations";
 import { sanitizeText, isValidUrl, isValidEmail, isValidPhone, MAX_NAME, MAX_DESCRIPTION, MAX_URL, MAX_DATE, MAX_CATEGORY, MAX_PRIZE, MAX_PHONE, MAX_EMAIL, MAX_PASSWORD } from "@/lib/validation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // Types
 interface AdminNotification {
@@ -141,33 +142,30 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
 
-  // Auth gate state
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem("admin_authenticated") === "true");
+  // Auth via Supabase
+  const { isAuthenticated, isLoading: authLoading, signIn, signOut, changePassword } = useAdminAuth();
   const [loginUser, setLoginUser] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
 
-  const handleAdminAuth = () => {
-    if (!localStorage.getItem("admin_username")) {
-      localStorage.setItem("admin_username", "EERB1976");
+  const handleAdminAuth = async () => {
+    if (!loginUser || !loginPass) {
+      setLoginError("Preencha todos os campos");
+      return;
     }
-    if (!localStorage.getItem("admin_password")) {
-      localStorage.setItem("admin_password", "123456");
-    }
-    const storedUser = localStorage.getItem("admin_username");
-    const storedPass = localStorage.getItem("admin_password");
-    if (loginUser === storedUser && loginPass === storedPass) {
-      sessionStorage.setItem("admin_authenticated", "true");
-      setIsAuthenticated(true);
-      setLoginError("");
+    setLoginLoading(true);
+    const { error } = await signIn(loginUser, loginPass);
+    setLoginLoading(false);
+    if (error) {
+      setLoginError(error);
     } else {
-      setLoginError("Login ou senha incorretos");
+      setLoginError("");
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("admin_authenticated");
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut();
     navigate(base);
   };
 
@@ -404,14 +402,12 @@ const AdminPanel = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handlePasswordChange = () => {
-    const storedPass = localStorage.getItem("admin_password");
-    if (!storedPass) { setPassMsg("Nenhuma senha configurada"); return; }
-    if (currentPass !== storedPass) { setPassMsg("Senha atual incorreta"); return; }
+  const handlePasswordChange = async () => {
     if (newPass.length < 6) { setPassMsg("Nova senha deve ter pelo menos 6 caracteres"); return; }
     if (newPass.length > MAX_PASSWORD) { setPassMsg(`Senha deve ter no máximo ${MAX_PASSWORD} caracteres`); return; }
     if (newPass !== confirmPass) { setPassMsg("As senhas não coincidem"); return; }
-    localStorage.setItem("admin_password", sanitizeText(newPass));
+    const { error } = await changePassword(sanitizeText(newPass));
+    if (error) { setPassMsg(error); return; }
     setPassMsg("Senha alterada com sucesso!");
     setCurrentPass(""); setNewPass(""); setConfirmPass("");
   };
@@ -678,6 +674,14 @@ const AdminPanel = () => {
     </div>
   );
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verificando autenticação...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -687,16 +691,18 @@ const AdminPanel = () => {
               <Lock className="w-8 h-8 text-foreground" />
             </div>
             <h1 className="font-display text-xl font-bold text-foreground">Painel Admin</h1>
-            <p className="text-sm text-muted-foreground mt-1">Faça login para acessar o painel</p>
+            <p className="text-sm text-muted-foreground mt-1">Faça login com seu e-mail de administrador</p>
           </div>
           <div className="space-y-3">
-            <input type="text" value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="Login"
+            <input type="email" value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="E-mail"
               className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none" />
             <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Senha"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none" />
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              onKeyDown={e => e.key === "Enter" && handleAdminAuth()} />
             {loginError && <p className="text-xs text-destructive font-semibold">{loginError}</p>}
-            <button onClick={handleAdminAuth} className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all">
-              Entrar
+            <button onClick={handleAdminAuth} disabled={loginLoading}
+              className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50">
+              {loginLoading ? "Entrando..." : "Entrar"}
             </button>
           </div>
           <button onClick={() => navigate(base)} className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2">

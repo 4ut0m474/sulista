@@ -206,11 +206,68 @@ export type Database = {
             referencedRelation: "establishments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "votes_establishment_id_fkey"
+            columns: ["establishment_id"]
+            isOneToOne: false
+            referencedRelation: "establishments_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      establishments_public: {
+        Row: {
+          address: string | null
+          avg_rating: number | null
+          category: string | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_vip: boolean | null
+          name: string | null
+          photo_url: string | null
+          state_abbr: string | null
+          sub_location: string | null
+          total_votes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_vip?: boolean | null
+          name?: string | null
+          photo_url?: string | null
+          state_abbr?: string | null
+          sub_location?: string | null
+          total_votes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_vip?: boolean | null
+          name?: string | null
+          photo_url?: string | null
+          state_abbr?: string | null
+          sub_location?: string | null
+          total_votes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

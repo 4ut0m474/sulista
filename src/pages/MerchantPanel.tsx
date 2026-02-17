@@ -2,10 +2,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Lock, Eye, EyeOff } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
-import { useState } from "react";
-import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
+import { useState, useEffect } from "react";
+import { getAdminConfig, getAdminCityData, pageBackgrounds } from "@/lib/adminData";
 import { sanitizeText, MAX_NAME } from "@/lib/validation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const MerchantPanel = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -17,6 +18,7 @@ const MerchantPanel = () => {
   const [showCode, setShowCode] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // Admin login state
   const [adminLogin, setAdminLogin] = useState("");
@@ -25,6 +27,12 @@ const MerchantPanel = () => {
   const [adminError, setAdminError] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
   const { signIn: adminSignIn } = useAdminAuth();
+
+  const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
+
+  useEffect(() => {
+    getAdminConfig().then(setConfig);
+  }, []);
 
   const handleAdminLogin = async () => {
     if (!adminLogin || !adminPass) {
@@ -41,7 +49,7 @@ const MerchantPanel = () => {
     }
   };
 
-  const handleMerchantLogin = () => {
+  const handleMerchantLogin = async () => {
     const name = sanitizeText(stallName);
     const code = sanitizeText(stallCode);
     if (!name || !code) {
@@ -56,23 +64,22 @@ const MerchantPanel = () => {
       setError("O código secreto deve ter 12 dígitos");
       return;
     }
-    // Check against stored stall codes
-    const stallsKey = `admin_${state}_${city ? decodeURIComponent(city) : ""}_stalls`;
-    const storedStalls = localStorage.getItem(stallsKey);
-    if (storedStalls) {
-      const stalls = JSON.parse(storedStalls);
-      const match = stalls.find((s: any) => s.secretCode === code.toUpperCase() && s.name && s.active);
+    setLoginLoading(true);
+    // Check against stored stall codes from database
+    const stallsData = await getAdminCityData(state || "", city ? decodeURIComponent(city) : "", "stalls");
+    if (Array.isArray(stallsData)) {
+      const match = stallsData.find((s: any) => s.secretCode === code.toUpperCase() && s.name && s.active);
       if (!match) {
         setError("Código secreto inválido ou barraca não encontrada");
+        setLoginLoading(false);
         return;
       }
     }
     setStallName(name);
     setLoggedIn(true);
     setError("");
+    setLoginLoading(false);
   };
-
-  // Old handleAdminLogin removed - using useAdminAuth hook instead
 
   if (!loggedIn) {
     return (
@@ -130,9 +137,10 @@ const MerchantPanel = () => {
 
               <button
                 onClick={handleMerchantLogin}
-                className="w-full py-3 rounded-xl bg-gradient-primary text-primary-foreground font-bold text-sm shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+                disabled={loginLoading}
+                className="w-full py-3 rounded-xl bg-gradient-primary text-primary-foreground font-bold text-sm shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
-                Entrar
+                {loginLoading ? "Verificando..." : "Entrar"}
               </button>
             </div>
           </div>
@@ -146,7 +154,7 @@ const MerchantPanel = () => {
               Ver Planos
             </button>
             <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
-              <Phone className="w-3 h-3" /> {getAdminConfig().whatsapp}
+              <Phone className="w-3 h-3" /> {config.whatsapp}
             </p>
           </div>
 

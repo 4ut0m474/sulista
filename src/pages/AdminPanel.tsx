@@ -5,7 +5,8 @@ import { states, citiesByState, getCityData } from "@/data/cities";
 import { getCitySubLocations, type SubLocation } from "@/data/subLocations";
 import { sanitizeText, isValidUrl, isValidEmail, isValidPhone, MAX_NAME, MAX_DESCRIPTION, MAX_URL, MAX_DATE, MAX_CATEGORY, MAX_PRIZE, MAX_PHONE, MAX_EMAIL, MAX_PASSWORD } from "@/lib/validation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-
+import { supabase } from "@/integrations/supabase/client";
+import { getAdminCityData, setAdminCityData, getAdminConfig, setAdminConfig, getAdminNotifications, addAdminNotification, markAllNotificationsRead } from "@/lib/adminData";
 // Types
 interface AdminNotification {
   id: number;
@@ -57,38 +58,9 @@ const defaultNotifications: AdminNotification[] = [
   { id: 4, type: "purchase", title: "Nova compra de propaganda", description: "Comerciante Maria solicitou Plano VIP para Barraca 10 em Curitiba-PR", timestamp: "06/02/2026 14:45", read: false, city: "Curitiba", state: "PR" },
 ];
 
-// Helper to get/set admin data per city
-const getAdminData = (stateAbbr: string, cityName: string, section: string) => {
-  const key = `admin_${stateAbbr}_${cityName}_${section}`;
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : null;
-};
+// Helper to get/set admin data per city (now async via Supabase, handled by adminData.ts)
 
-const setAdminData = (stateAbbr: string, cityName: string, section: string, data: any) => {
-  const key = `admin_${stateAbbr}_${cityName}_${section}`;
-  localStorage.setItem(key, JSON.stringify(data));
-};
-
-// Notifications helper
-const getNotifications = (): AdminNotification[] => {
-  const stored = localStorage.getItem("admin_notifications");
-  return stored ? JSON.parse(stored) : defaultNotifications;
-};
-
-const saveNotifications = (notifs: AdminNotification[]) => {
-  localStorage.setItem("admin_notifications", JSON.stringify(notifs));
-};
-
-export const addNotification = (notif: Omit<AdminNotification, "id" | "timestamp" | "read">) => {
-  const notifs = getNotifications();
-  const newNotif: AdminNotification = {
-    ...notif,
-    id: Date.now(),
-    timestamp: new Date().toLocaleString("pt-BR"),
-    read: false,
-  };
-  saveNotifications([newNotif, ...notifs]);
-};
+// Notifications are now async via Supabase
 
 const defaultStalls = Array.from({ length: 40 }, (_, i) => ({
   id: i + 1,
@@ -177,7 +149,25 @@ const AdminPanel = () => {
 
   // Notification filter
   const [notifFilter, setNotifFilter] = useState<"all" | "purchase" | "city_update" | "merchant_update">("all");
-  const [notifications, setNotifications] = useState<AdminNotification[]>(getNotifications());
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+
+  // Load notifications from database
+  useEffect(() => {
+    const loadNotifs = async () => {
+      const notifs = await getAdminNotifications();
+      setNotifications(notifs.map((n: any) => ({
+        id: n.id || Date.now(),
+        type: n.type,
+        title: n.title,
+        description: n.description,
+        timestamp: n.created_at ? new Date(n.created_at).toLocaleString("pt-BR") : "",
+        read: n.read,
+        city: n.city,
+        state: n.state_abbr,
+      })));
+    };
+    loadNotifs();
+  }, []);
 
   // Password
   const [currentPass, setCurrentPass] = useState("");
@@ -223,74 +213,77 @@ const AdminPanel = () => {
 
   // Load global config
   useEffect(() => {
-    const stored = localStorage.getItem("admin_global_config");
-    if (stored) {
-      const cfg = JSON.parse(stored);
+    const loadConfig = async () => {
+      const cfg = await getAdminConfig();
       setConfigWhatsapp(cfg.whatsapp || "(41) 99235-4211");
       setConfigEmail(cfg.email || "eerb1976@gmail.com");
-    } else {
-      setConfigWhatsapp("(41) 99235-4211");
-      setConfigEmail("eerb1976@gmail.com");
-    }
+    };
+    loadConfig();
   }, []);
 
   // Load data when city changes
   useEffect(() => {
     if (!selectedState || !selectedCity) return;
-    setStalls(getAdminData(selectedState, selectedCity, "stalls") || defaultStalls);
-    setCarousel(getAdminData(selectedState, selectedCity, "carousel") || defaultCarousel);
-    setPromotions(getAdminData(selectedState, selectedCity, "promotions") || defaultPromotions);
-    setEvents(getAdminData(selectedState, selectedCity, "events") || defaultEvents);
-    setExplore(getAdminData(selectedState, selectedCity, "explore") || defaultExplore);
-    setTreasure(getAdminData(selectedState, selectedCity, "treasure") || defaultTreasure);
-    setTrails(getAdminData(selectedState, selectedCity, "trails") || defaultTrails);
-    setGroupBuy(getAdminData(selectedState, selectedCity, "groupBuy") || defaultGroupBuy);
+    const loadCityData = async () => {
+      const sections = ["stalls", "carousel", "promotions", "events", "explore", "treasure", "trails", "groupBuy", "subLocations", "city_settings"];
+      const results = await Promise.all(
+        sections.map(s => getAdminCityData(selectedState, selectedCity, s))
+      );
+      const [stallsData, carouselData, promosData, eventsData, exploreData, treasureData, trailsData, groupBuyData, subLocsData, citySettingsData] = results;
 
-    // Load sub-locations from admin data or from defaults
-    const adminSubLocs = getAdminData(selectedState, selectedCity, "subLocations");
-    if (adminSubLocs) {
-      setSubLocations(adminSubLocs);
-    } else {
-      const defaultSubLocs = getCitySubLocations(selectedCity, selectedState);
-      if (defaultSubLocs) {
-        setSubLocations(defaultSubLocs.subLocations.map((sl, i) => ({
-          id: i + 1,
-          name: sl.name,
-          description: sl.description,
-          image: sl.image,
-          district: sl.district,
-          highlights: sl.highlights,
-          active: true,
-        })));
+      setStalls((stallsData as any) || defaultStalls);
+      setCarousel((carouselData as any) || defaultCarousel);
+      setPromotions((promosData as any) || defaultPromotions);
+      setEvents((eventsData as any) || defaultEvents);
+      setExplore((exploreData as any) || defaultExplore);
+      setTreasure((treasureData as any) || defaultTreasure);
+      setTrails((trailsData as any) || defaultTrails);
+      setGroupBuy((groupBuyData as any) || defaultGroupBuy);
+
+      if (subLocsData) {
+        setSubLocations(subLocsData as any);
       } else {
-        setSubLocations([]);
+        const defaultSubLocs = getCitySubLocations(selectedCity, selectedState);
+        if (defaultSubLocs) {
+          setSubLocations(defaultSubLocs.subLocations.map((sl, i) => ({
+            id: i + 1,
+            name: sl.name,
+            description: sl.description,
+            image: sl.image,
+            district: sl.district,
+            highlights: sl.highlights,
+            active: true,
+          })));
+        } else {
+          setSubLocations([]);
+        }
       }
-    }
 
-    // Load city settings
-    const citySettings = getAdminData(selectedState, selectedCity, "city_settings");
-    if (citySettings) {
-      setCityBirthday(citySettings.birthday || "");
-      setCityDescription(citySettings.description || "");
-      setCityHistory(citySettings.history || "");
-      setCityFestivities(citySettings.festivities || "");
-    } else {
-      const defaultData = getCityData(selectedCity, selectedState);
-      setCityBirthday(defaultData.birthday);
-      setCityDescription(defaultData.description);
-      setCityHistory(defaultData.history);
-      setCityFestivities(defaultData.festivities);
-    }
+      if (citySettingsData && typeof citySettingsData === "object" && !Array.isArray(citySettingsData)) {
+        const cs = citySettingsData as Record<string, string>;
+        setCityBirthday(cs.birthday || "");
+        setCityDescription(cs.description || "");
+        setCityHistory(cs.history || "");
+        setCityFestivities(cs.festivities || "");
+      } else {
+        const defaultData = getCityData(selectedCity, selectedState);
+        setCityBirthday(defaultData.birthday);
+        setCityDescription(defaultData.description);
+        setCityHistory(defaultData.history);
+        setCityFestivities(defaultData.festivities);
+      }
+    };
+    loadCityData();
   }, [selectedState, selectedCity]);
 
-  const saveSection = (section: string, data: EditableItem[]) => {
+  const saveSection = async (section: string, data: EditableItem[]) => {
     if (!selectedState || !selectedCity) return;
-    setAdminData(selectedState, selectedCity, section, data);
+    await setAdminCityData(selectedState, selectedCity, section, data);
     setSaveMsg("Salvo com sucesso!");
     setTimeout(() => setSaveMsg(""), 2000);
   };
 
-  const saveCitySettings = () => {
+  const saveCitySettings = async () => {
     if (!selectedState || !selectedCity) return;
     const sanitizedBirthday = sanitizeText(cityBirthday);
     const sanitizedDesc = sanitizeText(cityDescription);
@@ -298,20 +291,30 @@ const AdminPanel = () => {
     const sanitizedFestivities = sanitizeText(cityFestivities);
     if (sanitizedDesc.length > 2000) { setCityMsg("Descrição muito longa (máx. 2000 caracteres)"); setTimeout(() => setCityMsg(""), 3000); return; }
     if (sanitizedHistory.length > 5000) { setCityMsg("História muito longa (máx. 5000 caracteres)"); setTimeout(() => setCityMsg(""), 3000); return; }
-    setAdminData(selectedState, selectedCity, "city_settings", {
+    await setAdminCityData(selectedState, selectedCity, "city_settings", {
       birthday: sanitizedBirthday,
       description: sanitizedDesc,
       history: sanitizedHistory,
       festivities: sanitizedFestivities,
     });
-    addNotification({
+    await addAdminNotification({
       type: "city_update",
       title: "Informações da cidade atualizadas",
       description: `Configurações de ${selectedCity}-${selectedState} foram alteradas pelo admin`,
       city: selectedCity,
-      state: selectedState,
+      state_abbr: selectedState,
     });
-    setNotifications(getNotifications());
+    const notifs = await getAdminNotifications();
+    setNotifications(notifs.map((n: any) => ({
+      id: n.id || Date.now(),
+      type: n.type,
+      title: n.title,
+      description: n.description,
+      timestamp: n.created_at ? new Date(n.created_at).toLocaleString("pt-BR") : "",
+      read: n.read,
+      city: n.city,
+      state: n.state_abbr,
+    })));
     setCityMsg("Configurações da cidade salvas!");
     setTimeout(() => setCityMsg(""), 2000);
   };
@@ -358,17 +361,17 @@ const AdminPanel = () => {
     setDeleteConfirm(null);
   };
 
-  const saveGlobalConfig = () => {
+  const saveGlobalConfig = async () => {
     const phone = sanitizeText(configWhatsapp);
     const email = sanitizeText(configEmail);
     if (!isValidPhone(phone)) { setConfigMsg("Formato de telefone inválido"); setTimeout(() => setConfigMsg(""), 3000); return; }
     if (!isValidEmail(email)) { setConfigMsg("Formato de e-mail inválido"); setTimeout(() => setConfigMsg(""), 3000); return; }
     const whatsappNumber = phone.replace(/\D/g, "");
-    localStorage.setItem("admin_global_config", JSON.stringify({
+    await setAdminConfig({
       whatsapp: phone,
       whatsappNumber: whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`,
       email: email,
-    }));
+    });
     setConfigMsg("Configurações salvas com sucesso!");
     setTimeout(() => setConfigMsg(""), 2000);
   };
@@ -382,18 +385,17 @@ const AdminPanel = () => {
     saveSection(section, newItems);
   };
 
-  const regenerateCode = (stallId: number) => {
+  const regenerateCode = async (stallId: number) => {
     const updated = stalls.map(s => s.id === stallId ? { ...s, secretCode: generateSecretCode() } : s);
     setStalls(updated);
     saveSection("stalls", updated);
-    addNotification({
+    await addAdminNotification({
       type: "merchant_update",
       title: "Código secreto regenerado",
       description: `Código da Barraca ${stallId} em ${selectedCity}-${selectedState} foi alterado`,
       city: selectedCity,
-      state: selectedState,
+      state_abbr: selectedState,
     });
-    setNotifications(getNotifications());
   };
 
   const copyCode = (code: string, stallId: number) => {
@@ -412,10 +414,10 @@ const AdminPanel = () => {
     setCurrentPass(""); setNewPass(""); setConfirmPass("");
   };
 
-  const markAllRead = () => {
+  const markAllRead = async () => {
     const updated = notifications.map(n => ({ ...n, read: true }));
     setNotifications(updated);
-    saveNotifications(updated);
+    await markAllNotificationsRead();
   };
 
   const filteredNotifications = notifFilter === "all" ? notifications : notifications.filter(n => n.type === notifFilter);

@@ -50,8 +50,8 @@ const Opinion = () => {
 
   const fetchEstablishments = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("establishments")
+    const { data, error } = await (supabase as any)
+      .from("establishments_public")
       .select("id, name, description, category, photo_url, avg_rating, total_votes, address")
       .eq("city", cityName)
       .eq("state_abbr", state || "")

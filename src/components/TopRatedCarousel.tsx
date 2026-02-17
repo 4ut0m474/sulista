@@ -22,8 +22,8 @@ const TopRatedCarousel = ({ city, stateAbbr }: TopRatedCarouselProps) => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
-        .from("establishments")
+      const { data } = await (supabase as any)
+        .from("establishments_public")
         .select("id, name, photo_url, avg_rating, total_votes, category")
         .eq("city", city)
         .eq("state_abbr", stateAbbr)

@@ -52,7 +52,6 @@ const CityHome = () => {
   const { theme, toggleTheme } = useTheme();
   const { fontSize, cycleFontSize } = useFontSize();
   const { t } = useLanguage();
-  const config = getAdminConfig();
   const { isFavorite, toggleFavorite } = useFavorites();
   const starred = isFavorite(state || "", cityName);
   const { activeIncentive, isPulsing } = useIconIncentives();
@@ -61,25 +60,41 @@ const CityHome = () => {
     return !localStorage.getItem("sulista-notification-setup-done");
   });
 
-  // Read admin-configured city settings
-  const citySettings = getAdminCityData(state || "", cityName, "city_settings");
-  const cityData: CityData = citySettings ? {
-    ...defaultData,
-    birthday: citySettings.birthday || defaultData.birthday,
-    description: citySettings.description || defaultData.description,
-    history: citySettings.history || defaultData.history,
-    festivities: citySettings.festivities || defaultData.festivities,
-  } : defaultData;
+  // Async admin data
+  const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
+  const [cityData, setCityData] = useState<CityData>(defaultData);
+  const [carouselAds, setCarouselAds] = useState(defaultCarouselAds);
 
-  // Read admin-configured carousel
-  const adminCarousel = getAdminCityData(state || "", cityName, "carousel");
-  const carouselAds = adminCarousel
-    ? adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
-        title: c.name || c.title || "",
-        subtitle: c.description || c.subtitle || "",
-        image: c.image || "",
-      }))
-    : defaultCarouselAds;
+  useEffect(() => {
+    const loadData = async () => {
+      const [cfg, citySettings, adminCarousel] = await Promise.all([
+        getAdminConfig(),
+        getAdminCityData(state || "", cityName, "city_settings"),
+        getAdminCityData(state || "", cityName, "carousel"),
+      ]);
+      setConfig(cfg);
+      if (citySettings && typeof citySettings === "object" && !Array.isArray(citySettings)) {
+        const s = citySettings as Record<string, string>;
+        setCityData({
+          ...defaultData,
+          birthday: s.birthday || defaultData.birthday,
+          description: s.description || defaultData.description,
+          history: s.history || defaultData.history,
+          festivities: s.festivities || defaultData.festivities,
+        });
+      }
+      if (Array.isArray(adminCarousel)) {
+        setCarouselAds(
+          adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
+            title: c.name || c.title || "",
+            subtitle: c.description || c.subtitle || "",
+            image: c.image || "",
+          }))
+        );
+      }
+    };
+    loadData();
+  }, [state, cityName]);
 
   const backgroundUrl = cityBackgrounds[cityData.name] || cityBackgrounds["default"];
 

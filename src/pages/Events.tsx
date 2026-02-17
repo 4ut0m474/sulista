@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Calendar, MapPin, Clock } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import { getAdminCityData, pageBackgrounds } from "@/lib/adminData";
+import { useState, useEffect } from "react";
 
 const defaultEvents = [
   { name: "Feira de Artesanato", date: "Todo sábado", time: "08h - 14h", location: "Praça Central", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&q=80", active: true },
@@ -15,10 +16,19 @@ const Events = () => {
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.events;
-
   const cityName = city ? decodeURIComponent(city) : "";
-  const adminEvents = getAdminCityData(state || "", cityName, "events");
-  const events = (adminEvents || defaultEvents).filter((e: any) => e.active !== false);
+
+  const [events, setEvents] = useState(defaultEvents);
+
+  useEffect(() => {
+    const load = async () => {
+      const adminEvents = await getAdminCityData(state || "", cityName, "events");
+      if (Array.isArray(adminEvents)) {
+        setEvents(adminEvents.filter((e: any) => e.active !== false) as any[]);
+      }
+    };
+    load();
+  }, [state, cityName]);
 
   return (
     <div className="min-h-screen pb-20 relative">
@@ -38,7 +48,6 @@ const Events = () => {
         </header>
 
         <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-
           {events.map((evt: any, i: number) => (
             <div key={i} className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 shadow-card overflow-hidden">
               {evt.image && (

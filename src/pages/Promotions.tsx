@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Clock, Percent } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import { getAdminCityData, pageBackgrounds } from "@/lib/adminData";
+import { useState, useEffect } from "react";
 
 const defaultPromotions = [
   { store: "Padaria Colonial", deal: "Pão artesanal - Leve 3, pague 2", discount: "33%", expires: "Hoje", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", active: true },
@@ -15,20 +16,28 @@ const Promotions = () => {
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.promotions;
-
   const cityName = city ? decodeURIComponent(city) : "";
-  const adminPromos = getAdminCityData(state || "", cityName, "promotions");
-  
-  // Admin data uses 'name' field, default uses 'store' field
-  const promotions = adminPromos 
-    ? adminPromos.filter((p: any) => p.active !== false).map((p: any) => ({
-        store: p.name || p.store || "",
-        deal: p.description || p.deal || "",
-        discount: p.discount || "",
-        expires: p.expires || "",
-        image: p.image || "",
-      }))
-    : defaultPromotions;
+
+  const [promotions, setPromotions] = useState(defaultPromotions);
+
+  useEffect(() => {
+    const load = async () => {
+      const adminPromos = await getAdminCityData(state || "", cityName, "promotions");
+      if (Array.isArray(adminPromos)) {
+        setPromotions(
+          adminPromos.filter((p: any) => p.active !== false).map((p: any) => ({
+            store: p.name || p.store || "",
+            deal: p.description || p.deal || "",
+            discount: p.discount || "",
+            expires: p.expires || "",
+            image: p.image || "",
+            active: true,
+          }))
+        );
+      }
+    };
+    load();
+  }, [state, cityName]);
 
   return (
     <div className="min-h-screen pb-20 relative">
@@ -48,7 +57,6 @@ const Promotions = () => {
         </header>
 
         <div className="max-w-md mx-auto px-4 py-4 space-y-4">
-
           {promotions.map((promo: any, i: number) => (
             <div key={i} className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 shadow-card overflow-hidden">
               {promo.image && (

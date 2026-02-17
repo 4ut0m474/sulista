@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_city_content: {
+        Row: {
+          city: string
+          data: Json
+          id: string
+          section: string
+          state_abbr: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          data?: Json
+          id?: string
+          section: string
+          state_abbr: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          data?: Json
+          id?: string
+          section?: string
+          state_abbr?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      admin_notifications: {
+        Row: {
+          city: string | null
+          created_at: string
+          description: string
+          id: string
+          read: boolean
+          state_abbr: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          read?: boolean
+          state_abbr?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          read?: boolean
+          state_abbr?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       establishments: {
         Row: {
           address: string | null

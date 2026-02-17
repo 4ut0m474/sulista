@@ -1,20 +1,76 @@
-// Helper to read admin-configured data from localStorage
+// Helper to read admin-configured data from Supabase
 // Used by public pages to display admin-managed content
 
-export const getAdminConfig = () => {
-  const stored = localStorage.getItem("admin_global_config");
-  if (stored) return JSON.parse(stored);
-  return {
-    whatsapp: "(41) 99235-4211",
-    whatsappNumber: "5541992354211",
-    email: "eerb1976@gmail.com",
-  };
+import { supabase } from "@/integrations/supabase/client";
+
+// Default config values
+const DEFAULT_CONFIG = {
+  whatsapp: "(41) 99235-4211",
+  whatsappNumber: "5541992354211",
+  email: "eerb1976@gmail.com",
 };
 
-export const getAdminCityData = (stateAbbr: string, cityName: string, section: string) => {
-  const key = `admin_${stateAbbr}_${cityName}_${section}`;
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : null;
+export const getAdminConfig = async (): Promise<typeof DEFAULT_CONFIG> => {
+  const { data } = await supabase
+    .from("admin_config")
+    .select("value")
+    .eq("key", "global_config")
+    .maybeSingle();
+  if (data?.value && typeof data.value === "object") {
+    return { ...DEFAULT_CONFIG, ...(data.value as Record<string, string>) };
+  }
+  return DEFAULT_CONFIG;
+};
+
+export const setAdminConfig = async (config: Record<string, string>) => {
+  const { error } = await supabase
+    .from("admin_config")
+    .upsert({ key: "global_config", value: config as any }, { onConflict: "key" });
+  return { error };
+};
+
+export const getAdminCityData = async (stateAbbr: string, cityName: string, section: string) => {
+  const { data } = await supabase
+    .from("admin_city_content")
+    .select("data")
+    .eq("state_abbr", stateAbbr)
+    .eq("city", cityName)
+    .eq("section", section)
+    .maybeSingle();
+  return data?.data ?? null;
+};
+
+export const setAdminCityData = async (stateAbbr: string, cityName: string, section: string, sectionData: any) => {
+  const { error } = await supabase
+    .from("admin_city_content")
+    .upsert(
+      { state_abbr: stateAbbr, city: cityName, section, data: sectionData },
+      { onConflict: "state_abbr,city,section" }
+    );
+  return { error };
+};
+
+// Notifications
+export const getAdminNotifications = async () => {
+  const { data } = await supabase
+    .from("admin_notifications")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return data || [];
+};
+
+export const addAdminNotification = async (notif: {
+  type: string;
+  title: string;
+  description: string;
+  city?: string;
+  state_abbr?: string;
+}) => {
+  await supabase.from("admin_notifications").insert(notif as any);
+};
+
+export const markAllNotificationsRead = async () => {
+  await supabase.from("admin_notifications").update({ read: true } as any).eq("read", false);
 };
 
 // Page background images - unique per page type

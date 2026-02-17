@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Check, Star, Crown, Sparkles } from "lucide-react";
 import { plans } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import PlanContractModal from "@/components/PlanContractModal";
 
@@ -12,8 +12,13 @@ const Plans = () => {
   const [annual, setAnnual] = useState(true);
   const [contractModal, setContractModal] = useState<{ planName: string; displayPrice: string; priceDetail: string } | null>(null);
   const base = `/city/${state}/${city}`;
-  const config = getAdminConfig();
   const bgUrl = pageBackgrounds.plans;
+
+  const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
+
+  useEffect(() => {
+    getAdminConfig().then(setConfig);
+  }, []);
 
   return (
     <div className="min-h-screen pb-20 relative">

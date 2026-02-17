@@ -11,15 +11,16 @@ const DEFAULT_CONFIG = {
 };
 
 export const getAdminConfig = async (): Promise<typeof DEFAULT_CONFIG> => {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("admin_config")
     .select("value")
     .eq("key", "global_config")
     .maybeSingle();
-  if (data?.value && typeof data.value === "object") {
-    return { ...DEFAULT_CONFIG, ...(data.value as Record<string, string>) };
+  // If RLS blocks access (non-admin), gracefully return defaults
+  if (error || !data?.value || typeof data.value !== "object") {
+    return DEFAULT_CONFIG;
   }
-  return DEFAULT_CONFIG;
+  return { ...DEFAULT_CONFIG, ...(data.value as Record<string, string>) };
 };
 
 export const setAdminConfig = async (config: Record<string, string>) => {

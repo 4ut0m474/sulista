@@ -1,1 +1,4 @@
 project_id = "dgvqfawipufxoxklpnyn"
+
+[functions.verify-merchant-code]
+verify_jwt = false

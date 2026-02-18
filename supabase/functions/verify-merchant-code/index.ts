@@ -1,12 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const ALLOWED_ORIGINS = [
+  "https://sulista.lovable.app",
+  "https://id-preview--2c4c0396-2206-46f5-b853-be558ea3b2f4.lovable.app",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
+
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const DELAY_ON_FAIL_MS = 2000;
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -21,7 +38,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (typeof code !== "string" || code.length !== 12) {
+    if (typeof code !== "string" || code.length !== 32) {
       return new Response(
         JSON.stringify({ error: "Invalid code format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -29,7 +46,7 @@ Deno.serve(async (req) => {
     }
 
     const sanitizedCode = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (sanitizedCode.length !== 12) {
+    if (sanitizedCode.length !== 32) {
       return new Response(
         JSON.stringify({ error: "Invalid code characters" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -40,6 +57,25 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Rate limiting: check recent failed attempts for this city
+    const rateLimitKey = `${stateAbbr}:${cityName}`;
+    const windowStart = new Date(Date.now() - WINDOW_MS).toISOString();
+
+    const { count } = await supabase
+      .from("admin_notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("type", "merchant_code_attempt")
+      .eq("state_abbr", stateAbbr)
+      .eq("city", cityName)
+      .gte("created_at", windowStart);
+
+    if ((count ?? 0) >= MAX_ATTEMPTS) {
+      return new Response(
+        JSON.stringify({ valid: false, error: "Muitas tentativas. Tente novamente em 1 hora." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Fetch stall data server-side
     const { data, error } = await supabase
@@ -59,6 +95,8 @@ Deno.serve(async (req) => {
     }
 
     if (!data?.data || !Array.isArray(data.data)) {
+      await logFailedAttempt(supabase, stateAbbr, cityName);
+      await delay(DELAY_ON_FAIL_MS);
       return new Response(
         JSON.stringify({ valid: false, error: "Código secreto inválido ou barraca não encontrada" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -71,6 +109,8 @@ Deno.serve(async (req) => {
     );
 
     if (!match) {
+      await logFailedAttempt(supabase, stateAbbr, cityName);
+      await delay(DELAY_ON_FAIL_MS);
       return new Response(
         JSON.stringify({ valid: false, error: "Código secreto inválido ou barraca não encontrada" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -84,9 +124,24 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("Unexpected error:", err);
+    const corsHeaders = getCorsHeaders(req);
     return new Response(
       JSON.stringify({ error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
+
+async function logFailedAttempt(supabase: any, stateAbbr: string, cityName: string) {
+  await supabase.from("admin_notifications").insert({
+    type: "merchant_code_attempt",
+    title: "Tentativa de código de comerciante",
+    description: `Tentativa falha para ${cityName}/${stateAbbr}`,
+    state_abbr: stateAbbr,
+    city: cityName,
+  });
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

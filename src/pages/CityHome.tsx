@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, ShoppingCart } from "lucide-react";
+import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
 import { getCityData, type CityData } from "@/data/cities";
@@ -137,6 +138,13 @@ const CityHome = () => {
                 </button>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate(`/city/${state}/${city}/litoranea`)}
+                  className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-primary/50 flex items-center justify-center shadow-card overflow-hidden hover:ring-2 hover:ring-primary/30 transition-all"
+                  aria-label="Litorânea IA"
+                >
+                  <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
+                </button>
                 <button
                   onClick={() => toggleFavorite(state || "", cityName)}
                   className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"

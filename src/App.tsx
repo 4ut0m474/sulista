@@ -25,6 +25,7 @@ import Weather from "./pages/Weather";
 import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
+import Wallet from "./pages/Wallet";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/city/:state/:city/locations" element={<SubLocationsList />} />
                 <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
                 <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />
+                <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

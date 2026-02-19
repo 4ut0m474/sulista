@@ -1,5 +1,5 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { Home, Compass, CloudSun, Settings } from "lucide-react";
+import { Home, Compass, CloudSun, Settings, Coins } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 
 interface FooterNavProps {
@@ -16,7 +16,7 @@ const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
     { label: "Explorar", icon: Compass, path: `${base}/commerce` },
     { label: "Litorânea", icon: null, path: `${base}/litoranea`, isCenter: true },
     { label: "Tempo", icon: CloudSun, path: `${base}/weather` },
-    { label: "Comerciante", icon: Settings, path: `${base}/merchant` },
+    { label: "Carteira", icon: Coins, path: `${base}/wallet` },
   ];
 
   return (

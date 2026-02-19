@@ -149,6 +149,81 @@ export type Database = {
         }
         Relationships: []
       }
+      sulcoins: {
+        Row: {
+          atualizado_em: string
+          saldo: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          saldo?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          saldo?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sulcoins_log: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      transfers: {
+        Row: {
+          confirmada: boolean
+          created_at: string
+          de_id: string
+          id: string
+          motivo: string | null
+          para_id: string
+          valor: number
+        }
+        Insert: {
+          confirmada?: boolean
+          created_at?: string
+          de_id: string
+          id?: string
+          motivo?: string | null
+          para_id: string
+          valor: number
+        }
+        Update: {
+          confirmada?: boolean
+          created_at?: string
+          de_id?: string
+          id?: string
+          motivo?: string | null
+          para_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

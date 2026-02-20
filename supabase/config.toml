@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.litoranea-chat]
 verify_jwt = false
+
+[functions.litoranea-security-review]
+verify_jwt = false

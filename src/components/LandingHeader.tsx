@@ -2,22 +2,48 @@ import { Sun, Moon, Type, Globe, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage, languageLabels } from "@/contexts/LanguageContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LandingHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const { fontSize, cycleFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
+  const themeClicksRef = useRef(0);
+  const themeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+
+  const handleThemeClick = () => {
+    toggleTheme();
+
+    // Count clicks — secret admin access: font must be A++ (extra-large) + 5 clicks
+    themeClicksRef.current += 1;
+
+    if (themeTimerRef.current) clearTimeout(themeTimerRef.current);
+
+    if (themeClicksRef.current >= 5) {
+      themeClicksRef.current = 0;
+      if (fontSize === "extra-large") {
+        // Secret combo achieved → navigate to admin (uses a placeholder state/city)
+        navigate("/admin-access");
+      }
+    } else {
+      // Reset counter after 3 seconds of inactivity
+      themeTimerRef.current = setTimeout(() => {
+        themeClicksRef.current = 0;
+      }, 3000);
+    }
+  };
 
   return (
     <header className="absolute top-0 left-0 right-0 z-20 px-4 py-3">
       <div className="max-w-md mx-auto flex items-center justify-between">
-        {/* Theme Toggle */}
+        {/* Theme Toggle — also part of admin secret combo */}
         <button
-          onClick={toggleTheme}
+          onClick={handleThemeClick}
           className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-colors"
           aria-label="Alternar tema"
         >
@@ -58,7 +84,7 @@ const LandingHeader = () => {
           )}
         </div>
 
-        {/* Font Size Toggle */}
+        {/* Font Size Toggle — must be A++ for admin secret */}
         <button
           onClick={cycleFontSize}
           className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-colors"

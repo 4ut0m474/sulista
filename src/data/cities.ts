@@ -6,8 +6,6 @@ export interface CityData {
   description: string;
   festivities: string;
   history: string;
-  temperature: number;
-  weather: "sunny" | "cloudy" | "rainy" | "partly-cloudy" | "stormy";
 }
 
 export const states = [
@@ -61,7 +59,6 @@ export const citiesByState: Record<string, string[]> = {
 };
 
 export function getCityData(cityName: string, stateAbbr: string): CityData {
-  const weatherOptions: CityData["weather"][] = ["sunny", "cloudy", "rainy", "partly-cloudy"];
   const hash = cityName.length + stateAbbr.charCodeAt(0);
   
   return {
@@ -72,8 +69,6 @@ export function getCityData(cityName: string, stateAbbr: string): CityData {
     description: `${cityName} é uma das belas cidades do ${states.find(s => s.abbr === stateAbbr)?.name}, conhecida por sua cultura, gastronomia e hospitalidade sulista.`,
     festivities: getFestivities(cityName),
     history: `Fundada no século XIX, ${cityName} cresceu com a influência de imigrantes europeus que trouxeram tradições, culinária e arquitetura únicas para a região sul do Brasil.`,
-    temperature: 15 + (hash % 18),
-    weather: weatherOptions[hash % weatherOptions.length],
   };
 }
 

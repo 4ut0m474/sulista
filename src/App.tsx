@@ -21,7 +21,7 @@ import MerchantPanel from "./pages/MerchantPanel";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import GroupBuy from "./pages/GroupBuy";
-import Weather from "./pages/Weather";
+
 import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
@@ -54,7 +54,7 @@ const App = () => (
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
                 <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
-                <Route path="/city/:state/:city/weather" element={<Weather />} />
+                
                 <Route path="/city/:state/:city/locations" element={<SubLocationsList />} />
                 <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
                 <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />

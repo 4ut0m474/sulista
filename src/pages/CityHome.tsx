@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Sun, Cloud, CloudRain, CloudSun, CloudLightning, Store, Tag, Calendar, MessageSquare, Map, TreePine, Phone, Mail, Moon, Star, ShoppingCart } from "lucide-react";
+import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
@@ -15,9 +15,6 @@ import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
 import TopRatedCarousel from "@/components/TopRatedCarousel";
 
-const weatherIcons: Record<string, typeof Sun> = {
-  sunny: Sun, cloudy: Cloud, rainy: CloudRain, "partly-cloudy": CloudSun, stormy: CloudLightning,
-};
 
 const defaultCarouselAds = [
   { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" },
@@ -107,8 +104,6 @@ const CityHome = () => {
     return () => clearInterval(interval);
   }, [carouselAds.length]);
 
-  const WeatherIcon = weatherIcons[cityData.weather] || Sun;
-
   const iconButtons = [
     { label: t("digitalStalls"), icon: Store, path: "market" },
     { label: t("topRated"), icon: Star, path: "opinion" },
@@ -162,10 +157,6 @@ const CityHome = () => {
             </div>
             <div className="flex items-center justify-between bg-card/90 backdrop-blur-sm rounded-2xl p-4 border border-border/50 shadow-card">
               <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-              <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full">
-                <WeatherIcon className="w-5 h-5 text-primary" />
-                <span className="text-lg font-bold text-foreground">{cityData.temperature}°C</span>
-              </div>
             </div>
           </div>
         </header>

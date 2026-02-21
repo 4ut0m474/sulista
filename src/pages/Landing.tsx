@@ -147,8 +147,8 @@ const Landing = () => {
                       <button
                         key={city}
                         onClick={() => {
-                          setSelectedCity(city);
                           setCityOpen(false);
+                          navigate(`/city/${selectedState}/${encodeURIComponent(city)}`);
                         }}
                         className={`w-full text-left px-4 py-2.5 hover:bg-muted transition-colors ${textSizeClass} ${
                           selectedCity === city ? "bg-primary/10 text-primary font-semibold" : "text-foreground"
@@ -160,20 +160,6 @@ const Landing = () => {
                   </div>
                 )}
               </div>
-
-              {/* Enter Button */}
-              <button
-                onClick={handleEnter}
-                disabled={!canEnter}
-                className={`w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl font-bold transition-all ${textSizeClass} ${
-                  canEnter
-                    ? "bg-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                <MapPin className="w-5 h-5" />
-                {t("selectToContinue")}
-              </button>
 
               <p className={`text-center text-muted-foreground ${fontSize === "extra-large" ? "text-base" : "text-xs"}`}>
                 {t("selectToContinue")}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, MicOff, Volume2, VolumeX, PhoneCall, PhoneOff } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -80,23 +80,49 @@ const LitoraneaChat = () => {
   const [showAvatar, setShowAvatar] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(true);
-  const [profileStep, setProfileStep] = useState<number>(-1); // -1 = not started, 0..N = step index, N+1 = done
+  const [voiceConvoMode, setVoiceConvoMode] = useState(false); // bidirectional voice mode
+  const [profileStep, setProfileStep] = useState<number>(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const sendMessageRef = useRef<(text: string) => void>(() => {});
+  const femaleVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   const hasSpeech = !!SpeechRecognition;
   const hasTTS = typeof window !== "undefined" && "speechSynthesis" in window;
 
-  // Speak a text aloud
-  const speak = useCallback((text: string) => {
-    if (!hasTTS || !ttsEnabled) return;
+  // Find and cache a feminine pt-BR voice
+  useEffect(() => {
+    if (!hasTTS) return;
+    const pickFemaleVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      // Prefer female pt-BR voices
+      const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "francisca", "maria", "google"];
+      const ptBrVoices = voices.filter(v => v.lang.startsWith("pt"));
+      const female = ptBrVoices.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
+      femaleVoiceRef.current = female || ptBrVoices[0] || null;
+    };
+    pickFemaleVoice();
+    window.speechSynthesis.onvoiceschanged = pickFemaleVoice;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, [hasTTS]);
+
+  // Speak a text aloud with feminine, calm voice
+  const speak = useCallback((text: string, onEnd?: () => void) => {
+    if (!hasTTS || !ttsEnabled) {
+      onEnd?.();
+      return;
+    }
     window.speechSynthesis.cancel();
     const clean = text.replace(/[*_`#>\[\]]/g, "").replace(/\n+/g, " ");
     const utter = new SpeechSynthesisUtterance(clean);
     utter.lang = "pt-BR";
-    utter.rate = 0.95;
+    utter.rate = 0.88; // calm, not rushed
+    utter.pitch = 1.15; // slightly higher = more feminine
+    utter.volume = 1;
+    if (femaleVoiceRef.current) utter.voice = femaleVoiceRef.current;
+    utter.onend = () => onEnd?.();
     synthRef.current = utter;
     window.speechSynthesis.speak(utter);
   }, [hasTTS, ttsEnabled]);
@@ -105,29 +131,38 @@ const LitoraneaChat = () => {
     if (hasTTS) window.speechSynthesis.cancel();
   }, [hasTTS]);
 
-  // Voice input
-  const toggleListening = useCallback(() => {
-    if (!hasSpeech) return;
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
+  // Voice input - supports continuous conversation mode
+  const startListening = useCallback(() => {
+    if (!hasSpeech || isListening) return;
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
       setIsListening(false);
+      // In voice convo mode, send immediately
+      if (voiceConvoMode) {
+        sendMessageRef.current(transcript);
+      } else {
+        setInput(prev => prev ? `${prev} ${transcript}` : transcript);
+      }
     };
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
-  }, [isListening, hasSpeech]);
+  }, [isListening, hasSpeech, voiceConvoMode]);
+
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    startListening();
+  }, [isListening, startListening]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -162,7 +197,7 @@ const LitoraneaChat = () => {
       const botMsg: Msg = { role: "assistant", content: nextQ.question, options: nextQ.options };
       setMessages(prev => [...prev, userMsg, botMsg]);
       setProfileStep(nextStep);
-      if (nextQ.speak) speak(nextQ.question);
+      if (nextQ.speak) speak(nextQ.question, () => { if (voiceConvoMode) startListening(); });
     } else {
       // Profile complete
       const profile = getProfile();
@@ -173,13 +208,14 @@ const LitoraneaChat = () => {
       };
       setMessages(prev => [...prev, userMsg, doneMsg]);
       setProfileStep(nextStep);
-      speak(doneMsg.content);
+      speak(doneMsg.content, () => { if (voiceConvoMode) startListening(); });
     }
   };
 
   // Main AI chat send
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    stopSpeaking(); // stop any current speech
 
     // If in profile mode, handle as profile answer
     if (profileStep >= 0 && profileStep < PROFILE_STEPS.length) {
@@ -305,8 +341,8 @@ const LitoraneaChat = () => {
         });
       }
 
-      // Speak the final response
-      if (assistantSoFar) speak(assistantSoFar);
+      // Speak the final response, then auto-listen in voice convo mode
+      if (assistantSoFar) speak(assistantSoFar, () => { if (voiceConvoMode) startListening(); });
 
     } catch (e: any) {
       const errMsg = `Opa, deu ruim aqui! 😅 ${e.message || "Tente de novo."}`;
@@ -320,7 +356,9 @@ const LitoraneaChat = () => {
     }
   };
 
-  // Extract clickable options from AI response text
+  // Keep ref in sync for voice convo callbacks
+  useEffect(() => { sendMessageRef.current = sendMessage; });
+
   const extractOptions = (text: string): string[] => {
     const opts: string[] = [];
     // Look for patterns like "Sou turista", "Quero grupo", "Frete?" etc embedded in the text
@@ -367,6 +405,22 @@ const LitoraneaChat = () => {
               : "Limite diário atingido"}
           </p>
         </div>
+        {/* Voice conversation toggle */}
+        {hasSpeech && hasTTS && (
+          <button
+            onClick={() => {
+              setVoiceConvoMode(v => {
+                if (!v) { setTtsEnabled(true); }
+                else { stopSpeaking(); recognitionRef.current?.stop(); setIsListening(false); }
+                return !v;
+              });
+            }}
+            className={`p-2 rounded-full transition-colors ${voiceConvoMode ? "bg-primary/20 ring-2 ring-primary" : "hover:bg-muted"}`}
+            title={voiceConvoMode ? "Desativar conversa por voz" : "Conversar por voz"}
+          >
+            {voiceConvoMode ? <PhoneCall className="w-5 h-5 text-primary animate-pulse" /> : <PhoneOff className="w-5 h-5 text-muted-foreground" />}
+          </button>
+        )}
         {/* TTS toggle */}
         {hasTTS && (
           <button
@@ -459,6 +513,12 @@ const LitoraneaChat = () => {
         )}
       </div>
 
+      {/* Voice convo mode indicator */}
+      {voiceConvoMode && isListening && (
+        <div className="text-center py-2 text-xs text-primary font-bold animate-pulse">
+          🎙️ Ouvindo você... fale agora!
+        </div>
+      )}
       {/* Input */}
       <div className="p-4 bg-card border-t border-border">
         <form
@@ -468,7 +528,7 @@ const LitoraneaChat = () => {
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={isInProfileMode ? "Digite ou fale sua resposta..." : "Pergunte à Litorânea..."}
+            placeholder={voiceConvoMode ? "Modo conversa por voz ativo 🎙️" : isInProfileMode ? "Digite ou fale sua resposta..." : "Pergunte à Litorânea..."}
             className="flex-1 px-4 py-2.5 rounded-full bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             disabled={isLoading}
           />

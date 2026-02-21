@@ -85,5 +85,5 @@ export const pageBackgrounds: Record<string, string> = {
   commerce: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=80",
   plans: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80",
   merchant: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&q=80",
-  weather: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=1200&q=80",
+  
 };

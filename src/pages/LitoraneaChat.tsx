@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, MicOff, Volume2, VolumeX, PhoneCall, PhoneOff } from "lucide-react";
+import { ArrowLeft, Send, Sparkles } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -21,7 +21,6 @@ const incrementUsage = () => {
   localStorage.setItem(key, String(getUsageCount() + 1));
 };
 
-// User profile stored in localStorage
 const PROFILE_KEY = "litoranea-user-profile";
 const getProfile = (): Record<string, string> => {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch { return {}; }
@@ -37,38 +36,12 @@ const isProfileComplete = () => {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 
-// Profile onboarding quick options per step
 const PROFILE_STEPS = [
-  {
-    key: "name",
-    question: "Oi! Sou a Litorânea, tua guia do Sul! 👋 Como tu chamas?",
-    options: ["Prefiro não dizer", "Pode me chamar de amigo(a)"],
-    speak: true,
-  },
-  {
-    key: "type",
-    question: "Boa! Você vem ao Sul como...?",
-    options: ["🏖️ Turista", "🏪 Comerciante", "🏡 Moro aqui"],
-    speak: true,
-  },
-  {
-    key: "state",
-    question: "Qual estado do Sul mais te interessa?",
-    options: ["🌊 Paraná (PR)", "🌲 Santa Catarina (SC)", "🍷 Rio Grande do Sul (RS)", "Os três!"],
-    speak: true,
-  },
-  {
-    key: "interests",
-    question: "O que tu mais curtes? (pode escolher mais de um)",
-    options: ["🦐 Frutos do mar", "🍫 Artesanato & doces", "🏕️ Trilhas & natureza", "🎉 Festas & eventos", "💰 Promoções & compras"],
-    speak: true,
-  },
-  {
-    key: "notif_freq",
-    question: "Com que frequência queres receber notificações de promoções?",
-    options: ["📅 Diária", "📆 Semanal", "🗓️ Mensal", "🔕 Não quero"],
-    speak: true,
-  },
+  { key: "name", question: "Oi! Sou a Litorânea, tua guia do Sul! 👋 Como tu chamas?", options: ["Prefiro não dizer", "Pode me chamar de amigo(a)"] },
+  { key: "type", question: "Boa! Você vem ao Sul como...?", options: ["🏖️ Turista", "🏪 Comerciante", "🏡 Moro aqui"] },
+  { key: "state", question: "Qual estado do Sul mais te interessa?", options: ["🌊 Paraná (PR)", "🌲 Santa Catarina (SC)", "🍷 Rio Grande do Sul (RS)", "Os três!"] },
+  { key: "interests", question: "O que tu mais curtes? (pode escolher mais de um)", options: ["🦐 Frutos do mar", "🍫 Artesanato & doces", "🏕️ Trilhas & natureza", "🎉 Festas & eventos", "💰 Promoções & compras"] },
+  { key: "notif_freq", question: "Com que frequência queres receber notificações de promoções?", options: ["📅 Diária", "📆 Semanal", "🗓️ Mensal", "🔕 Não quero"] },
 ];
 
 const LitoraneaChat = () => {
@@ -78,114 +51,27 @@ const LitoraneaChat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatar, setShowAvatar] = useState(true);
-  const [isListening, setIsListening] = useState(false);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
-  const [voiceConvoMode, setVoiceConvoMode] = useState(false); // bidirectional voice mode
   const [profileStep, setProfileStep] = useState<number>(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const sendMessageRef = useRef<(text: string) => void>(() => {});
-  const femaleVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
-
-  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  const hasSpeech = !!SpeechRecognition;
-  const hasTTS = typeof window !== "undefined" && "speechSynthesis" in window;
-
-  // Find and cache a feminine pt-BR voice
-  useEffect(() => {
-    if (!hasTTS) return;
-    const pickFemaleVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-      // Prefer female pt-BR voices
-      const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "francisca", "maria", "google"];
-      const ptBrVoices = voices.filter(v => v.lang.startsWith("pt"));
-      const female = ptBrVoices.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
-      femaleVoiceRef.current = female || ptBrVoices[0] || null;
-    };
-    pickFemaleVoice();
-    window.speechSynthesis.onvoiceschanged = pickFemaleVoice;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
-  }, [hasTTS]);
-
-  // Speak a text aloud with feminine, calm voice
-  const speak = useCallback((text: string, onEnd?: () => void) => {
-    if (!hasTTS || !ttsEnabled) {
-      onEnd?.();
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const clean = text.replace(/[*_`#>\[\]]/g, "").replace(/\n+/g, " ");
-    const utter = new SpeechSynthesisUtterance(clean);
-    utter.lang = "pt-BR";
-    utter.rate = 0.88; // calm, not rushed
-    utter.pitch = 1.15; // slightly higher = more feminine
-    utter.volume = 1;
-    if (femaleVoiceRef.current) utter.voice = femaleVoiceRef.current;
-    utter.onend = () => onEnd?.();
-    synthRef.current = utter;
-    window.speechSynthesis.speak(utter);
-  }, [hasTTS, ttsEnabled]);
-
-  const stopSpeaking = useCallback(() => {
-    if (hasTTS) window.speechSynthesis.cancel();
-  }, [hasTTS]);
-
-  // Voice input - supports continuous conversation mode
-  const startListening = useCallback(() => {
-    if (!hasSpeech || isListening) return;
-    const recognition = new SpeechRecognition();
-    recognition.lang = "pt-BR";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-      // In voice convo mode, send immediately
-      if (voiceConvoMode) {
-        sendMessageRef.current(transcript);
-      } else {
-        setInput(prev => prev ? `${prev} ${transcript}` : transcript);
-      }
-    };
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
-  }, [isListening, hasSpeech, voiceConvoMode]);
-
-  const toggleListening = useCallback(() => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-    startListening();
-  }, [isListening, startListening]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Start profile onboarding on first visit if profile is incomplete
+  // Start profile onboarding
   useEffect(() => {
     if (!isProfileComplete() && profileStep === -1) {
       setTimeout(() => {
         setProfileStep(0);
         const step = PROFILE_STEPS[0];
-        const msg: Msg = { role: "assistant", content: step.question, options: step.options };
-        setMessages([msg]);
+        setMessages([{ role: "assistant", content: step.question, options: step.options }]);
         setShowAvatar(false);
-        if (step.speak) speak(step.question);
       }, 800);
     }
   }, []); // eslint-disable-line
 
-  // Handle profile step answer
   const handleProfileAnswer = (answer: string) => {
     const step = PROFILE_STEPS[profileStep];
-    // Map option label to clean value
     const cleanValue = answer.replace(/^[^\w]+/, "").trim();
     saveProfile({ [step.key]: cleanValue });
 
@@ -194,12 +80,9 @@ const LitoraneaChat = () => {
 
     if (nextStep < PROFILE_STEPS.length) {
       const nextQ = PROFILE_STEPS[nextStep];
-      const botMsg: Msg = { role: "assistant", content: nextQ.question, options: nextQ.options };
-      setMessages(prev => [...prev, userMsg, botMsg]);
+      setMessages(prev => [...prev, userMsg, { role: "assistant", content: nextQ.question, options: nextQ.options }]);
       setProfileStep(nextStep);
-      if (nextQ.speak) speak(nextQ.question, () => { if (voiceConvoMode) startListening(); });
     } else {
-      // Profile complete
       const profile = getProfile();
       const doneMsg: Msg = {
         role: "assistant",
@@ -208,16 +91,12 @@ const LitoraneaChat = () => {
       };
       setMessages(prev => [...prev, userMsg, doneMsg]);
       setProfileStep(nextStep);
-      speak(doneMsg.content, () => { if (voiceConvoMode) startListening(); });
     }
   };
 
-  // Main AI chat send
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
-    stopSpeaking(); // stop any current speech
 
-    // If in profile mode, handle as profile answer
     if (profileStep >= 0 && profileStep < PROFILE_STEPS.length) {
       handleProfileAnswer(text);
       setInput("");
@@ -329,7 +208,7 @@ const LitoraneaChat = () => {
         }
       }
 
-      // Extract quick-reply options from response (lines starting with "Quer" / "•" / options pattern)
+      // Extract quick-reply options
       const extractedOptions = extractOptions(assistantSoFar);
       if (extractedOptions.length > 0) {
         setMessages(prev => {
@@ -340,34 +219,21 @@ const LitoraneaChat = () => {
           return prev;
         });
       }
-
-      // Speak the final response, then auto-listen in voice convo mode
-      if (assistantSoFar) speak(assistantSoFar, () => { if (voiceConvoMode) startListening(); });
-
     } catch (e: any) {
-      const errMsg = `Opa, deu ruim aqui! 😅 ${e.message || "Tente de novo."}`;
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: errMsg, options: ["Tentar novamente 🔄"] },
+        { role: "assistant", content: `Opa, deu ruim aqui! 😅 ${e.message || "Tente de novo."}`, options: ["Tentar novamente 🔄"] },
       ]);
-      speak(errMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Keep ref in sync for voice convo callbacks
-  useEffect(() => { sendMessageRef.current = sendMessage; });
-
   const extractOptions = (text: string): string[] => {
     const opts: string[] = [];
-    // Look for patterns like "Sou turista", "Quero grupo", "Frete?" etc embedded in the text
     const btnPattern = /"([^"]{5,40})"/g;
     let match;
-    while ((match = btnPattern.exec(text)) !== null) {
-      opts.push(match[1]);
-    }
-    // Also look for bullet lines
+    while ((match = btnPattern.exec(text)) !== null) opts.push(match[1]);
     const bulletPattern = /^[•\-\*]\s*(.+)$/gm;
     while ((match = bulletPattern.exec(text)) !== null) {
       const opt = match[1].trim();
@@ -405,32 +271,6 @@ const LitoraneaChat = () => {
               : "Limite diário atingido"}
           </p>
         </div>
-        {/* Voice conversation toggle */}
-        {hasSpeech && hasTTS && (
-          <button
-            onClick={() => {
-              setVoiceConvoMode(v => {
-                if (!v) { setTtsEnabled(true); }
-                else { stopSpeaking(); recognitionRef.current?.stop(); setIsListening(false); }
-                return !v;
-              });
-            }}
-            className={`p-2 rounded-full transition-colors ${voiceConvoMode ? "bg-primary/20 ring-2 ring-primary" : "hover:bg-muted"}`}
-            title={voiceConvoMode ? "Desativar conversa por voz" : "Conversar por voz"}
-          >
-            {voiceConvoMode ? <PhoneCall className="w-5 h-5 text-primary animate-pulse" /> : <PhoneOff className="w-5 h-5 text-muted-foreground" />}
-          </button>
-        )}
-        {/* TTS toggle */}
-        {hasTTS && (
-          <button
-            onClick={() => { setTtsEnabled(e => !e); stopSpeaking(); }}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
-            title={ttsEnabled ? "Silenciar voz" : "Ativar voz"}
-          >
-            {ttsEnabled ? <Volume2 className="w-5 h-5 text-primary" /> : <VolumeX className="w-5 h-5 text-muted-foreground" />}
-          </button>
-        )}
         <Sparkles className="w-5 h-5 text-primary" />
       </header>
 
@@ -482,7 +322,6 @@ const LitoraneaChat = () => {
               </div>
             </div>
 
-            {/* Clickable option buttons — accessible for deaf users */}
             {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
               <div className="ml-9 flex flex-wrap gap-2">
                 {msg.options.map(opt => (
@@ -513,12 +352,6 @@ const LitoraneaChat = () => {
         )}
       </div>
 
-      {/* Voice convo mode indicator */}
-      {voiceConvoMode && isListening && (
-        <div className="text-center py-2 text-xs text-primary font-bold animate-pulse">
-          🎙️ Ouvindo você... fale agora!
-        </div>
-      )}
       {/* Input */}
       <div className="p-4 bg-card border-t border-border">
         <form
@@ -528,23 +361,10 @@ const LitoraneaChat = () => {
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={voiceConvoMode ? "Modo conversa por voz ativo 🎙️" : isInProfileMode ? "Digite ou fale sua resposta..." : "Pergunte à Litorânea..."}
+            placeholder={isInProfileMode ? "Digite sua resposta..." : "Pergunte à Litorânea..."}
             className="flex-1 px-4 py-2.5 rounded-full bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             disabled={isLoading}
           />
-          {hasSpeech && (
-            <button
-              type="button"
-              onClick={toggleListening}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                isListening
-                  ? "bg-destructive text-destructive-foreground animate-pulse"
-                  : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
-              }`}
-            >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </button>
-          )}
           <button
             type="submit"
             disabled={isLoading || !input.trim()}

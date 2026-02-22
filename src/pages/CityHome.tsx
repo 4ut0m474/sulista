@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart } from "lucide-react";
+import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
-import { getCityData, type CityData } from "@/data/cities";
+import { getCityData, type CityData, plans } from "@/data/cities";
 
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
@@ -208,6 +208,33 @@ const CityHome = () => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Propagandas / Planos */}
+          <div className="px-4 mb-6">
+            <h2 className="font-display text-lg font-bold text-foreground mb-3">Anuncie Aqui</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {plans.map(plan => (
+                <button
+                  key={plan.id}
+                  onClick={() => navigate(`/city/${state}/${city}/plans`)}
+                  className={`rounded-2xl border p-3 text-left shadow-card backdrop-blur-sm transition-all hover:scale-[1.02] active:scale-95 ${
+                    (plan as any).isVip
+                      ? "border-gold bg-card/95 ring-1 ring-gold"
+                      : (plan as any).highlight
+                      ? "border-primary bg-card/95 ring-1 ring-primary"
+                      : "border-border bg-card/90"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {(plan as any).isVip ? <Crown className="w-4 h-4 text-secondary" /> : (plan as any).highlight ? <Star className="w-4 h-4 text-primary" /> : <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />}
+                    <span className="font-bold text-sm text-foreground">{plan.name}</span>
+                  </div>
+                  <p className="text-lg font-black text-foreground">R$ {plan.price.toFixed(2)}<span className="text-xs font-normal text-muted-foreground">/mês</span></p>
+                  <p className="text-[10px] text-primary mt-1 font-semibold">Ver detalhes →</p>
+                </button>
+              ))}
+            </div>
           </div>
 
           <TopRatedCarousel city={cityName} stateAbbr={state || ""} />

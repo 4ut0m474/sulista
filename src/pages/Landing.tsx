@@ -65,8 +65,8 @@ const Landing = () => {
           </p>
         </div>
 
-        {/* Selectors — no card, just floating on the image */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6">
+        {/* Selectors — floating on the image, close to subtitle */}
+        <div className="flex flex-col items-center px-6 mt-4">
           <div className="w-full max-w-sm space-y-3">
             {/* State Selector */}
             <div className="relative">

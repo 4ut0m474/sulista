@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -8,6 +8,7 @@ type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
 const ADMIN_PASSWORD = "eEe";
+const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 
 const getUsageKey = () => {
   const today = new Date().toISOString().slice(0, 10);
@@ -45,6 +46,20 @@ const PROFILE_STEPS = [
   { key: "notif_freq", question: "Com que frequência queres receber notificações de promoções?", options: ["📅 Diária", "📆 Semanal", "🗓️ Mensal", "🔕 Não quero"] },
 ];
 
+// Strip markdown/emojis for cleaner TTS
+const cleanTextForTTS = (text: string): string => {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/#{1,6}\s/g, "")
+    .replace(/[`~]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[•\-\*]\s/g, "")
+    .replace(/\n{2,}/g, ". ")
+    .replace(/\n/g, ". ")
+    .trim();
+};
+
 const LitoraneaChat = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
@@ -54,7 +69,12 @@ const LitoraneaChat = () => {
   const [showAvatar, setShowAvatar] = useState(true);
   const [profileStep, setProfileStep] = useState<number>(-1);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -71,6 +91,110 @@ const LitoraneaChat = () => {
       }, 800);
     }
   }, []); // eslint-disable-line
+
+  // TTS: speak assistant message via ElevenLabs
+  const speakText = useCallback(async (text: string) => {
+    if (!voiceEnabled) return;
+    const clean = cleanTextForTTS(text);
+    if (!clean || clean.length < 3) return;
+
+    try {
+      setIsSpeaking(true);
+      const resp = await fetch(TTS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text: clean }),
+      });
+
+      if (!resp.ok) {
+        console.warn("TTS failed:", resp.status);
+        setIsSpeaking(false);
+        return;
+      }
+
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      await audio.play();
+    } catch (e) {
+      console.warn("TTS error:", e);
+      setIsSpeaking(false);
+    }
+  }, [voiceEnabled]);
+
+  // STT: start listening via Web Speech API
+  const startListening = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("Speech Recognition not supported");
+      return;
+    }
+
+    // Stop any current TTS
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setIsSpeaking(false);
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "pt-BR";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      if (transcript.trim()) {
+        setInput(transcript);
+        // Auto-send after a short delay so user sees what was transcribed
+        setTimeout(() => {
+          sendMessageDirect(transcript);
+        }, 300);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.warn("STT error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, []); // sendMessageDirect defined below via ref
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
+
+  // We need a ref-based sendMessage to avoid stale closure in STT callback
+  const sendMessageRef = useRef<(text: string) => Promise<void>>();
+
+  const sendMessageDirect = (text: string) => {
+    sendMessageRef.current?.(text);
+  };
 
   const handleProfileAnswer = (answer: string) => {
     const step = PROFILE_STEPS[profileStep];
@@ -237,6 +361,11 @@ const LitoraneaChat = () => {
           return prev;
         });
       }
+
+      // TTS: speak the final response
+      if (assistantSoFar) {
+        speakText(assistantSoFar);
+      }
     } catch (e: any) {
       setMessages(prev => [
         ...prev,
@@ -246,6 +375,11 @@ const LitoraneaChat = () => {
       setIsLoading(false);
     }
   };
+
+  // Keep ref updated
+  useEffect(() => {
+    sendMessageRef.current = sendMessage;
+  });
 
   const extractOptions = (text: string): string[] => {
     const opts: string[] = [];
@@ -291,6 +425,21 @@ const LitoraneaChat = () => {
               : "Limite diário atingido"}
           </p>
         </div>
+        {/* Voice toggle */}
+        <button
+          onClick={() => {
+            if (isSpeaking && audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current = null;
+              setIsSpeaking(false);
+            }
+            setVoiceEnabled(!voiceEnabled);
+          }}
+          className={`p-2 rounded-full transition-colors ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}
+          title={voiceEnabled ? "Desativar voz" : "Ativar voz"}
+        >
+          {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        </button>
         <Sparkles className="w-5 h-5 text-primary" />
       </header>
 
@@ -303,6 +452,9 @@ const LitoraneaChat = () => {
               <h2 className="font-display text-xl font-bold text-foreground">Oi, sou a Litorânea! 👋</h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Tua guia do Sul do Brasil. Pergunte sobre praias, barracas, produtos, SulCoins ou frete!
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                🎤 Toque no microfone para falar comigo por voz!
               </p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
@@ -358,6 +510,19 @@ const LitoraneaChat = () => {
           </div>
         ))}
 
+        {/* Speaking indicator */}
+        {isSpeaking && (
+          <div className="flex items-center gap-2 ml-9">
+            <div className="flex gap-0.5 items-center">
+              <span className="w-1 h-3 bg-primary rounded-full animate-pulse" />
+              <span className="w-1 h-4 bg-primary rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
+              <span className="w-1 h-2.5 bg-primary rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+              <span className="w-1 h-3.5 bg-primary rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="text-[10px] text-primary font-semibold">Falando...</span>
+          </div>
+        )}
+
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <div className="flex items-end gap-2">
             <img src={litoraneaAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
@@ -370,6 +535,16 @@ const LitoraneaChat = () => {
             </div>
           </div>
         )}
+
+        {/* Listening indicator */}
+        {isListening && (
+          <div className="flex justify-end">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 border border-destructive/30">
+              <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+              <span className="text-xs font-bold text-destructive">🎙️ Ouvindo você...</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input */}
@@ -378,16 +553,31 @@ const LitoraneaChat = () => {
           onSubmit={e => { e.preventDefault(); sendMessage(input); }}
           className="flex gap-2 max-w-md mx-auto"
         >
+          {/* Mic button */}
+          <button
+            type="button"
+            onClick={() => isListening ? stopListening() : startListening()}
+            disabled={isLoading}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${
+              isListening
+                ? "bg-destructive text-destructive-foreground animate-pulse"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
+            title={isListening ? "Parar de ouvir" : "Falar por voz"}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </button>
+
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={isInProfileMode ? "Digite sua resposta..." : "Pergunte à Litorânea..."}
+            placeholder={isListening ? "🎙️ Fale agora..." : isInProfileMode ? "Digite sua resposta..." : "Pergunte à Litorânea..."}
             className="flex-1 px-4 py-2.5 rounded-full bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            disabled={isLoading}
+            disabled={isLoading || isListening}
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !input.trim() || isListening}
             className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 transition-colors hover:bg-primary/90"
           >
             <Send className="w-4 h-4" />

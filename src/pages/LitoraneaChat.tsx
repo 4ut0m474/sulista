@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
+const ADMIN_PASSWORD = "eEe";
 
 const getUsageKey = () => {
   const today = new Date().toISOString().slice(0, 10);
@@ -52,6 +53,7 @@ const LitoraneaChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatar, setShowAvatar] = useState(true);
   const [profileStep, setProfileStep] = useState<number>(-1);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,25 +99,41 @@ const LitoraneaChat = () => {
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    // Admin password check
+    if (text.trim() === ADMIN_PASSWORD && !isAdminMode) {
+      setIsAdminMode(true);
+      setInput("");
+      setShowAvatar(false);
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: "🔑 ****" },
+        { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nAgora posso te ajudar com notificações, ações de segurança, relatórios e gestão do app. Perguntas ilimitadas neste modo.", options: ["📊 Relatório de vendas", "🔔 Notificações pendentes", "🛡️ Revisão de segurança", "📋 Status do sistema"] },
+      ]);
+      return;
+    }
+
     if (profileStep >= 0 && profileStep < PROFILE_STEPS.length) {
       handleProfileAnswer(text);
       setInput("");
       return;
     }
 
-    const usage = getUsageCount();
-    if (usage >= DAILY_LIMIT) {
-      setMessages(prev => [
-        ...prev,
-        { role: "user", content: text },
-        {
-          role: "assistant",
-          content: "Bah, tchê! Você já usou suas 5 perguntas gratuitas hoje! 🎯\n\nQue tal assinar o **Sulista Premium** por apenas **R$ 4,99/mês** pra perguntas ilimitadas? Vale tri a pena! 💎",
-          options: ["Quero assinar Premium 💎", "Lembrar amanhã ⏰"],
-        },
-      ]);
-      setShowAvatar(false);
-      return;
+    // Skip daily limit for admin
+    if (!isAdminMode) {
+      const usage = getUsageCount();
+      if (usage >= DAILY_LIMIT) {
+        setMessages(prev => [
+          ...prev,
+          { role: "user", content: text },
+          {
+            role: "assistant",
+            content: "Bah, tchê! Você já usou suas 5 perguntas gratuitas hoje! 🎯\n\nQue tal assinar o **Sulista Premium** por apenas **R$ 4,99/mês** pra perguntas ilimitadas? Vale tri a pena! 💎",
+            options: ["Quero assinar Premium 💎", "Lembrar amanhã ⏰"],
+          },
+        ]);
+        setShowAvatar(false);
+        return;
+      }
     }
 
     const userMsg: Msg = { role: "user", content: text };
@@ -123,7 +141,7 @@ const LitoraneaChat = () => {
     setShowAvatar(false);
     setInput("");
     setIsLoading(true);
-    incrementUsage();
+    if (!isAdminMode) incrementUsage();
 
     let assistantSoFar = "";
     const allMessages = [...messages, userMsg];
@@ -135,7 +153,7 @@ const LitoraneaChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: isAdminMode }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -264,7 +282,9 @@ const LitoraneaChat = () => {
         <div className="flex-1">
           <h1 className="font-display text-base font-bold text-foreground">Litorânea</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isInProfileMode
+            {isAdminMode
+              ? "🔓 Modo Administrador • ilimitado"
+              : isInProfileMode
               ? `Criando seu perfil • passo ${profileStep + 1}/${PROFILE_STEPS.length}`
               : remaining > 0
               ? `IA do Sulista • ${remaining} perguntas restantes hoje`

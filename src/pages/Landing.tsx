@@ -123,7 +123,7 @@ const Landing = () => {
                 <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${cityOpen ? "rotate-180" : ""}`} />
               </button>
               {cityOpen && (
-                <div className="absolute bottom-full left-0 right-0 mb-1 bg-card border border-border rounded-xl shadow-card z-50 max-h-72 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-card z-50 max-h-72 overflow-y-auto">
                   {cities.map(city => (
                     <button
                       key={city}
@@ -144,6 +144,17 @@ const Landing = () => {
               {t("selectToContinue")}
             </p>
           </div>
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Privacy Notice */}
+        <div className="relative z-10 px-6 pb-6 pt-4">
+          <p className="text-center text-primary-foreground/60 text-[10px] leading-relaxed max-w-sm mx-auto">
+            🔒 <strong>Termos de Privacidade:</strong> O Sulista não guarda nenhum dado pessoal do usuário comum. 
+            Apenas comerciantes que contratam planos de anúncio possuem dados armazenados para fins de prestação de serviço.
+          </p>
         </div>
       </div>
     </div>

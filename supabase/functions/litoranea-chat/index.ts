@@ -58,13 +58,24 @@ CIDADES E PRODUTOS CONHECIDOS:
 
 FREE TIER: O usuário tem direito a 5 perguntas por dia gratuitamente. Depois disso, sugira: "Que tal assinar o Sulista Premium por R$ 4,99/mês pra perguntas ilimitadas?"`;
 
+const ADMIN_SYSTEM_PROMPT = `Você é a Litorânea em MODO ADMINISTRADOR. Você ajuda o administrador do app Sulista com:
+
+1. Relatórios de vendas, métricas e engajamento
+2. Notificações de segurança e anomalias (votos suspeitos, transferências irregulares de SulCoins)
+3. Gestão de comerciantes, planos e propagandas
+4. Status do sistema, logs e alertas
+5. Sugestões para melhorar o app
+
+Responda de forma profissional mas ainda amigável (tom sulista). Use dados plausíveis de exemplo quando não tiver dados reais. Sempre sugira ações práticas.
+Não há limite de perguntas no modo admin.`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, adminMode } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -79,7 +90,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: adminMode ? ADMIN_SYSTEM_PROMPT : SYSTEM_PROMPT },
             ...messages,
           ],
           stream: true,

@@ -81,7 +81,10 @@ const Opinion = () => {
         toast({ title: "Erro ao votar", description: error.message, variant: "destructive" });
       }
     } else {
-      toast({ title: "Voto registrado!", description: `Obrigado por avaliar ${selectedEstablishment.name}` });
+      toast({ title: "Voto registrado! +1 SulCoin 💰", description: `Obrigado por avaliar ${selectedEstablishment.name}. Você ganhou 1 SulCoin por dar sua opinião!` });
+      // Award 1 SulCoin for voting (device-based, no auth required for display)
+      const currentCoins = parseInt(localStorage.getItem("sulcoins-balance") || "0", 10);
+      localStorage.setItem("sulcoins-balance", String(currentCoins + 1));
       setSelectedEstablishment(null);
       setRating(0);
       setComment("");

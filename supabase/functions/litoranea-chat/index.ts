@@ -69,6 +69,10 @@ const ADMIN_SYSTEM_PROMPT = `Você é a Litorânea em MODO ADMINISTRADOR. Você 
 Responda de forma profissional mas ainda amigável (tom sulista). Use dados plausíveis de exemplo quando não tiver dados reais. Sempre sugira ações práticas.
 Não há limite de perguntas no modo admin.`;
 
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_LENGTH = 5000;
+const VALID_ROLES = ["user", "assistant"];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -76,6 +80,31 @@ serve(async (req) => {
 
   try {
     const { messages, adminMode } = await req.json();
+
+    // Validate messages array
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
+      return new Response(
+        JSON.stringify({ error: "Número inválido de mensagens" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate each message
+    for (const msg of messages) {
+      if (!msg || typeof msg.content !== "string" || !VALID_ROLES.includes(msg.role)) {
+        return new Response(
+          JSON.stringify({ error: "Formato de mensagem inválido" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (msg.content.length > MAX_MESSAGE_LENGTH) {
+        return new Response(
+          JSON.stringify({ error: "Mensagem muito longa" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -125,7 +154,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("litoranea-chat error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro interno" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

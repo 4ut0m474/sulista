@@ -446,16 +446,22 @@ const LitoraneaChat = () => {
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {showAvatar && messages.length === 0 && (
-          <div className="flex flex-col items-center gap-4 pt-8">
-            <img src={litoraneaAvatar} alt="Litorânea" className="w-32 h-32 rounded-full border-4 border-primary shadow-lg" />
-            <div className="text-center">
-              <h2 className="font-display text-xl font-bold text-foreground">Oi, sou a Litorânea! 👋</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Tua guia do Sul do Brasil. Pergunte sobre praias, barracas, produtos, SulCoins ou frete!
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                🎤 Toque no microfone para falar comigo por voz!
-              </p>
+          <div className="flex flex-col items-center gap-4 pt-4">
+            <img src={litoraneaAvatar} alt="Litorânea" className="w-24 h-24 rounded-full border-4 border-primary shadow-lg" />
+            <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm text-foreground">
+              <div className="prose prose-sm max-w-none dark:prose-invert">
+                <p>Oi, tudo bem? Eu sou a <strong>Litorânea</strong> — sua amiga do celular, a secretária que nasceu pra ajudar o Sul inteiro. 👋</p>
+                <p>Eu trabalho no <strong>Sulista</strong>, um aplicativo feito só pra gente daqui: turistas que querem descobrir o melhor pastel de Morretes, moradores que precisam de carne fresca em Lages, comerciantes como o Seu João que querem vender mais sem esforço.</p>
+                <p>Aqui todo mundo tem lugar.</p>
+                <p>Tem barraca digital baratinha (R$ 10) pra você anunciar seu produto. Tem área de opiniões, pra todo mundo dizer o que achou. Tem trilhas, caça ao tesouro mostrando as belezas escondidas. Tem promoções e eventos rolando o dia todo.</p>
+                <p>E o melhor: a <strong>compra coletiva</strong>. 🛒</p>
+                <p>É assim: o Seu João diz "pastel R$ 5 se 10 chegarem às 8h". Eu monto o grupo, aviso quem gosta de pastel, e quando fecha, todo mundo ganha desconto — e ele vende tudo de uma vez.</p>
+                <p>Pra isso funcionar, eu preciso de você. Me conta quem você é: turista? Comerciante? Morador?</p>
+                <p>Ah, e tem <strong>SulCoins</strong>: ganha moedas toda vez que confirma, vai, indica. Troca por desconto, entrada grátis, ou até plano do app. 💰</p>
+                <p>O plano é baratinho: <strong>R$ 4,99/mês</strong> ou <strong>R$ 49/ano</strong>. Com ele, você fala comigo todo dia — eu sou sua secretária 24h.</p>
+                <p>Me conta três coisas que você gosta? Eu já te dou <strong>10 SulCoins</strong> de boas-vindas! 🎉</p>
+                <p className="text-xs text-muted-foreground mt-2">🎤 Toque no microfone para falar comigo por voz!</p>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-2">
               {quickOptions.map(opt => (

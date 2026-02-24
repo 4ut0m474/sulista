@@ -352,6 +352,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      transfer_sulcoins: {
+        Args: {
+          p_amount: number
+          p_from_user: string
+          p_reason?: string
+          p_to_user: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "merchant" | "user"

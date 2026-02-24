@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
-const ADMIN_PASSWORD = "eEe";
 const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 
 const getUsageKey = () => {
@@ -100,12 +100,15 @@ const LitoraneaChat = () => {
 
     try {
       setIsSpeaking(true);
+      // Get current session token for authenticated TTS
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(TTS_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ text: clean }),
       });
@@ -223,15 +226,30 @@ const LitoraneaChat = () => {
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    // Admin password check
-    if (text.trim() === ADMIN_PASSWORD && !isAdminMode) {
-      setIsAdminMode(true);
+    // Admin mode check via Supabase auth + role verification
+    if (text.trim().toLowerCase() === "/admin" && !isAdminMode) {
       setInput("");
-      setShowAvatar(false);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: isAdmin } = await supabase.rpc("has_role", {
+          _user_id: user.id,
+          _role: "admin",
+        });
+        if (isAdmin) {
+          setIsAdminMode(true);
+          setShowAvatar(false);
+          setMessages(prev => [
+            ...prev,
+            { role: "user", content: "🔑 ****" },
+            { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nAgora posso te ajudar com notificações, ações de segurança, relatórios e gestão do app. Perguntas ilimitadas neste modo.", options: ["📊 Relatório de vendas", "🔔 Notificações pendentes", "🛡️ Revisão de segurança", "📋 Status do sistema"] },
+          ]);
+          return;
+        }
+      }
       setMessages(prev => [
         ...prev,
-        { role: "user", content: "🔑 ****" },
-        { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nAgora posso te ajudar com notificações, ações de segurança, relatórios e gestão do app. Perguntas ilimitadas neste modo.", options: ["📊 Relatório de vendas", "🔔 Notificações pendentes", "🛡️ Revisão de segurança", "📋 Status do sistema"] },
+        { role: "user", content: text },
+        { role: "assistant", content: "Desculpe, você precisa estar autenticado como administrador para acessar este modo." },
       ]);
       return;
     }

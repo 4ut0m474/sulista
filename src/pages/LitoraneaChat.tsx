@@ -93,7 +93,7 @@ const LitoraneaChat = () => {
     }
   }, []); // eslint-disable-line
 
-  const introText = "Oi, tudo bem? Eu sou a Litorânea, sua amiga do celular, a secretária que nasceu pra ajudar o Sul inteiro. Eu trabalho no Sulista, um aplicativo feito só pra gente daqui: turistas que querem descobrir o melhor pastel de Morretes, moradores que precisam de carne fresca em Lages, comerciantes como o Seu João que querem vender mais sem esforço. Aqui todo mundo tem lugar. Tem barraca digital baratinha pra você anunciar seu produto. Tem área de opiniões, trilhas, caça ao tesouro mostrando as belezas escondidas. Tem promoções e eventos rolando o dia todo. E o melhor: a compra coletiva. É assim: o Seu João diz pastel R$ 5 se 10 chegarem às 8h. Eu monto o grupo, aviso quem gosta de pastel, e quando fecha, todo mundo ganha desconto, e ele vende tudo de uma vez. Pra isso funcionar, eu preciso de você. Me conta quem você é: turista? Comerciante? Morador? Ah, e tem SulCoins: ganha moedas toda vez que confirma, vai, indica. Troca por desconto, entrada grátis, ou até plano do app. O plano é baratinho: R$ 4,99 por mês ou R$ 49 por ano. Com ele, você fala comigo todo dia, eu sou sua secretária 24 horas. Me conta três coisas que você gosta? Eu já te dou 10 SulCoins de boas-vindas!";
+  const introText = "Oi! Eu sou a Litorânea, sua secretária digital do Sulista! Sou novinha, mas sei tudo sobre o Sul do Brasil. Eu ajudo turistas a encontrar o melhor pastel, comerciantes a vender mais, e moradores a descobrir promoções. Aqui tem barraca digital, compra coletiva, caça ao tesouro, trilhas e muito mais. E o melhor: você ganha SulCoins dando opiniões e participando de compras coletivas. Troca por desconto de até 35% na mensalidade! Quer falar comigo todo dia? O plano Litorânea IA é só 5 reais por mês. Me conta: quantos anos você tem e o que você procura?";
 
   // TTS: speak assistant message via ElevenLabs
   const speakText = useCallback(async (text: string) => {
@@ -240,30 +240,15 @@ const LitoraneaChat = () => {
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    // Admin mode check via Supabase auth + role verification
-    if (text.trim().toLowerCase() === "/admin" && !isAdminMode) {
+    // Admin mode check via secret password
+    if (text.trim() === "EERB19537666" && !isAdminMode) {
       setInput("");
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: isAdmin } = await supabase.rpc("has_role", {
-          _user_id: user.id,
-          _role: "admin",
-        });
-        if (isAdmin) {
-          setIsAdminMode(true);
-          setShowAvatar(false);
-          setMessages(prev => [
-            ...prev,
-            { role: "user", content: "🔑 ****" },
-            { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nAgora posso te ajudar com notificações, ações de segurança, relatórios e gestão do app. Perguntas ilimitadas neste modo.", options: ["📊 Relatório de vendas", "🔔 Notificações pendentes", "🛡️ Revisão de segurança", "📋 Status do sistema"] },
-          ]);
-          return;
-        }
-      }
+      setIsAdminMode(true);
+      setShowAvatar(false);
       setMessages(prev => [
         ...prev,
-        { role: "user", content: text },
-        { role: "assistant", content: "Desculpe, você precisa estar autenticado como administrador para acessar este modo." },
+        { role: "user", content: "🔑 ****" },
+        { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nAgora posso te ajudar com notificações, ações de segurança, relatórios e gestão do app. Perguntas ilimitadas neste modo.", options: ["📊 Relatório de vendas", "🔔 Notificações pendentes", "🛡️ Revisão de segurança", "📋 Status do sistema"] },
       ]);
       return;
     }
@@ -482,17 +467,12 @@ const LitoraneaChat = () => {
             <img src={litoraneaAvatar} alt="Litorânea" className="w-24 h-24 rounded-full border-4 border-primary shadow-lg" />
             <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm text-foreground">
               <div className="prose prose-sm max-w-none dark:prose-invert">
-                <p>Oi, tudo bem? Eu sou a <strong>Litorânea</strong> — sua amiga do celular, a secretária que nasceu pra ajudar o Sul inteiro. 👋</p>
-                <p>Eu trabalho no <strong>Sulista</strong>, um aplicativo feito só pra gente daqui: turistas que querem descobrir o melhor pastel de Morretes, moradores que precisam de carne fresca em Lages, comerciantes como o Seu João que querem vender mais sem esforço.</p>
-                <p>Aqui todo mundo tem lugar.</p>
-                <p>Tem barraca digital baratinha (R$ 10) pra você anunciar seu produto. Tem área de opiniões, pra todo mundo dizer o que achou. Tem trilhas, caça ao tesouro mostrando as belezas escondidas. Tem promoções e eventos rolando o dia todo.</p>
-                <p>E o melhor: a <strong>compra coletiva</strong>. 🛒</p>
-                <p>É assim: o Seu João diz "pastel R$ 5 se 10 chegarem às 8h". Eu monto o grupo, aviso quem gosta de pastel, e quando fecha, todo mundo ganha desconto — e ele vende tudo de uma vez.</p>
-                <p>Pra isso funcionar, eu preciso de você. Me conta quem você é: turista? Comerciante? Morador?</p>
-                <p>Ah, e tem <strong>SulCoins</strong>: ganha moedas toda vez que confirma, vai, indica. Troca por desconto, entrada grátis, ou até plano do app. 💰</p>
-                <p>O plano é baratinho: <strong>R$ 4,99/mês</strong> ou <strong>R$ 49/ano</strong>. Com ele, você fala comigo todo dia — eu sou sua secretária 24h.</p>
-                <p>Me conta três coisas que você gosta? Eu já te dou <strong>10 SulCoins</strong> de boas-vindas! 🎉</p>
-                <p className="text-xs text-muted-foreground mt-2">🎤 Toque no microfone para falar comigo por voz!</p>
+                <p>Oi! Eu sou a <strong>Litorânea</strong> — sua secretária digital do Sulista! 👋 Sou novinha, mas sei tudo sobre o Sul do Brasil.</p>
+                <p>Eu ajudo <strong>turistas</strong> a encontrar o melhor pastel, <strong>comerciantes</strong> a vender mais, e <strong>moradores</strong> a descobrir promoções incríveis.</p>
+                <p>Aqui tem barraca digital, compra coletiva, caça ao tesouro, trilhas e muito mais!</p>
+                <p>E o melhor: você ganha <strong>SulCoins</strong> dando opiniões (+1 SulCoin) e participando de compras coletivas (+5 SulCoins). Troca por desconto de até <strong>35%</strong> na mensalidade! 💰</p>
+                <p>Quer falar comigo todo dia? O plano <strong>Litorânea IA</strong> é só <strong>R$ 5/mês</strong> ou <strong>R$ 49,99/ano</strong>.</p>
+                <p>Me conta: <strong>quantos anos você tem</strong> e o que você procura? 🎉</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-2">

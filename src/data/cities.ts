@@ -145,11 +145,19 @@ export const stallsData = Array.from({ length: 40 }, (_, i) => ({
 
 export const plans = [
   {
+    id: "ai-chat",
+    name: "Litorânea IA",
+    price: 5,
+    annualDiscount: 17,
+    features: ["Chat ilimitado com a Litorânea", "Secretária IA 24h", "Sem propaganda inclusa", "Suporte por voz"],
+    highlight: false,
+  },
+  {
     id: "basic",
     name: "Básico",
     price: 10,
     annualDiscount: 10,
-    features: ["Barraca digital", "Exibição de produtos", "Preços e descrições"],
+    features: ["Barraca digital", "Exibição de produtos", "Preços e descrições", "+200 SulCoins na primeira compra"],
     highlight: false,
   },
   {
@@ -157,7 +165,7 @@ export const plans = [
     name: "Carrossel",
     price: 20,
     annualDiscount: 15,
-    features: ["Espaço no carrossel de imagens", "Propaganda visual", "Mais visibilidade"],
+    features: ["Espaço no carrossel de imagens", "Propaganda visual", "Mais visibilidade", "+500 SulCoins na primeira compra"],
     highlight: false,
   },
   {
@@ -165,7 +173,7 @@ export const plans = [
     name: "Combo",
     price: 30,
     annualDiscount: 20,
-    features: ["Barraca digital", "Espaço no carrossel", "Propaganda completa", "Melhor custo-benefício"],
+    features: ["Barraca digital", "Espaço no carrossel", "Propaganda completa", "Melhor custo-benefício", "+800 SulCoins na primeira compra"],
     highlight: true,
   },
   {
@@ -180,6 +188,7 @@ export const plans = [
       "Mais apresentações",
       "Auxílio via WhatsApp",
       "IA para criar fotos e projetos",
+      "+1500 SulCoins na primeira compra",
     ],
     highlight: false,
     isVip: true,

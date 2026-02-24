@@ -6,8 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Laura - voz feminina suave
-const VOICE_ID = "FGY2WhTYpPnrIDTdsKH5";
+// Lily - voz feminina jovem, calma e amigável (secretária nova)
+const VOICE_ID = "pFZP5JQG7iQjIQuC4Bku";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json();
+    const { text, speed } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
     if (!ELEVENLABS_API_KEY) {
       throw new Error("ELEVENLABS_API_KEY is not configured");
@@ -42,11 +42,11 @@ serve(async (req) => {
           text: trimmedText,
           model_id: "eleven_multilingual_v2",
           voice_settings: {
-            stability: 0.6,
-            similarity_boost: 0.75,
-            style: 0.3,
+            stability: 0.5,
+            similarity_boost: 0.8,
+            style: 0.4,
             use_speaker_boost: true,
-            speed: 0.9,
+            speed: typeof speed === "number" ? Math.max(0.7, Math.min(1.2, speed)) : 0.95,
           },
         }),
       }

@@ -7,6 +7,7 @@ import { sanitizeText, isValidUrl, isValidEmail, isValidPhone, MAX_NAME, MAX_DES
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminCityData, setAdminCityData, getAdminConfig, setAdminConfig, getAdminNotifications, addAdminNotification, markAllNotificationsRead } from "@/lib/adminData";
+import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 // Types
 interface AdminNotification {
   id: number;
@@ -721,9 +722,14 @@ const AdminPanel = () => {
             <button onClick={() => navigate(`${base}/merchant`)} className="p-1 -ml-1"><ChevronLeft className="w-5 h-5" /></button>
             <h1 className="font-display text-xl font-bold">Painel Admin</h1>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
-            <LogOut className="w-4 h-4" /> Sair
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(`${base}/litoranea`)} className="p-1.5 rounded-full bg-background/20 hover:bg-background/30 transition-colors" title="Consultar Litorânea IA">
+              <img src={litoraneaAvatar} alt="Litorânea" className="w-6 h-6 rounded-full" />
+            </button>
+            <button onClick={handleLogout} className="flex items-center gap-1 text-xs opacity-70 hover:opacity-100">
+              <LogOut className="w-4 h-4" /> Sair
+            </button>
+          </div>
         </div>
       </header>
 

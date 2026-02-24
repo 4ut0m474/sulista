@@ -72,6 +72,7 @@ const LitoraneaChat = () => {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [introSpoken, setIntroSpoken] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -91,6 +92,8 @@ const LitoraneaChat = () => {
       }, 800);
     }
   }, []); // eslint-disable-line
+
+  const introText = "Oi, tudo bem? Eu sou a Litorânea, sua amiga do celular, a secretária que nasceu pra ajudar o Sul inteiro. Eu trabalho no Sulista, um aplicativo feito só pra gente daqui: turistas que querem descobrir o melhor pastel de Morretes, moradores que precisam de carne fresca em Lages, comerciantes como o Seu João que querem vender mais sem esforço. Aqui todo mundo tem lugar. Tem barraca digital baratinha pra você anunciar seu produto. Tem área de opiniões, trilhas, caça ao tesouro mostrando as belezas escondidas. Tem promoções e eventos rolando o dia todo. E o melhor: a compra coletiva. É assim: o Seu João diz pastel R$ 5 se 10 chegarem às 8h. Eu monto o grupo, aviso quem gosta de pastel, e quando fecha, todo mundo ganha desconto, e ele vende tudo de uma vez. Pra isso funcionar, eu preciso de você. Me conta quem você é: turista? Comerciante? Morador? Ah, e tem SulCoins: ganha moedas toda vez que confirma, vai, indica. Troca por desconto, entrada grátis, ou até plano do app. O plano é baratinho: R$ 4,99 por mês ou R$ 49 por ano. Com ele, você fala comigo todo dia, eu sou sua secretária 24 horas. Me conta três coisas que você gosta? Eu já te dou 10 SulCoins de boas-vindas!";
 
   // TTS: speak assistant message via ElevenLabs
   const speakText = useCallback(async (text: string) => {
@@ -137,6 +140,17 @@ const LitoraneaChat = () => {
       setIsSpeaking(false);
     }
   }, [voiceEnabled]);
+
+  // Auto-speak introduction when welcome screen is shown
+  useEffect(() => {
+    if (showAvatar && messages.length === 0 && !introSpoken && voiceEnabled) {
+      const timer = setTimeout(() => {
+        setIntroSpoken(true);
+        speakText(introText);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showAvatar, messages.length, introSpoken, voiceEnabled, speakText, introText]);
 
   // STT: start listening via Web Speech API
   const startListening = useCallback(() => {

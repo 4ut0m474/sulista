@@ -19,7 +19,7 @@ function getCorsHeaders(req: Request) {
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const DELAY_ON_FAIL_MS = 2000;
+const MIN_RESPONSE_TIME_MS = 2000; // Constant-time responses to prevent timing attacks
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -28,29 +28,47 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+
   try {
     const { stateAbbr, cityName, code } = await req.json();
 
     if (!stateAbbr || !cityName || !code) {
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
+    }
+
+    // Input validation for stateAbbr: must be exactly 2 uppercase letters
+    if (typeof stateAbbr !== "string" || !/^[A-Z]{2}$/.test(stateAbbr)) {
+      return await constantTimeResponse(startTime, new Response(
+        JSON.stringify({ error: "Invalid state format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      ));
+    }
+
+    // Input validation for cityName: max 100 chars, only letters/spaces/hyphens/accents
+    if (typeof cityName !== "string" || cityName.length > 100 || !/^[\p{L}\s\-'']+$/u.test(cityName)) {
+      return await constantTimeResponse(startTime, new Response(
+        JSON.stringify({ error: "Invalid city format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      ));
     }
 
     if (typeof code !== "string" || code.length !== 32) {
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ error: "Invalid code format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     const sanitizedCode = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (sanitizedCode.length !== 32) {
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ error: "Invalid code characters" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     const supabase = createClient(
@@ -71,10 +89,10 @@ Deno.serve(async (req) => {
       .gte("created_at", windowStart);
 
     if ((count ?? 0) >= MAX_ATTEMPTS) {
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ valid: false, error: "Muitas tentativas. Tente novamente em 1 hora." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     // Fetch stall data server-side
@@ -88,19 +106,18 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error("DB error:", error.message);
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ error: "Internal error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     if (!data?.data || !Array.isArray(data.data)) {
       await logFailedAttempt(supabase, stateAbbr, cityName);
-      await delay(DELAY_ON_FAIL_MS);
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ valid: false, error: "Código secreto inválido ou barraca não encontrada" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     const stalls = data.data as any[];
@@ -110,25 +127,24 @@ Deno.serve(async (req) => {
 
     if (!match) {
       await logFailedAttempt(supabase, stateAbbr, cityName);
-      await delay(DELAY_ON_FAIL_MS);
-      return new Response(
+      return await constantTimeResponse(startTime, new Response(
         JSON.stringify({ valid: false, error: "Código secreto inválido ou barraca não encontrada" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      ));
     }
 
     // Return only the stall name, never the secret code
-    return new Response(
+    return await constantTimeResponse(startTime, new Response(
       JSON.stringify({ valid: true, stallName: match.name }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    ));
   } catch (err) {
     console.error("Unexpected error:", err);
     const corsHeaders = getCorsHeaders(req);
-    return new Response(
+    return await constantTimeResponse(startTime, new Response(
       JSON.stringify({ error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    ));
   }
 });
 
@@ -142,6 +158,10 @@ async function logFailedAttempt(supabase: any, stateAbbr: string, cityName: stri
   });
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function constantTimeResponse(startTime: number, response: Response): Promise<Response> {
+  const elapsed = Date.now() - startTime;
+  if (elapsed < MIN_RESPONSE_TIME_MS) {
+    await new Promise((resolve) => setTimeout(resolve, MIN_RESPONSE_TIME_MS - elapsed));
+  }
+  return response;
 }

@@ -17,8 +17,8 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// Lily - voz feminina jovem, calma e amigável (secretária nova)
-const VOICE_ID = "pFZP5JQG7iQjIQuC4Bku";
+// Alice - voz feminina jovem, calma e inteligente
+const VOICE_ID = "Xb7hH8MSUJpSbSDYk0k2";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);

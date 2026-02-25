@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, ChevronLeft, Waves } from "lucide-react";
+import { MapPin, ChevronLeft, Waves, Star } from "lucide-react";
 import { getCitySubLocations } from "@/data/subLocations";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Moon, Sun } from "lucide-react";
 import { useState } from "react";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const SubLocationsList = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -13,6 +14,7 @@ const SubLocationsList = () => {
   const data = getCitySubLocations(cityName, state || "");
   const { theme, toggleTheme } = useTheme();
   const [activeDistrict, setActiveDistrict] = useState<string | null>(null);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   if (!data) {
     return (
@@ -92,8 +94,18 @@ const SubLocationsList = () => {
               className="w-full text-left bg-card rounded-2xl border border-border/50 overflow-hidden shadow-card hover:shadow-lg hover:scale-[1.01] transition-all active:scale-[0.99]"
             >
               <div className="flex">
-                <div className="w-28 h-28 flex-shrink-0">
+                <div className="w-28 h-28 flex-shrink-0 relative">
                   <img src={loc.image} alt={loc.name} className="w-full h-full object-cover" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const locType = data.groups?.[0]?.type === "praias" ? "praia" : "bairro";
+                      toggleFavorite(state || "", city || "", loc.name, locType as "praia" | "bairro");
+                    }}
+                    className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center"
+                  >
+                    <Star className={`w-3.5 h-3.5 ${isFavorite(state || "", decodeURIComponent(city || ""), loc.name) ? "fill-secondary text-secondary" : "text-white/80"}`} />
+                  </button>
                 </div>
                 <div className="flex-1 p-3 flex flex-col justify-between">
                   <div>

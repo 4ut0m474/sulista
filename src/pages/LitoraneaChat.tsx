@@ -93,7 +93,7 @@ const LitoraneaChat = () => {
     }
   }, []); // eslint-disable-line
 
-  const introText = "Oi! Eu sou a Litorânea, sua secretária digital do Sulista! Sou novinha, mas sei tudo sobre o Sul do Brasil. Eu ajudo turistas a encontrar o melhor pastel, comerciantes a vender mais, e moradores a descobrir promoções. Aqui tem barraca digital, compra coletiva, caça ao tesouro, trilhas e muito mais. E o melhor: você ganha SulCoins dando opiniões e participando de compras coletivas. Troca por desconto de até 35% na mensalidade! Quer falar comigo todo dia? O plano Litorânea IA é só 5 reais por mês. Me conta: quantos anos você tem e o que você procura?";
+  const introText = "Oi! Eu sou a Litorânea, sua assistente inteligente do Sulista! Conheço tudo sobre o Sul do Brasil. Ajudo turistas a encontrar as melhores praias e promoções, comerciantes a vender mais, e moradores a descobrir eventos incríveis. Você já começa com 1 SulCoin de boas-vindas! Cada opinião rende mais SulCoins que viram desconto: até 10% pra turistas e até 20% pra comerciantes. O plano Litorânea IA é só 5 reais por mês pra falar comigo sem limite. Me conta: quantos anos você tem e o que você procura?";
 
   // TTS: speak assistant message via ElevenLabs
   const speakText = useCallback(async (text: string) => {
@@ -467,11 +467,11 @@ const LitoraneaChat = () => {
             <img src={litoraneaAvatar} alt="Litorânea" className="w-24 h-24 rounded-full border-4 border-primary shadow-lg" />
             <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3 text-sm text-foreground">
               <div className="prose prose-sm max-w-none dark:prose-invert">
-                <p>Oi! Eu sou a <strong>Litorânea</strong> — sua secretária digital do Sulista! 👋 Sou novinha, mas sei tudo sobre o Sul do Brasil.</p>
-                <p>Eu ajudo <strong>turistas</strong> a encontrar o melhor pastel, <strong>comerciantes</strong> a vender mais, e <strong>moradores</strong> a descobrir promoções incríveis.</p>
-                <p>Aqui tem barraca digital, compra coletiva, caça ao tesouro, trilhas e muito mais!</p>
-                <p>E o melhor: você ganha <strong>SulCoins</strong> dando opiniões (+1 SulCoin) e participando de compras coletivas (+5 SulCoins). Troca por desconto de até <strong>35%</strong> na mensalidade! 💰</p>
-                <p>Quer falar comigo todo dia? O plano <strong>Litorânea IA</strong> é só <strong>R$ 5/mês</strong> ou <strong>R$ 49,99/ano</strong>.</p>
+                <p>Oi! Eu sou a <strong>Litorânea</strong> — sua assistente inteligente do Sulista! 👋 Conheço tudo sobre o Sul do Brasil.</p>
+                <p>Eu ajudo <strong>turistas</strong> a encontrar as melhores praias e promoções, <strong>comerciantes</strong> a vender mais, e <strong>moradores</strong> a descobrir eventos incríveis.</p>
+                <p>Você já começa com <strong>1 SulCoin</strong> de boas-vindas! 🎁 Cada opinião rende mais SulCoins que viram desconto: até <strong>10%</strong> pra turistas e até <strong>20%</strong> pra comerciantes. 💰</p>
+                <p>Além disso, posso te ajudar a conhecer pessoas! Crio <strong>chats de promoções e sociais</strong> baseados em atividades da região. 🤝</p>
+                <p>O plano <strong>Litorânea IA</strong> é só <strong>R$ 5/mês</strong> ou <strong>R$ 49,99/ano</strong> pra falar comigo sem limite.</p>
                 <p>Me conta: <strong>quantos anos você tem</strong> e o que você procura? 🎉</p>
               </div>
             </div>
@@ -557,9 +557,9 @@ const LitoraneaChat = () => {
         {/* Listening indicator */}
         {isListening && (
           <div className="flex justify-end">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 border border-destructive/30">
-              <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
-              <span className="text-xs font-bold text-destructive">🎙️ Ouvindo você...</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-bold text-primary">🎙️ Ouvindo você...</span>
             </div>
           </div>
         )}
@@ -578,12 +578,12 @@ const LitoraneaChat = () => {
             disabled={isLoading}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${
               isListening
-                ? "bg-destructive text-destructive-foreground animate-pulse"
-                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/30"
+                : "bg-muted text-muted-foreground hover:bg-primary/20 hover:text-primary"
             }`}
             title={isListening ? "Parar de ouvir" : "Falar por voz"}
           >
-            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            {isListening ? <Mic className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
           </button>
 
           <input

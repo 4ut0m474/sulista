@@ -237,6 +237,48 @@ const LitoraneaChat = () => {
     }
   };
 
+  // Split full text into chunks of ~150-200 chars at natural break points
+  const splitIntoChunks = (text: string): string[] => {
+    const MAX_CHUNK = 200;
+    const MIN_CHUNK = 100;
+    const chunks: string[] = [];
+    let remaining = text.trim();
+
+    while (remaining.length > 0) {
+      if (remaining.length <= MAX_CHUNK) {
+        chunks.push(remaining);
+        break;
+      }
+
+      // Try to find a natural break (sentence end) within MAX_CHUNK
+      let cutAt = -1;
+      // Prefer sentence-ending punctuation
+      for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
+        const ch = remaining[i];
+        if ((ch === '.' || ch === '!' || ch === '?' || ch === '\n') && i + 1 < remaining.length) {
+          cutAt = i + 1;
+          break;
+        }
+      }
+      // Fallback: break at comma or space
+      if (cutAt === -1) {
+        for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
+          if (remaining[i] === ',' || remaining[i] === ' ') {
+            cutAt = i + 1;
+            break;
+          }
+        }
+      }
+      // Hard cut if nothing found
+      if (cutAt === -1) cutAt = MAX_CHUNK;
+
+      chunks.push(remaining.slice(0, cutAt).trim());
+      remaining = remaining.slice(cutAt).trim();
+    }
+
+    return chunks.filter(c => c.length > 0);
+  };
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
@@ -284,7 +326,7 @@ const LitoraneaChat = () => {
     setIsLoading(true);
     if (!isAdminMode) incrementUsage();
 
-    let assistantSoFar = "";
+    let fullResponse = "";
     const allMessages = [...messages, userMsg];
 
     try {
@@ -304,18 +346,74 @@ const LitoraneaChat = () => {
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
-      let textBuffer = "";
+      let sseBuffer = "";
       let streamDone = false;
+      // Track chunks already displayed
+      let displayedLength = 0;
+
+      const flushChunks = () => {
+        // Split accumulated full response and show new complete chunks as separate bubbles
+        const chunks = splitIntoChunks(fullResponse);
+        // Figure out how many chars have been fully chunked and displayed
+        let accLen = 0;
+        const newMessages: Msg[] = [];
+        for (const chunk of chunks) {
+          accLen += chunk.length;
+          if (accLen <= displayedLength) continue;
+          // Only add chunks that are "complete" (next chunk exists or stream is done)
+          const isLastChunk = accLen >= fullResponse.length;
+          if (!isLastChunk || streamDone) {
+            newMessages.push({ role: "assistant", content: chunk });
+            displayedLength = accLen;
+          }
+        }
+
+        if (newMessages.length > 0) {
+          setMessages(prev => {
+            // Remove any "streaming" partial assistant message (last one if assistant)
+            const cleaned = prev.length > 0 && prev[prev.length - 1]?.role === "assistant" && prev[prev.length - 1]?.content !== undefined
+              ? prev
+              : prev;
+            return [...cleaned, ...newMessages];
+          });
+        }
+
+        // Show partial last chunk as streaming preview
+        if (!streamDone) {
+          const chunks2 = splitIntoChunks(fullResponse);
+          let shown = 0;
+          for (const c of chunks2) {
+            shown += c.length;
+          }
+          const partialText = fullResponse.slice(displayedLength);
+          if (partialText.length > 0) {
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant" && !last.options) {
+                // Check if last message is a "partial" (not a committed chunk)
+                const committedChunks = splitIntoChunks(fullResponse.slice(0, displayedLength));
+                const lastCommitted = committedChunks[committedChunks.length - 1];
+                if (last.content !== lastCommitted) {
+                  // Update partial
+                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: partialText } : m);
+                }
+              }
+              // Add new partial bubble
+              return [...prev, { role: "assistant", content: partialText }];
+            });
+          }
+        }
+      };
 
       while (!streamDone) {
         const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
+        if (done) { streamDone = true; break; }
+        sseBuffer += decoder.decode(value, { stream: true });
 
         let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
+        while ((newlineIndex = sseBuffer.indexOf("\n")) !== -1) {
+          let line = sseBuffer.slice(0, newlineIndex);
+          sseBuffer = sseBuffer.slice(newlineIndex + 1);
           if (line.endsWith("\r")) line = line.slice(0, -1);
           if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
@@ -325,25 +423,20 @@ const LitoraneaChat = () => {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
             if (content) {
-              assistantSoFar += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
-                }
-                return [...prev, { role: "assistant", content: assistantSoFar }];
-              });
+              fullResponse += content;
+              flushChunks();
             }
           } catch {
-            textBuffer = line + "\n" + textBuffer;
+            sseBuffer = line + "\n" + sseBuffer;
             break;
           }
         }
       }
 
-      // Final flush
-      if (textBuffer.trim()) {
-        for (let raw of textBuffer.split("\n")) {
+      // Final flush for remaining text
+      streamDone = true;
+      if (sseBuffer.trim()) {
+        for (let raw of sseBuffer.split("\n")) {
           if (!raw) continue;
           if (raw.endsWith("\r")) raw = raw.slice(0, -1);
           if (raw.startsWith(":") || raw.trim() === "") continue;
@@ -353,35 +446,35 @@ const LitoraneaChat = () => {
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantSoFar += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
-                }
-                return [...prev, { role: "assistant", content: assistantSoFar }];
-              });
-            }
+            if (content) fullResponse += content;
           } catch { /* ignore */ }
         }
       }
 
-      // Extract quick-reply options
-      const extractedOptions = extractOptions(assistantSoFar);
-      if (extractedOptions.length > 0) {
-        setMessages(prev => {
-          const last = prev[prev.length - 1];
-          if (last?.role === "assistant") {
-            return prev.map((m, i) => i === prev.length - 1 ? { ...m, options: extractedOptions } : m);
-          }
-          return prev;
-        });
-      }
+      // Final: replace all partial/streaming messages with properly chunked ones
+      if (fullResponse) {
+        const finalChunks = splitIntoChunks(fullResponse);
+        const extractedOptions = extractOptions(fullResponse);
 
-      // TTS: speak the final response
-      if (assistantSoFar) {
-        speakText(assistantSoFar);
+        setMessages(prev => {
+          // Remove all streaming assistant messages after the user message
+          const userMsgIdx = prev.length - 1;
+          // Find where our assistant messages started (after last user msg)
+          let lastUserIdx = -1;
+          for (let i = prev.length - 1; i >= 0; i--) {
+            if (prev[i].role === "user") { lastUserIdx = i; break; }
+          }
+          const before = prev.slice(0, lastUserIdx + 1);
+          const chunkedMsgs: Msg[] = finalChunks.map((chunk, idx) => ({
+            role: "assistant" as const,
+            content: chunk,
+            ...(idx === finalChunks.length - 1 && extractedOptions.length > 0 ? { options: extractedOptions } : {}),
+          }));
+          return [...before, ...chunkedMsgs];
+        });
+
+        // TTS: speak the full response
+        speakText(fullResponse);
       }
     } catch (e: any) {
       setMessages(prev => [

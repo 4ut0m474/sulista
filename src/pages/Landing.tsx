@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, MapPin, Star, Palmtree, Building2 } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2 } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
-import { citySubLocations } from "@/data/subLocations";
+import { getCitySubLocations } from "@/data/subLocations";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
@@ -13,6 +13,8 @@ const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
   const [stateOpen, setStateOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
+  const [expandedCity, setExpandedCity] = useState<string | null>(null);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { fontSize } = useFontSize();
@@ -111,18 +113,81 @@ const Landing = () => {
               </button>
               {cityOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-card z-50 max-h-72 overflow-y-auto">
-                  {cities.map(city => (
-                    <button
-                      key={city}
-                      onClick={() => {
-                        setCityOpen(false);
-                        navigate(`/city/${selectedState}/${encodeURIComponent(city)}`);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 hover:bg-muted transition-colors ${textSizeClass} text-foreground`}
-                    >
-                      {city}
-                    </button>
-                  ))}
+                  {cities.map(city => {
+                    const subLocs = selectedState ? getCitySubLocations(city, selectedState) : null;
+                    const isExpanded = expandedCity === city;
+                    const groupIcon = (type: string) => type === "praias"
+                      ? <Palmtree className="w-3 h-3" />
+                      : <Building2 className="w-3 h-3" />;
+
+                    return (
+                      <div key={city}>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => {
+                              setCityOpen(false);
+                              setExpandedCity(null);
+                              setExpandedGroup(null);
+                              navigate(`/city/${selectedState}/${encodeURIComponent(city)}`);
+                            }}
+                            className={`flex-1 text-left px-4 py-2.5 hover:bg-muted transition-colors ${textSizeClass} text-foreground`}
+                          >
+                            {city}
+                          </button>
+                          {subLocs && subLocs.groups.length > 0 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setExpandedCity(isExpanded ? null : city); setExpandedGroup(null); }}
+                              className="px-3 py-2.5 text-accent hover:bg-muted transition-colors"
+                            >
+                              <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                            </button>
+                          )}
+                        </div>
+
+                        {subLocs && isExpanded && subLocs.groups.map(group => {
+                          const groupKey = `${city}-${group.type}`;
+                          const isGroupExpanded = expandedGroup === groupKey;
+                          return (
+                            <div key={groupKey} className="ml-3 border-l-2 border-accent/20">
+                              <button
+                                onClick={() => setExpandedGroup(isGroupExpanded ? null : groupKey)}
+                                className="w-full flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-accent hover:bg-muted/50 transition-colors"
+                              >
+                                {groupIcon(group.type)}
+                                {group.label}
+                                <ChevronRight className={`w-3 h-3 ml-auto transition-transform ${isGroupExpanded ? "rotate-90" : ""}`} />
+                              </button>
+                              {isGroupExpanded && (
+                                <div className="bg-muted/20">
+                                  {[...new Set(group.subLocations.map(sl => sl.district))].map(district => (
+                                    <div key={district}>
+                                      <div className="px-4 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/40">
+                                        {district}
+                                      </div>
+                                      {group.subLocations.filter(sl => sl.district === district).map(sl => (
+                                        <button
+                                          key={sl.name}
+                                          onClick={() => {
+                                            setCityOpen(false);
+                                            setExpandedCity(null);
+                                            setExpandedGroup(null);
+                                            navigate(`/city/${selectedState}/${encodeURIComponent(city)}/local/${encodeURIComponent(sl.name)}`);
+                                          }}
+                                          className="w-full text-left px-5 py-1.5 text-xs hover:bg-accent/10 text-foreground/80 hover:text-accent transition-colors"
+                                        >
+                                          {sl.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -163,32 +228,6 @@ const Landing = () => {
           </div>
         )}
 
-        {/* Explore: Beaches & Districts */}
-        <div className="px-4 pt-6">
-          <div className="max-w-sm mx-auto">
-            <p className="text-primary-foreground/70 text-[10px] font-bold uppercase tracking-wider mb-2 text-center">🏖️ Praias & Bairros em Destaque</p>
-            <div className="grid grid-cols-2 gap-2">
-              {citySubLocations.slice(0, 6).map(city => {
-                const icon = city.groups[0]?.type === "praias" 
-                  ? <Palmtree className="w-3.5 h-3.5 text-secondary" /> 
-                  : <Building2 className="w-3.5 h-3.5 text-accent" />;
-                return (
-                  <button
-                    key={`${city.stateAbbr}-${city.cityName}`}
-                    onClick={() => navigate(`/city/${city.stateAbbr}/${encodeURIComponent(city.cityName)}/locais`)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-card/70 backdrop-blur-sm border border-white/15 hover:bg-card/90 transition-all text-left"
-                  >
-                    {icon}
-                    <div className="min-w-0">
-                      <span className="text-xs font-bold text-foreground block truncate">{city.cityName}</span>
-                      <span className="text-[10px] text-muted-foreground">{city.subLocations.length} {city.groups[0]?.label?.toLowerCase() || "locais"}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
 
         {/* Spacer */}
         <div className="flex-1" />

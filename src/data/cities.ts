@@ -149,7 +149,7 @@ export const plans = [
     name: "Litorânea IA",
     price: 5,
     annualDiscount: 17,
-    features: ["Chat ilimitado com a Litorânea", "Secretária IA 24h", "Sem propaganda inclusa", "Suporte por voz"],
+    features: ["Chat com a Litorânea (10 perguntas/dia)", "Notificações diárias de promoções", "Suporte por voz", "+0,30 SulCoins de bônus"],
     highlight: false,
   },
   {
@@ -157,7 +157,7 @@ export const plans = [
     name: "Básico",
     price: 10,
     annualDiscount: 10,
-    features: ["Barraca digital", "Exibição de produtos", "Preços e descrições", "+200 SulCoins na primeira compra"],
+    features: ["Barraca digital", "Chat IA (20 perguntas/dia)", "20 notificações/dia (promoções, eventos, compra coletiva)", "Preços e descrições", "+0,35 SulCoins de bônus"],
     highlight: false,
   },
   {
@@ -165,7 +165,7 @@ export const plans = [
     name: "Carrossel",
     price: 20,
     annualDiscount: 15,
-    features: ["Espaço no carrossel de imagens", "Propaganda visual", "Mais visibilidade", "+500 SulCoins na primeira compra"],
+    features: ["Espaço no carrossel de imagens", "Chat limitado extra (20 perguntas/dia)", "20 notificações/dia", "Propaganda visual", "+0,40 SulCoins de bônus"],
     highlight: false,
   },
   {
@@ -173,7 +173,7 @@ export const plans = [
     name: "Combo",
     price: 30,
     annualDiscount: 20,
-    features: ["Barraca digital", "Espaço no carrossel", "Propaganda completa", "Melhor custo-benefício", "+800 SulCoins na primeira compra"],
+    features: ["Barraca digital + carrossel", "Chat ilimitado com a Litorânea", "Propaganda completa", "Melhor custo-benefício", "+0,45 SulCoins de bônus"],
     highlight: true,
   },
   {
@@ -183,12 +183,13 @@ export const plans = [
     annualDiscount: 25,
     features: [
       "Barraca digital especial VIP",
+      "Chat ilimitado com a Litorânea",
+      "Confirmação via e-mail mágico (anti-duplicidade)",
       "Posição de destaque (início)",
       "Espaço no carrossel premium",
-      "Mais apresentações",
       "Auxílio via WhatsApp",
       "IA para criar fotos e projetos",
-      "+1500 SulCoins na primeira compra",
+      "+1,00 SulCoin de bônus",
     ],
     highlight: false,
     isVip: true,

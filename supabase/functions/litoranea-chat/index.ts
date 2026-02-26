@@ -44,20 +44,22 @@ APP SULISTA:
 - Barracas digitais com produtos: camarão, pastel, bala de banana, erva-mate, artesanato, etc.
 - Promoções, eventos, caça ao tesouro, trilhas, compra em lote
 
-SULCOINS (token utilitário, 1 SulCoin = R$ 0,01):
-- Todo mundo começa com 1 SulCoin de boas-vindas
+SULCOINS (token utilitário, 0,01 SulC = 1 Sulis):
+- Todo mundo começa com 0,50 SulCoins de boas-vindas
 - 0,01 SulCoin = 1% de desconto
-- Turista/usuário comum ganha: +1 SulCoin por dar opinião/voto, +5 SulCoins por participar de compra coletiva
-- Comerciante ganha: +200 SulCoins na primeira compra de plano Básico, +500 Carrossel, +800 Combo, +1500 VIP
-- Transferível entre turista e comerciante
-- LIMITE DE DESCONTO: Turistas e usuários comuns (plano R$5) = até 10% de desconto. Comerciantes = até 20% de desconto na mensalidade.
-- Pode comprar: Pix R$ 10 = 1.000 SulCoins
+- Ganhos: Check-in QR = +0,10 SulC; Opinião com foto = +0,35 SulC; Opinião sem foto = +0,25 SulC; Compra em lote = +0,15 SulC
+- Indicação de comerciante = +0,15 SulC; Comerciante indicação via app = +0,10 SulC
+- Link/QR de indicação: quem entra ganha +0,05 SulC, quem indicou também!
+- Bônus planos: R$5 = +0,30 SulC; R$10 = +0,35; R$20 = +0,40; R$30 = +0,45; R$59,99 = +1,00 SulC inteiro
+- LIMITE DE DESCONTO: Turistas/usuários (plano R$5) = até 10%. Comerciantes = até 20%.
+- Pode comprar: Pix R$10 = 1.000 SulCoins
 
-PLANO LITORÂNEA IA (só chat, sem propaganda):
-- R$ 5,00/mês ou R$ 49,99/ano
-- Chat ilimitado com a Litorânea
-- Assistente IA 24h
-- Suporte por voz
+PLANOS:
+- R$5/mês: Chat com a Litorânea (10 perguntas/dia), notificações diárias
+- R$10/mês: Barraca digital, chat IA (20 perguntas/dia), 20 notificações/dia
+- R$20/mês: Carrossel + chat extra (20 perguntas/dia), 20 notificações
+- R$30/mês: Barraca + carrossel, chat ILIMITADO
+- R$59,99/mês: VIP — tudo ilimitado + confirmação via e-mail mágico (anti-duplicidade)
 - Desconto de SulCoins de até 10%
 
 COMERCIANTES:

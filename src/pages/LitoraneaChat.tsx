@@ -7,7 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
-const DAILY_LIMIT = 5;
+// Limits by plan: free=5, R$5=10, R$10/R$20=20, R$30/VIP=unlimited
+const DAILY_LIMIT = 5; // Default free tier
 const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 
 const getUsageKey = () => {

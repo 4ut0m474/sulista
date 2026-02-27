@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2 } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Shield } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";
@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
+import PersistenceModal from "@/components/PersistenceModal";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
@@ -19,6 +20,8 @@ const Landing = () => {
   const { t } = useLanguage();
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const [persistOpen, setPersistOpen] = useState(false);
+  const isPersistent = localStorage.getItem("sulista-persistent") === "true";
 
   const cities = useMemo(() => {
     if (!selectedState) return [];
@@ -195,6 +198,40 @@ const Landing = () => {
             <p className={`text-center text-primary-foreground/70 ${fontSize === "extra-large" ? "text-base" : "text-xs"}`}>
               {t("selectToContinue")}
             </p>
+
+            {/* Persistence Button */}
+            {!isPersistent ? (
+              <button
+                onClick={() => setPersistOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-secondary/30 hover:bg-card transition-all shadow-lg group"
+              >
+                <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-secondary" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="text-sm font-bold text-foreground block">Persistência Anônima</span>
+                  <span className="text-[10px] text-muted-foreground leading-tight">
+                    Não guardamos suas informações pessoais, somente preferências.
+                  </span>
+                </div>
+              </button>
+            ) : (
+              <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-green-500/30 shadow-lg">
+                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-green-500" />
+                </div>
+                <div className="text-left flex-1">
+                  <span className="text-sm font-bold text-foreground block">Persistência Ativa ✅</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Você pode ganhar SulCoins!
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <p className="text-center text-primary-foreground/50 text-[10px]">
+              Sem persistência você navega normalmente, mas não acumula SulCoins.
+            </p>
           </div>
         </div>
 
@@ -240,6 +277,12 @@ const Landing = () => {
           </p>
         </div>
       </div>
+
+      <PersistenceModal
+        open={persistOpen}
+        onClose={() => setPersistOpen(false)}
+        onSuccess={() => setPersistOpen(false)}
+      />
     </div>
   );
 };

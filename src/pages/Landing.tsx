@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Shield } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Shield, X } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";
@@ -9,6 +9,10 @@ import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
+import PinLoginModal from "@/components/PinLoginModal";
+import SulCoinsBanner from "@/components/SulCoinsBanner";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
@@ -21,7 +25,34 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
-  const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("sulista-persistent") === "true");
+  const [pinVerified, setPinVerified] = useState(false);
+  const [showPinLogin, setShowPinLogin] = useState(false);
+
+  // On mount, if persistent but not verified, show PIN modal
+  useEffect(() => {
+    if (isPersistent && !pinVerified) {
+      // Check if there's an active session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          setShowPinLogin(true);
+        } else {
+          // No session, persistence is stale
+          setIsPersistent(false);
+          localStorage.removeItem("sulista-persistent");
+        }
+      });
+    }
+  }, []);
+
+  const handleCancelPersistence = () => {
+    localStorage.removeItem("sulista-persistent");
+    localStorage.removeItem("sulista-uuid");
+    setIsPersistent(false);
+    setPinVerified(false);
+    supabase.auth.signOut();
+    toast.success("Persistência desativada");
+  };
 
   const cities = useMemo(() => {
     if (!selectedState) return [];
@@ -30,7 +61,6 @@ const Landing = () => {
 
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
-  // Separate favorites by type
   const cityFavorites = favorites.filter(f => !f.subLocation);
   const subLocationFavorites = favorites.filter(f => !!f.subLocation);
 
@@ -42,12 +72,9 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-hero" />
       </div>
 
-      {/* Header */}
       <LandingHeader />
 
-      {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Logo / Title */}
         <div className="flex flex-col items-center justify-center px-6 pt-16 pb-4">
           <h1 className="font-display text-5xl font-black text-primary-foreground tracking-tight mb-1 drop-shadow-lg">
             Sulista
@@ -57,7 +84,6 @@ const Landing = () => {
           </p>
         </div>
 
-        {/* Selectors */}
         <div className="flex flex-col items-center px-6 mt-4">
           <div className="w-full max-w-sm space-y-3">
             {/* State Selector */}
@@ -199,7 +225,7 @@ const Landing = () => {
               {t("selectToContinue")}
             </p>
 
-            {/* Persistence Button */}
+            {/* Persistence Button / Status */}
             {!isPersistent ? (
               <button
                 onClick={() => setPersistOpen(true)}
@@ -221,12 +247,32 @@ const Landing = () => {
                   <Shield className="w-4 h-4 text-green-500" />
                 </div>
                 <div className="text-left flex-1">
-                  <span className="text-sm font-bold text-foreground block">Persistência Ativa ✅</span>
+                  <span className="text-sm font-bold text-foreground block">
+                    Persistência Ativa {pinVerified ? "✅" : "🔒"}
+                  </span>
                   <span className="text-[10px] text-muted-foreground">
-                    Você pode ganhar SulCoins!
+                    {pinVerified ? "Você pode ganhar SulCoins!" : "Verifique seu PIN para continuar"}
                   </span>
                 </div>
+                <button
+                  onClick={handleCancelPersistence}
+                  className="p-1.5 rounded-full hover:bg-destructive/10 transition-colors"
+                  title="Cancelar persistência"
+                >
+                  <X className="w-4 h-4 text-destructive/70 hover:text-destructive" />
+                </button>
               </div>
+            )}
+
+            {/* SulCoins banner when persistent and verified */}
+            {isPersistent && pinVerified && selectedState && (
+              <SulCoinsBanner onGoToWallet={() => {
+                // Navigate to first city wallet if a city is selected
+                const firstCity = cities[0];
+                if (firstCity) {
+                  navigate(`/city/${selectedState}/${encodeURIComponent(firstCity)}/wallet`);
+                }
+              }} />
             )}
 
             <p className="text-center text-primary-foreground/50 text-[10px]">
@@ -265,11 +311,8 @@ const Landing = () => {
           </div>
         )}
 
-
-        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Privacy Notice */}
         <div className="relative z-10 px-6 pb-6 pt-4">
           <p className="text-center text-primary-foreground/60 text-[10px] leading-relaxed max-w-sm mx-auto">
             🔒 <strong>Termos de Privacidade:</strong> O Sulista não guarda nenhum dado pessoal do usuário comum. 
@@ -281,7 +324,22 @@ const Landing = () => {
       <PersistenceModal
         open={persistOpen}
         onClose={() => setPersistOpen(false)}
-        onSuccess={() => setPersistOpen(false)}
+        onSuccess={() => {
+          setPersistOpen(false);
+          setIsPersistent(true);
+          setPinVerified(true);
+        }}
+      />
+
+      <PinLoginModal
+        open={showPinLogin}
+        onSuccess={() => {
+          setShowPinLogin(false);
+          setPinVerified(true);
+        }}
+        onCancel={() => {
+          setShowPinLogin(false);
+        }}
       />
     </div>
   );

@@ -96,12 +96,21 @@ const LitoraneaChat = () => {
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoMicAfterSpeakRef = useRef(true);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+
+  // Load voices
+  useEffect(() => {
+    const loadVoices = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // TTS
+  // TTS using native Web Speech API
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
     if (!voiceEnabled) {
       if (activateMicAfter) setTimeout(() => startListeningWithTimeout(), 500);
@@ -112,21 +121,20 @@ const LitoraneaChat = () => {
     autoMicAfterSpeakRef.current = activateMicAfter;
     try {
       setIsSpeaking(true);
-      // Use native Web Speech API (free, no API key needed)
       const synth = window.speechSynthesis;
-      synth.cancel(); // Stop any ongoing speech
+      synth.cancel();
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.lang = "pt-BR";
       utterance.rate = 0.95;
       utterance.pitch = 1.1;
-      // Try to find a female Brazilian Portuguese voice
-      const voices = synth.getVoices();
+      // Select female pt-BR voice
+      const voices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "fernanda", "maria", "ana"];
       const ptBrVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
       const ptVoices = ptBrVoices.length > 0 ? ptBrVoices : voices.filter(v => v.lang.startsWith("pt"));
       const femaleVoice = ptVoices.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
-      const selectedVoice = femaleVoice || ptVoices[0];
-      if (selectedVoice) utterance.voice = selectedVoice;
+      if (femaleVoice) utterance.voice = femaleVoice;
+      else if (ptVoices[0]) utterance.voice = ptVoices[0];
       utterance.onend = () => {
         setIsSpeaking(false);
         if (autoMicAfterSpeakRef.current) {

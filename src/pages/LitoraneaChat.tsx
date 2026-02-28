@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
-const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
 const SILENCE_TIMEOUT_MS = 10000;
@@ -94,7 +93,6 @@ const LitoraneaChat = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoMicAfterSpeakRef = useRef(true);
@@ -114,32 +112,25 @@ const LitoraneaChat = () => {
     autoMicAfterSpeakRef.current = activateMicAfter;
     try {
       setIsSpeaking(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const resp = await fetch(TTS_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ text: clean }),
-      });
-      if (!resp.ok) { setIsSpeaking(false); return; }
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onended = () => {
+      // Use native Web Speech API (free, no API key needed)
+      const synth = window.speechSynthesis;
+      synth.cancel(); // Stop any ongoing speech
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = "pt-BR";
+      utterance.rate = 0.95;
+      utterance.pitch = 1.1;
+      // Try to find a Brazilian Portuguese voice
+      const voices = synth.getVoices();
+      const ptVoice = voices.find(v => v.lang.startsWith("pt-BR")) || voices.find(v => v.lang.startsWith("pt"));
+      if (ptVoice) utterance.voice = ptVoice;
+      utterance.onend = () => {
         setIsSpeaking(false);
-        URL.revokeObjectURL(url);
-        // Auto-activate mic after Litorânea finishes speaking
         if (autoMicAfterSpeakRef.current) {
           setTimeout(() => startListeningWithTimeout(), 400);
         }
       };
-      audio.onerror = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
-      await audio.play();
+      utterance.onerror = () => { setIsSpeaking(false); };
+      synth.speak(utterance);
     } catch { setIsSpeaking(false); }
   }, [voiceEnabled]);
 
@@ -149,7 +140,7 @@ const LitoraneaChat = () => {
     if (!SpeechRecognition) return;
 
     // Stop TTS if playing
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; setIsSpeaking(false); }
+    window.speechSynthesis.cancel(); setIsSpeaking(false);
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
@@ -411,7 +402,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
         </div>
         <button
           onClick={() => {
-            if (isSpeaking && audioRef.current) { audioRef.current.pause(); audioRef.current = null; setIsSpeaking(false); }
+            if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
             setVoiceEnabled(!voiceEnabled);
           }}
           className={`p-2 rounded-full transition-colors ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}

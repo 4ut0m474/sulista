@@ -119,10 +119,14 @@ const LitoraneaChat = () => {
       utterance.lang = "pt-BR";
       utterance.rate = 0.95;
       utterance.pitch = 1.1;
-      // Try to find a Brazilian Portuguese voice
+      // Try to find a female Brazilian Portuguese voice
       const voices = synth.getVoices();
-      const ptVoice = voices.find(v => v.lang.startsWith("pt-BR")) || voices.find(v => v.lang.startsWith("pt"));
-      if (ptVoice) utterance.voice = ptVoice;
+      const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "fernanda", "maria", "ana"];
+      const ptBrVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
+      const ptVoices = ptBrVoices.length > 0 ? ptBrVoices : voices.filter(v => v.lang.startsWith("pt"));
+      const femaleVoice = ptVoices.find(v => femaleKeywords.some(k => v.name.toLowerCase().includes(k)));
+      const selectedVoice = femaleVoice || ptVoices[0];
+      if (selectedVoice) utterance.voice = selectedVoice;
       utterance.onend = () => {
         setIsSpeaking(false);
         if (autoMicAfterSpeakRef.current) {

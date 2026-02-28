@@ -38,9 +38,18 @@ const cleanTextForTTS = (text: string): string => {
     .replace(/#{1,6}\s/g, "")
     .replace(/[`~]/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[•\-\*]\s/g, "")
+    // Remove numbered lists (1. Option, 2. Option, etc.)
+    .replace(/^\d+\.\s+.+$/gm, "")
+    // Remove bullet options
+    .replace(/^[•\-\*]\s+.+$/gm, "")
+    // Remove "Usa o mic" reminders
+    .replace(/Usa o mic.*?🎙️/g, "")
+    .replace(/Fala comigo.*?🎙️/g, "")
+    // Remove emojis for cleaner speech
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}]/gu, "")
     .replace(/\n{2,}/g, ". ")
     .replace(/\n/g, ". ")
+    .replace(/\.\s*\.\s*/g, ". ")
     .trim();
 };
 
@@ -70,14 +79,24 @@ const splitIntoChunks = (text: string): string[] => {
 
 const extractOptions = (text: string): string[] => {
   const opts: string[] = [];
-  const btnPattern = /"([^"]{5,40})"/g;
+  const seen = new Set<string>();
+  const addOpt = (o: string) => {
+    const clean = o.trim();
+    if (clean.length >= 3 && clean.length <= 60 && !seen.has(clean)) {
+      seen.add(clean);
+      opts.push(clean);
+    }
+  };
+  // Numbered lists: 1. Option text
+  const numberedPattern = /^\d+\.\s+(.+)$/gm;
   let match;
-  while ((match = btnPattern.exec(text)) !== null) opts.push(match[1]);
-  const bulletPattern = /^[•\-\*]\s*(.+)$/gm;
-  while ((match = bulletPattern.exec(text)) !== null) {
-    const opt = match[1].trim();
-    if (opt.length >= 5 && opt.length <= 60) opts.push(opt);
-  }
+  while ((match = numberedPattern.exec(text)) !== null) addOpt(match[1]);
+  // Bullet lists
+  const bulletPattern = /^[•\-\*]\s+(.+)$/gm;
+  while ((match = bulletPattern.exec(text)) !== null) addOpt(match[1]);
+  // Quoted options
+  const btnPattern = /"([^"]{3,40})"/g;
+  while ((match = btnPattern.exec(text)) !== null) addOpt(match[1]);
   return opts.slice(0, 5);
 };
 

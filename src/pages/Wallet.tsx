@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, Send, ShoppingCart, History, ArrowDownUp, QrCode, Share2, Copy, Check } from "lucide-react";
+import { ArrowLeft, Coins, Send, ShoppingCart, History, ArrowDownUp, QrCode, Share2, Copy, Check, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 const Wallet = () => {
@@ -11,6 +11,7 @@ const Wallet = () => {
   const [showBuy, setShowBuy] = useState(false);
   const [showDiscount, setShowDiscount] = useState(false);
   const [copied, setCopied] = useState(false);
+  const isPersistent = localStorage.getItem("sulista-persistent") === "true";
 
   // Saldo local (sem auth, mostra 0.50 inicial)
   const saldo = 0.50;
@@ -59,6 +60,33 @@ const Wallet = () => {
         </div>
         <Coins className="w-5 h-5 text-primary" />
       </header>
+
+      {/* Persistence Status Banner */}
+      <div className={`mx-4 mt-3 p-3 rounded-xl border flex items-center gap-3 ${
+        isPersistent
+          ? "bg-green-500/10 border-green-500/30"
+          : "bg-destructive/10 border-destructive/30"
+      }`}>
+        <Shield className={`w-5 h-5 flex-shrink-0 ${isPersistent ? "text-green-500" : "text-destructive"}`} />
+        <div className="flex-1">
+          <p className={`text-xs font-bold ${isPersistent ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
+            {isPersistent ? "Persistência ativa ✓" : "Modo anônimo — sem persistência"}
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            {isPersistent
+              ? "Você pode acumular SulCoins!"
+              : "Ative a persistência para ganhar SulCoins."}
+          </p>
+        </div>
+        {!isPersistent && (
+          <button
+            onClick={() => navigate("/")}
+            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold"
+          >
+            Ativar
+          </button>
+        )}
+      </div>
 
       {/* Saldo Card */}
       <div className="px-4 pt-6">

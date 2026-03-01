@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles } from "lucide-react";
+import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
@@ -139,6 +139,27 @@ const CityHome = () => {
                   aria-label="Litorânea IA"
                 >
                   <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
+                </button>
+                <button
+                  onClick={() => {
+                    const persistent = localStorage.getItem("sulista-persistent") === "true";
+                    if (!persistent) {
+                      navigate("/");
+                    }
+                  }}
+                  className={`w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border flex items-center justify-center shadow-card ${
+                    localStorage.getItem("sulista-persistent") === "true"
+                      ? "border-green-500"
+                      : "border-destructive/50"
+                  }`}
+                  aria-label="Status persistência"
+                  title={localStorage.getItem("sulista-persistent") === "true" ? "Persistência ativa" : "Modo anônimo"}
+                >
+                  <Shield className={`w-4 h-4 ${
+                    localStorage.getItem("sulista-persistent") === "true"
+                      ? "text-green-500"
+                      : "text-destructive"
+                  }`} />
                 </button>
                 <button
                   onClick={() => toggleFavorite(state || "", cityName)}

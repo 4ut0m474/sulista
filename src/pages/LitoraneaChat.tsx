@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX } from "lucide-react";
+import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
@@ -414,9 +415,9 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
   const remaining = DAILY_LIMIT - getUsageCount();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
+      <header className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -520,7 +521,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
       </div>
 
       {/* Input bar */}
-      <div className="p-4 bg-card border-t border-border">
+      <div className="flex-shrink-0 p-4 bg-card border-t border-border pb-20">
         <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="flex gap-2 max-w-md mx-auto">
           <button
             type="button"
@@ -557,6 +558,9 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
           </p>
         )}
       </div>
+
+      {/* Footer */}
+      <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>
   );
 };

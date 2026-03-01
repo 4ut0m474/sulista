@@ -260,15 +260,25 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    // Admin mode
-    if (text.trim() === "EERB19537666" && !isAdminMode) {
+    // Admin mode detection — password OR natural language trigger
+    const trimmed = text.trim();
+    const lower = trimmed.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const isAdminTrigger =
+      trimmed === "EERB19537666" ||
+      (lower.includes("modo administrad") && lower.includes("erasto")) ||
+      (lower.includes("modo admin") && lower.includes("erasto")) ||
+      (lower.includes("litoranea") && lower.includes("erasto") && (lower.includes("admin") || lower.includes("administrad")));
+
+    if (isAdminTrigger && !isAdminMode) {
       setInput("");
       setIsAdminMode(true);
+      const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
       setMessages(prev => [
         ...prev,
         { role: "user", content: "🔑 ****" },
-        { role: "assistant", content: "🔓 **Modo Administrador ativado!**\n\nPerguntas ilimitadas.", options: ["📊 Relatório", "🔔 Notificações", "🛡️ Segurança", "📋 Status"] },
+        { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
       ]);
+      speakText(adminGreeting, true);
       return;
     }
 

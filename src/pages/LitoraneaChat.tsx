@@ -282,10 +282,24 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
       return;
     }
 
-    // Daily limit (except admin)
+    // Daily limit (except admin) — but ALWAYS allow admin trigger even when blocked
     if (!isAdminMode) {
       const usage = getUsageCount();
       if (usage >= DAILY_LIMIT) {
+        // Check if this message is an admin trigger BEFORE blocking
+        if (isAdminTrigger) {
+          // Allow admin activation even when limit is reached
+          setInput("");
+          setIsAdminMode(true);
+          const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
+          setMessages(prev => [
+            ...prev,
+            { role: "user", content: "🔑 ****" },
+            { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
+          ]);
+          speakText(adminGreeting, true);
+          return;
+        }
         setMessages(prev => [
           ...prev,
           { role: "user", content: text },

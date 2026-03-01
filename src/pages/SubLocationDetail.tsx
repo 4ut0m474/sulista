@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map, TreePine, ShoppingCart } from "lucide-react";
+import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map, TreePine, ShoppingCart, Shield } from "lucide-react";
 import { getCitySubLocations } from "@/data/subLocations";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
@@ -116,6 +116,18 @@ const SubLocationDetail = () => {
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const persistent = localStorage.getItem("sulista-persistent") === "true";
+                if (!persistent) navigate("/");
+              }}
+              className={`w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border flex items-center justify-center shadow-card ${
+                localStorage.getItem("sulista-persistent") === "true" ? "border-green-500" : "border-destructive/50"
+              }`}
+              aria-label="Status persistência"
+            >
+              <Shield className={`w-4 h-4 ${localStorage.getItem("sulista-persistent") === "true" ? "text-green-500" : "text-destructive"}`} />
+            </button>
             <button
               onClick={() => toggleFavorite(state || "", favKey)}
               className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card"

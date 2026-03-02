@@ -1,157 +1,112 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, Send, History, ArrowDownUp, QrCode, Share2, Copy, Check, Shield } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { Coins, QrCode, Camera, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import FooterNav from "@/components/FooterNav";
+import WalletHeader from "@/components/wallet/WalletHeader";
+import PersistenceBanner from "@/components/wallet/PersistenceBanner";
+import QRShareModal from "@/components/wallet/QRShareModal";
+import QRScannerModal from "@/components/wallet/QRScannerModal";
+import TransferConfirmModal from "@/components/wallet/TransferConfirmModal";
+import EarnList from "@/components/wallet/EarnList";
 
 const Wallet = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"saldo" | "historico" | "indicar">("saldo");
-  const [showTransfer, setShowTransfer] = useState(false);
-  const [showDiscount, setShowDiscount] = useState(false);
-  const [copied, setCopied] = useState(false);
   const isPersistent = localStorage.getItem("sulista-persistent") === "true";
 
-  // Saldo local (sem auth, mostra 0.50 inicial)
-  const saldo = 0.50;
-  const valorReais = (saldo * 0.01).toFixed(4);
-  const sulis = Math.floor(saldo * 100);
+  const [activeTab, setActiveTab] = useState<"saldo" | "historico" | "ganhar">("saldo");
+  const [saldo, setSaldo] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showQR, setShowQR] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedId, setScannedId] = useState<string | null>(null);
+  const [logs, setLogs] = useState<any[]>([]);
 
-  // Referral link
-  const userId = localStorage.getItem("sulista-ref-id") || (() => {
-    const id = Math.random().toString(36).substring(2, 10);
-    localStorage.setItem("sulista-ref-id", id);
-    return id;
-  })();
-  const referralLink = `${window.location.origin}/?ref=${userId}`;
+  const fetchData = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setUserId(user.id);
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    toast.success("Link copiado!");
-    setTimeout(() => setCopied(false), 2000);
-  };
+    const { data: sc } = await supabase.from("sulcoins").select("saldo").eq("user_id", user.id).maybeSingle();
+    setSaldo(sc?.saldo ?? 0);
 
-  const shareLink = async () => {
-    if (navigator.share) {
-      await navigator.share({ title: "Sulista App", text: "Entre no Sulista e ganhe SulCoins!", url: referralLink });
-    } else {
-      copyLink();
+    const { data: logData } = await supabase.from("sulcoins_log").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
+    setLogs(logData ?? []);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleScanned = (uuid: string) => {
+    setShowScanner(false);
+    if (!uuid || uuid.length < 10) {
+      toast.error("ID não encontrado. Tenta de novo.");
+      return;
     }
+    setScannedId(uuid);
   };
 
   const tabs = [
     { id: "saldo" as const, label: "Carteira", icon: Coins },
     { id: "historico" as const, label: "Histórico", icon: History },
-    { id: "indicar" as const, label: "Indicar", icon: Share2 },
+    { id: "ganhar" as const, label: "Ganhar", icon: Share2 },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background pb-20">
-      {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </button>
-        <div className="flex-1">
-          <h1 className="font-display text-lg font-bold text-foreground">Minha Carteira</h1>
-          <p className="text-[10px] text-muted-foreground">SulCoins • 0,01 SulC = 1 Sulis</p>
-        </div>
-        <Coins className="w-5 h-5 text-primary" />
-      </header>
-
-      {/* Persistence Status Banner */}
-      <div className={`mx-4 mt-3 p-3 rounded-xl border flex items-center gap-3 ${
-        isPersistent
-          ? "bg-green-500/10 border-green-500/30"
-          : "bg-destructive/10 border-destructive/30"
-      }`}>
-        <Shield className={`w-5 h-5 flex-shrink-0 ${isPersistent ? "text-green-500" : "text-destructive"}`} />
-        <div className="flex-1">
-          <p className={`text-xs font-bold ${isPersistent ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
-            {isPersistent ? "Persistência ativa ✓" : "Modo anônimo — sem persistência"}
-          </p>
-          <p className="text-[10px] text-muted-foreground">
-            {isPersistent
-              ? "Você pode acumular e usar SulCoins!"
-              : "Ative a persistência para ganhar SulCoins. SulCoins só são acumulados com persistência ativa."}
-          </p>
-        </div>
-        {!isPersistent && (
-          <button
-            onClick={() => navigate("/")}
-            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold"
-          >
-            Ativar
-          </button>
-        )}
-      </div>
+    <div className="min-h-screen flex flex-col bg-background pb-24">
+      <WalletHeader />
+      <PersistenceBanner isPersistent={isPersistent} />
 
       {/* Saldo Card */}
-      <div className="px-4 pt-6">
-        <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-6 border border-primary/20">
+      <div className="px-4 pt-5">
+        <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-6 border border-primary/20 text-center">
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Seu saldo</p>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-4xl font-display font-bold text-foreground">{saldo.toFixed(2)}</span>
+          <div className="flex items-baseline justify-center gap-2 mt-1">
+            <span className="text-4xl font-display font-bold text-foreground">{saldo}</span>
             <span className="text-sm text-primary font-bold">SulCoins</span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">{sulis} Sulis • ≈ R$ {valorReais}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Você tem {saldo} SulCoins
+          </p>
         </div>
       </div>
 
-      {/* Action Buttons — only Transfer and Use Discount (no buy/sell) */}
+      {/* Big Action Buttons */}
       <div className="grid grid-cols-2 gap-3 px-4 mt-4">
-        <ActionButton icon={Send} label="Transferir" desc="Para barraca" onClick={() => setShowTransfer(!showTransfer)} />
-        <ActionButton icon={ArrowDownUp} label="Usar desconto" desc="Na mensalidade" onClick={() => setShowDiscount(!showDiscount)} />
+        <button
+          onClick={() => {
+            if (!isPersistent) { toast.error("Ative a persistência primeiro!"); return; }
+            setShowQR(true);
+          }}
+          className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
+        >
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <QrCode className="w-6 h-6 text-primary" />
+          </div>
+          <span className="text-sm font-bold text-foreground">Compartilhar meu ID</span>
+          <span className="text-[10px] text-muted-foreground text-center">Gera QR Code pra receber</span>
+        </button>
+
+        <button
+          onClick={() => {
+            if (!isPersistent) { toast.error("Ative a persistência primeiro!"); return; }
+            setShowScanner(true);
+          }}
+          className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
+        >
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <Camera className="w-6 h-6 text-primary" />
+          </div>
+          <span className="text-sm font-bold text-foreground">Escanear QR</span>
+          <span className="text-[10px] text-muted-foreground text-center">Enviar SulCoins</span>
+        </button>
       </div>
-
-      {/* Transfer Panel */}
-      {showTransfer && (
-        <div className="mx-4 mt-3 p-4 rounded-xl bg-card border border-border space-y-3">
-          <h4 className="text-sm font-bold text-foreground">Transferir SulCoins</h4>
-          <p className="text-xs text-muted-foreground">Escaneie o QR Code da barraca ou insira o código do comerciante.</p>
-          <div className="flex gap-2">
-            <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold">
-              <QrCode className="w-4 h-4" /> Escanear QR
-            </button>
-            <input placeholder="Código da barraca" className="flex-1 px-3 py-2 rounded-xl bg-muted text-foreground text-xs border border-border" />
-          </div>
-          <input type="number" placeholder="Quantidade (ex: 0.10)" step="0.01" min="0.01" className="w-full px-3 py-2 rounded-xl bg-muted text-foreground text-xs border border-border" />
-          <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold" onClick={() => toast.info("Salve seu progresso para transferir SulCoins")}>
-            Confirmar Transferência
-          </button>
-        </div>
-      )}
-
-      {/* Discount Panel */}
-      {showDiscount && (
-        <div className="mx-4 mt-3 p-4 rounded-xl bg-card border border-border space-y-3">
-          <h4 className="text-sm font-bold text-foreground">Usar Desconto</h4>
-          <p className="text-xs text-muted-foreground">0,01 SulC = 1% de desconto na mensalidade.</p>
-          <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Turista/Usuário (plano R$5)</span>
-              <span className="font-bold text-foreground">Até 10% desconto</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Comerciante</span>
-              <span className="font-bold text-foreground">Até 20% desconto</span>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">Seu saldo: {saldo.toFixed(2)} SulC → até {Math.min(saldo, 0.20).toFixed(2)}% de desconto</p>
-          <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold" onClick={() => toast.info("Salve seu progresso para aplicar desconto")}>
-            Aplicar Desconto
-          </button>
-        </div>
-      )}
 
       {/* Info */}
       <div className="mx-4 mt-4 p-3 rounded-xl bg-muted/50 border border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          <strong className="text-foreground">SulCoin</strong> é crédito interno do Sulista.
-          0,01 SulC = 1 Sulis. Todos começam com 0,50 SulC.
-          <strong className="text-primary"> SulCoins só podem ser ganhos</strong> — não podem ser comprados ou vendidos.
-          Não é moeda. Não troca por dinheiro fora do app.
+          <strong className="text-foreground">SulCoins só podem ser ganhos</strong> — não podem ser comprados ou vendidos.
+          Tudo anônimo: só UUID no banco, sem nome ou dados.
         </p>
       </div>
 
@@ -176,86 +131,67 @@ const Wallet = () => {
       {/* Content */}
       <div className="px-4 mt-4 flex-1">
         {activeTab === "saldo" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold text-foreground">Como ganhar SulCoins</h3>
-            <p className="text-[10px] text-muted-foreground italic">⚠️ SulCoins só são acumulados com persistência ativa</p>
-            <EarnItem emoji="💬" title="Opinião sem foto" coins="0,05" />
-            <EarnItem emoji="📸" title="Opinião com foto" coins="0,10" />
-            <EarnItem emoji="📦" title="Compra em lote (grupo 3+)" coins="0,05" />
-            <EarnItem emoji="🔄" title="Indicação de comerciante" coins="0,05" />
-            <EarnItem emoji="🏪" title="Comerciante: indicação via app" coins="0,05" />
-            <EarnItem emoji="🔗" title="Link/QR de indicação (quem entra ganha)" coins="0,05" />
-            <h3 className="text-sm font-bold text-foreground mt-4">Bônus por contratar plano</h3>
-            <EarnItem emoji="💎" title="Plano R$5 (Litorânea IA)" coins="0,10" />
-            <EarnItem emoji="💎" title="Plano R$10 (Básico)" coins="0,15" />
-            <EarnItem emoji="💎" title="Plano R$20 (Carrossel)" coins="0,20" />
-            <EarnItem emoji="💎" title="Plano R$30 (Combo)" coins="0,25" />
-            <EarnItem emoji="👑" title="Plano R$59,99 (VIP)" coins="1,00" />
+          <div className="text-center py-8 space-y-2">
+            <Coins className="w-10 h-10 text-primary mx-auto" />
+            <p className="text-sm text-foreground font-bold">Você tem {saldo} SulCoins</p>
+            <p className="text-xs text-muted-foreground">Use os botões acima para compartilhar seu QR ou escanear o de alguém.</p>
           </div>
         )}
+
         {activeTab === "historico" && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <History className="w-10 h-10 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">
-              {isPersistent
-                ? "Nenhuma transação registrada ainda."
-                : "Ative a persistência para ver seu histórico de SulCoins."}
-            </p>
-            {!isPersistent && (
-              <button onClick={() => navigate("/")} className="mt-3 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                Ativar persistência
-              </button>
+          <div className="space-y-2">
+            {!isPersistent ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Ative a persistência para ver seu histórico.
+              </p>
+            ) : logs.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Nenhuma transação registrada ainda.
+              </p>
+            ) : (
+              logs.map((log) => (
+                <div key={log.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{log.descricao || log.tipo}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {new Date(log.created_at).toLocaleDateString("pt-BR")}
+                    </p>
+                  </div>
+                  <span className={`text-sm font-bold ${log.valor > 0 ? "text-green-600" : "text-destructive"}`}>
+                    {log.valor > 0 ? "+" : ""}{log.valor}
+                  </span>
+                </div>
+              ))
             )}
           </div>
         )}
-        {activeTab === "indicar" && (
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-foreground">Indique e ganhe!</h3>
-            <p className="text-xs text-muted-foreground">Cada pessoa que entrar pelo seu link ou QR code ganha <strong className="text-primary">0,05 SulC</strong> e você também!</p>
-            
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-              <p className="text-xs font-bold text-foreground">Seu link de indicação:</p>
-              <div className="flex items-center gap-2">
-                <input readOnly value={referralLink} className="flex-1 px-3 py-2 rounded-lg bg-muted text-foreground text-[10px] border border-border truncate" />
-                <button onClick={copyLink} className="p-2 rounded-lg bg-primary text-primary-foreground">
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={shareLink} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold">
-                  <Share2 className="w-4 h-4" /> Compartilhar
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted text-foreground text-xs font-bold border border-border">
-                  <QrCode className="w-4 h-4" /> QR Code
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+
+        {activeTab === "ganhar" && <EarnList />}
       </div>
+
+      {/* Modals */}
+      {showQR && userId && (
+        <QRShareModal userId={userId} onClose={() => setShowQR(false)} />
+      )}
+
+      {showScanner && (
+        <QRScannerModal onScanned={handleScanned} onClose={() => setShowScanner(false)} />
+      )}
+
+      {scannedId && userId && (
+        <TransferConfirmModal
+          targetId={scannedId}
+          saldo={saldo}
+          currentUserId={userId}
+          onClose={() => setScannedId(null)}
+          onSuccess={() => { setScannedId(null); fetchData(); }}
+        />
+      )}
+
+      {/* Footer */}
+      {state && city && <FooterNav stateAbbr={state} cityName={city} />}
     </div>
   );
 };
-
-const ActionButton = ({ icon: Icon, label, desc, onClick }: { icon: any; label: string; desc: string; onClick?: () => void }) => (
-  <button
-    onClick={onClick}
-    className="flex flex-col items-center gap-1 p-3 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors"
-  >
-    <Icon className="w-5 h-5 text-primary" />
-    <span className="text-xs font-bold text-foreground">{label}</span>
-    <span className="text-[9px] text-muted-foreground">{desc}</span>
-  </button>
-);
-
-const EarnItem = ({ emoji, title, coins }: { emoji: string; title: string; coins: string }) => (
-  <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
-    <span className="text-lg">{emoji}</span>
-    <div className="flex-1">
-      <p className="text-sm font-bold text-foreground">{title}</p>
-    </div>
-    <span className="text-xs font-bold text-primary">+{coins}</span>
-  </div>
-);
 
 export default Wallet;

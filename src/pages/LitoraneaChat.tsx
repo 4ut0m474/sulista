@@ -303,7 +303,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
         setMessages(prev => [
           ...prev,
           { role: "user", content: text },
-          { role: "assistant", content: "Bah! Usou as 5 perguntas de hoje! 🎯\n\nAssina o **Sulista Premium** por **R$ 5/mês** pra falar comigo sem limite! 💎", options: ["Quero assinar 💎", "Lembrar amanhã ⏰"] },
+          { role: "assistant", content: "Bah! Usou as 5 perguntas de hoje! 🎯\n\nPra continuar falando comigo sem limite, escolha um plano:\n\n1. **R$ 5/mês** — Litorânea IA (10 perguntas/dia + 0,10 SulC)\n2. **R$ 10/mês** — Básico (20 perguntas/dia + 0,15 SulC)\n3. **R$ 20/mês** — Carrossel (chat extra + 0,20 SulC)\n4. **R$ 30/mês** — Combo (chat ilimitado + 0,25 SulC)\n5. **R$ 59,99/mês** — VIP (tudo ilimitado + 1,00 SulC) 👑", options: ["Quero o plano R$5 💎", "Quero o VIP 👑", "Ver todos os planos", "Lembrar amanhã ⏰"] },
         ]);
         return;
       }

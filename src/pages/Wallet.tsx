@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Coins, Send, ShoppingCart, History, ArrowDownUp, QrCode, Share2, Copy, Check, Shield } from "lucide-react";
+import { ArrowLeft, Coins, Send, History, ArrowDownUp, QrCode, Share2, Copy, Check, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 const Wallet = () => {
@@ -8,7 +8,6 @@ const Wallet = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"saldo" | "historico" | "indicar">("saldo");
   const [showTransfer, setShowTransfer] = useState(false);
-  const [showBuy, setShowBuy] = useState(false);
   const [showDiscount, setShowDiscount] = useState(false);
   const [copied, setCopied] = useState(false);
   const isPersistent = localStorage.getItem("sulista-persistent") === "true";
@@ -74,8 +73,8 @@ const Wallet = () => {
           </p>
           <p className="text-[10px] text-muted-foreground">
             {isPersistent
-              ? "Você pode acumular SulCoins!"
-              : "Ative a persistência para ganhar SulCoins."}
+              ? "Você pode acumular e usar SulCoins!"
+              : "Ative a persistência para ganhar SulCoins. SulCoins só são acumulados com persistência ativa."}
           </p>
         </div>
         {!isPersistent && (
@@ -100,10 +99,9 @@ const Wallet = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="grid grid-cols-3 gap-3 px-4 mt-4">
+      {/* Action Buttons — only Transfer and Use Discount (no buy/sell) */}
+      <div className="grid grid-cols-2 gap-3 px-4 mt-4">
         <ActionButton icon={Send} label="Transferir" desc="Para barraca" onClick={() => setShowTransfer(!showTransfer)} />
-        <ActionButton icon={ShoppingCart} label="Comprar" desc="Pix → SulCoins" onClick={() => setShowBuy(!showBuy)} />
         <ActionButton icon={ArrowDownUp} label="Usar desconto" desc="Na mensalidade" onClick={() => setShowDiscount(!showDiscount)} />
       </div>
 
@@ -122,25 +120,6 @@ const Wallet = () => {
           <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold" onClick={() => toast.info("Salve seu progresso para transferir SulCoins")}>
             Confirmar Transferência
           </button>
-        </div>
-      )}
-
-      {/* Buy Panel */}
-      {showBuy && (
-        <div className="mx-4 mt-3 p-4 rounded-xl bg-card border border-border space-y-3">
-          <h4 className="text-sm font-bold text-foreground">Comprar SulCoins via Pix</h4>
-          <div className="space-y-2">
-            {[
-              { valor: "R$ 5", coins: "500 SulC (50.000 Sulis)" },
-              { valor: "R$ 10", coins: "1.000 SulC (100.000 Sulis)" },
-              { valor: "R$ 20", coins: "2.000 SulC (200.000 Sulis)" },
-            ].map(opt => (
-              <button key={opt.valor} className="w-full flex justify-between items-center p-3 rounded-xl bg-muted border border-border hover:border-primary/30 transition-colors" onClick={() => toast.info("Salve seu progresso para comprar SulCoins")}>
-                <span className="text-xs font-bold text-foreground">{opt.valor}</span>
-                <span className="text-xs text-primary font-bold">{opt.coins}</span>
-              </button>
-            ))}
-          </div>
         </div>
       )}
 
@@ -171,6 +150,7 @@ const Wallet = () => {
         <p className="text-xs text-muted-foreground leading-relaxed">
           <strong className="text-foreground">SulCoin</strong> é crédito interno do Sulista.
           0,01 SulC = 1 Sulis. Todos começam com 0,50 SulC.
+          <strong className="text-primary"> SulCoins só podem ser ganhos</strong> — não podem ser comprados ou vendidos.
           Não é moeda. Não troca por dinheiro fora do app.
         </p>
       </div>
@@ -198,18 +178,18 @@ const Wallet = () => {
         {activeTab === "saldo" && (
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-foreground">Como ganhar SulCoins</h3>
-            <EarnItem emoji="📍" title="Check-in QR" coins="0,10" />
-            <EarnItem emoji="📸" title="Opinião com foto" coins="0,35" />
-            <EarnItem emoji="💬" title="Opinião sem foto" coins="0,25" />
-            <EarnItem emoji="📦" title="Compra em lote (grupo 3+)" coins="0,15" />
-            <EarnItem emoji="🔄" title="Indicação de comerciante" coins="0,15" />
-            <EarnItem emoji="🏪" title="Comerciante: indicação via app" coins="0,10" />
+            <p className="text-[10px] text-muted-foreground italic">⚠️ SulCoins só são acumulados com persistência ativa</p>
+            <EarnItem emoji="💬" title="Opinião sem foto" coins="0,05" />
+            <EarnItem emoji="📸" title="Opinião com foto" coins="0,10" />
+            <EarnItem emoji="📦" title="Compra em lote (grupo 3+)" coins="0,05" />
+            <EarnItem emoji="🔄" title="Indicação de comerciante" coins="0,05" />
+            <EarnItem emoji="🏪" title="Comerciante: indicação via app" coins="0,05" />
             <EarnItem emoji="🔗" title="Link/QR de indicação (quem entra ganha)" coins="0,05" />
             <h3 className="text-sm font-bold text-foreground mt-4">Bônus por contratar plano</h3>
-            <EarnItem emoji="💎" title="Plano R$5 (Litorânea IA)" coins="0,30" />
-            <EarnItem emoji="💎" title="Plano R$10 (Básico)" coins="0,35" />
-            <EarnItem emoji="💎" title="Plano R$20 (Carrossel)" coins="0,40" />
-            <EarnItem emoji="💎" title="Plano R$30 (Combo)" coins="0,45" />
+            <EarnItem emoji="💎" title="Plano R$5 (Litorânea IA)" coins="0,10" />
+            <EarnItem emoji="💎" title="Plano R$10 (Básico)" coins="0,15" />
+            <EarnItem emoji="💎" title="Plano R$20 (Carrossel)" coins="0,20" />
+            <EarnItem emoji="💎" title="Plano R$30 (Combo)" coins="0,25" />
             <EarnItem emoji="👑" title="Plano R$59,99 (VIP)" coins="1,00" />
           </div>
         )}
@@ -217,11 +197,15 @@ const Wallet = () => {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <History className="w-10 h-10 text-muted-foreground/50 mb-3" />
             <p className="text-sm text-muted-foreground">
-              Salve seu progresso para ver seu histórico de SulCoins.
+              {isPersistent
+                ? "Nenhuma transação registrada ainda."
+                : "Ative a persistência para ver seu histórico de SulCoins."}
             </p>
-            <button className="mt-3 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-              Salvar meu progresso
-            </button>
+            {!isPersistent && (
+              <button onClick={() => navigate("/")} className="mt-3 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                Ativar persistência
+              </button>
+            )}
           </div>
         )}
         {activeTab === "indicar" && (

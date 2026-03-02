@@ -62,13 +62,14 @@ APP SULISTA:
 - Barracas digitais com produtos: camarão, pastel, bala de banana, erva-mate, artesanato
 - Promoções, eventos, caça ao tesouro, trilhas, compra em lote
 
-SULCOINS (0,01 SulC = 1 Sulis):
+SULCOINS (0,01 SulC = 1 Sulis) — SulCoins SÓ PODEM SER GANHOS, NÃO COMPRADOS NEM VENDIDOS:
 - Boas-vindas: 0,50 SulCoins
-- Check-in QR = +0,10 SulC; Opinião com foto = +0,35 SulC; Opinião sem foto = +0,25 SulC
-- Compra em lote = +0,15 SulC; Indicação comerciante = +0,15 SulC; Comerciante via app = +0,10 SulC
+- Opinião sem foto = +0,05 SulC; Opinião com foto = +0,10 SulC
+- Compra em lote = +0,05 SulC; Indicação comerciante = +0,05 SulC; Comerciante via app = +0,05 SulC
 - Link/QR indicação: quem entra +0,05 SulC, quem indicou também
-- Bônus planos: R$5=+0,30; R$10=+0,35; R$20=+0,40; R$30=+0,45; R$59,99=+1,00
+- Bônus planos: R$5=+0,10; R$10=+0,15; R$20=+0,20; R$30=+0,25; R$59,99=+1,00
 - Desconto: Turistas até 10%, Comerciantes até 20%
+- SulCoins SÓ são acumulados com persistência ativa!
 
 PLANOS:
 - R$5/mês: 10 perguntas/dia + notificações

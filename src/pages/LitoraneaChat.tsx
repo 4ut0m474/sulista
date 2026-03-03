@@ -102,6 +102,8 @@ const extractOptions = (text: string): string[] => {
   return opts.slice(0, 5);
 };
 
+const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira", "saldo", "transferir", "qr", "indicar", "moeda", "coin"];
+
 const LitoraneaChat = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
@@ -113,6 +115,18 @@ const LitoraneaChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+
+  // SulCoin inline state
+  const [showWalletActions, setShowWalletActions] = useState(false);
+  const [walletSaldo, setWalletSaldo] = useState<number | null>(null);
+  const [walletUserId, setWalletUserId] = useState<string | null>(null);
+  const [showInlineQR, setShowInlineQR] = useState(false);
+  const [showInlineTransfer, setShowInlineTransfer] = useState(false);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferTarget, setTransferTarget] = useState("");
+  const [transferStep, setTransferStep] = useState<"amount" | "target" | "confirm">("amount");
+  const [showInlineInvite, setShowInlineInvite] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

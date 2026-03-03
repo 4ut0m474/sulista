@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { QRCodeSVG } from "qrcode.react";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
@@ -101,6 +102,8 @@ const extractOptions = (text: string): string[] => {
   return opts.slice(0, 5);
 };
 
+const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira", "saldo", "transferir", "qr", "indicar", "moeda", "coin"];
+
 const LitoraneaChat = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
@@ -112,6 +115,18 @@ const LitoraneaChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+
+  // SulCoin inline state
+  const [showWalletActions, setShowWalletActions] = useState(false);
+  const [walletSaldo, setWalletSaldo] = useState<number | null>(null);
+  const [walletUserId, setWalletUserId] = useState<string | null>(null);
+  const [showInlineQR, setShowInlineQR] = useState(false);
+  const [showInlineTransfer, setShowInlineTransfer] = useState(false);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferTarget, setTransferTarget] = useState("");
+  const [transferStep, setTransferStep] = useState<"amount" | "target" | "confirm">("amount");
+  const [showInlineInvite, setShowInlineInvite] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -309,6 +324,43 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
       }
     }
 
+    // SulCoin keyword detection — show role picker
+    if (isSulcoinTrigger(text) && !showWalletActions) {
+      setInput("");
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: "Oi! Bora mexer com SulCoins! 💰\n\nPrimeiro, me diz: quem tu é?", options: ["🏖️ Turista", "🏪 Comerciante", "🏡 Usuário comum"] },
+      ]);
+      return;
+    }
+
+    // Handle role selection
+    if (text.includes("Turista") && !userRole) { handleRoleSelect("turista"); return; }
+    if (text.includes("Comerciante") && !userRole) { handleRoleSelect("comerciante"); return; }
+    if (text.includes("comum") && !userRole) { handleRoleSelect("comum"); return; }
+
+    // Handle wallet action selections
+    if (text.includes("Receber SulCoin") || text.includes("Enviar SulCoin") || text.includes("Enviar mais") || text.includes("Convidar alguém")) {
+      handleWalletAction(text);
+      setMessages(prev => [...prev, { role: "user", content: text }]);
+      return;
+    }
+
+    // Reset wallet mode if going back to chat
+    if (text.includes("Voltar ao chat")) {
+      setShowWalletActions(false);
+      setShowInlineQR(false);
+      setShowInlineTransfer(false);
+      setShowInlineInvite(false);
+      setUserRole(null);
+      setMessages(prev => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: "Beleza! Voltei pro modo conversa 💬 O que tu quer saber?", options: ["Ver promoções 🔥", "Eventos próximos 🎉", "Só bater papo 💬"] }
+      ]);
+      return;
+    }
+
     const userMsg: Msg = { role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput("");
@@ -432,6 +484,80 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
     // Profile data is saved when user responds to specific questions
   };
 
+  // SulCoin detection & inline actions
+  const isSulcoinTrigger = (text: string) => {
+    const lower = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return SULCOIN_KEYWORDS.some(k => lower.includes(k));
+  };
+
+  const fetchWalletData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setWalletSaldo(0); return; }
+    setWalletUserId(user.id);
+    const { data } = await supabase.from("sulcoins").select("saldo").eq("user_id", user.id).maybeSingle();
+    setWalletSaldo(data?.saldo ?? 0);
+  };
+
+  const handleRoleSelect = async (role: string) => {
+    setUserRole(role);
+    await fetchWalletData();
+    setShowWalletActions(true);
+    const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+    const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
+    setMessages(prev => [
+      ...prev,
+      { role: "user", content: roleLabel },
+      { role: "assistant", content: `Beleza, ${roleLabel}! ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins!\n\n" : ""}Teu saldo: **${walletSaldo ?? 0} SulCoins** 💰\n\nO que tu quer fazer?`,
+        options: ["💰 Receber SulCoin", "📤 Enviar SulCoin", "🤝 Convidar alguém"] },
+    ]);
+  };
+
+  const handleWalletAction = (action: string) => {
+    if (action.includes("Receber")) {
+      setShowInlineQR(true);
+      setShowInlineTransfer(false);
+      setShowInlineInvite(false);
+    } else if (action.includes("Enviar")) {
+      setShowInlineTransfer(true);
+      setShowInlineQR(false);
+      setShowInlineInvite(false);
+      setTransferStep("amount");
+      setTransferAmount("");
+      setTransferTarget("");
+    } else if (action.includes("Convidar")) {
+      setShowInlineInvite(true);
+      setShowInlineQR(false);
+      setShowInlineTransfer(false);
+    }
+  };
+
+  const executeTransfer = async () => {
+    if (!walletUserId || !transferTarget || !transferAmount) return;
+    const amount = parseInt(transferAmount);
+    if (amount <= 0 || amount > (walletSaldo ?? 0)) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Valor inválido ou saldo insuficiente! 😅" }]);
+      return;
+    }
+    try {
+      const { error } = await supabase.rpc("transfer_sulcoins", {
+        p_from_user: walletUserId,
+        p_to_user: transferTarget,
+        p_amount: amount,
+        p_reason: "Transferência via chat Litorânea",
+      });
+      if (error) throw error;
+      await fetchWalletData();
+      setShowInlineTransfer(false);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: `Feito! Enviado **${amount} SulCoins** 🎉\n\nSaldo atual: **${(walletSaldo ?? 0) - amount} SulCoins**`,
+        options: ["💰 Receber SulCoin", "📤 Enviar mais", "Voltar ao chat 💬"]
+      }]);
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: "assistant", content: `Erro: ${e.message || "Tente novamente."} 😅` }]);
+    }
+  };
+
   useEffect(() => {
     sendMessageRef.current = sendMessage;
   });
@@ -501,7 +627,92 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
           </div>
         ))}
 
-        {/* Speaking indicator */}
+        {/* Inline QR Code */}
+        {showInlineQR && walletUserId && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">Teu QR Code</span>
+            </div>
+            <div className="flex justify-center bg-background rounded-xl p-4">
+              <QRCodeSVG value={walletUserId} size={200} bgColor="transparent" fgColor="currentColor" className="text-foreground" />
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">Mostre isso pra quem quiser te enviar SulCoins. Ninguém vê teu ID real 🔒</p>
+            <button onClick={() => setShowInlineQR(false)} className="w-full py-2 rounded-xl bg-muted text-foreground text-xs font-bold">Fechar</button>
+          </div>
+        )}
+
+        {/* Inline Transfer */}
+        {showInlineTransfer && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Coins className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">
+                {transferStep === "amount" ? "Quanto enviar?" : transferStep === "target" ? "Pra quem?" : "Confirmar envio"}
+              </span>
+            </div>
+            {transferStep === "amount" && (
+              <>
+                <input type="number" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}
+                  placeholder="Ex: 5" min="1"
+                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border text-center font-bold" />
+                <p className="text-[10px] text-muted-foreground text-center">Saldo: {walletSaldo ?? 0} SulCoins</p>
+                <button onClick={() => { if (parseInt(transferAmount) > 0) setTransferStep("target"); }}
+                  disabled={!transferAmount || parseInt(transferAmount) <= 0}
+                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Próximo →</button>
+              </>
+            )}
+            {transferStep === "target" && (
+              <>
+                <input value={transferTarget} onChange={e => setTransferTarget(e.target.value)}
+                  placeholder="Cole o UUID do destinatário"
+                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border font-mono text-xs" />
+                <p className="text-[10px] text-muted-foreground text-center">Ou escaneie o QR na tela da Carteira 📷</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setTransferStep("amount")} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">← Voltar</button>
+                  <button onClick={() => { if (transferTarget.length >= 10) setTransferStep("confirm"); }}
+                    disabled={transferTarget.length < 10}
+                    className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Confirmar →</button>
+                </div>
+              </>
+            )}
+            {transferStep === "confirm" && (
+              <>
+                <p className="text-sm text-foreground text-center">Enviar <strong className="text-primary">{transferAmount} SulCoins</strong> pro ID <span className="font-mono text-xs">{transferTarget.substring(0, 8)}...</span>?</p>
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowInlineTransfer(false); }} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">Não</button>
+                  <button onClick={executeTransfer} className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">Sim, enviar!</button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Inline Invite */}
+        {showInlineInvite && walletUserId && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">Convidar alguém</span>
+            </div>
+            <p className="text-xs text-foreground">Manda esse link pro teu amigo:</p>
+            <div className="bg-muted rounded-xl p-3 text-center">
+              <p className="text-xs font-mono text-primary break-all select-all">sulista.app/invite?ref={walletUserId.substring(0, 8)}</p>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3 space-y-1">
+              <p className="text-[10px] text-foreground font-bold">Recompensas:</p>
+              <p className="text-[10px] text-muted-foreground">• Quem entra ganha <strong className="text-primary">+0,05 SulC</strong></p>
+              <p className="text-[10px] text-muted-foreground">• Tu ganha: Comerciante <strong className="text-primary">+0,25</strong>, Turista <strong className="text-primary">+0,30</strong>, Comum <strong className="text-primary">+0,15</strong></p>
+            </div>
+            <button onClick={() => {
+              navigator.clipboard?.writeText(`https://sulista.app/invite?ref=${walletUserId.substring(0, 8)}`);
+              setMessages(prev => [...prev, { role: "assistant", content: "Link copiado! 📋 Manda pro teu amigo! 🎉" }]);
+              setShowInlineInvite(false);
+            }} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">📋 Copiar link</button>
+          </div>
+        )}
+
+
         {isSpeaking && (
           <div className="flex items-center gap-2 ml-9">
             <div className="flex gap-0.5 items-center">

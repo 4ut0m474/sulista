@@ -574,7 +574,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
             {isAdminMode
               ? "🔓 Modo Admin • ilimitado"
               : remaining > 0
-              ? `IA do Sulista • ${remaining} restantes hoje`
+              ? `IA do Vento Sul • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>
         </div>

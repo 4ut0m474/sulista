@@ -246,22 +246,18 @@ const LitoraneaChat = () => {
 
     if (isFirstVisit) {
       localStorage.setItem(FIRST_VISIT_KEY, "true");
-      greetingText = `Oi! Eu sou a Litorânea, sua assistente inteligente do Sulista! 👋
+      greetingText = `Oi, eu sou a Litorânea, moro no aplicativo Vento Sul e nós somos como uma brisa que percorre o sul do Brasil integrando e trazendo benefícios para as pessoas. 🌊
 
-Deixa eu te explicar como funciona: aqui no app você encontra as melhores praias, promoções e produtos do Sul do Brasil. Turistas, comerciantes e moradores se conectam! 🌊
+O intuito desse aplicativo é fazer uma integração entre os três estados comercialmente, turisticamente e entre as pessoas. 🤝
 
-Você já começa com 0,50 SulCoin de boas-vindas! Cada opinião rende mais SulCoins que viram desconto. 💰
-
-Seus dados ficam só entre nós — uso pra te oferecer os melhores produtos, é só um número pra mim! 🔒
-
-Me conta: como tu chamas e quantos anos tu tens?`;
-      greetingOptions = ["Sou turista 🏖️", "Sou comerciante 🏪", "Moro no Sul 🏡"];
+Escolha uma opção pra eu te explicar melhor! 👇`;
+      greetingOptions = ["Explique o aplicativo por completo 📱", "Explique o que são Sucoins 💰", "Explique como ativar as compras coletivas 🛒"];
     } else {
       const greeting = getGreeting();
-      greetingText = `${greeting}${name ? `, ${name}` : ""}! Bah, que bom te ver de volta! 😊
+      greetingText = `${greeting}${name ? `, ${name}` : ""}! Bah, que bom te ver de volta no Vento Sul! 😊
 
 Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar! 🎙️`;
-      greetingOptions = ["Ver promoções 🔥", "Compra coletiva 🛒", "Eventos próximos 🎉", "Só bater papo 💬"];
+      greetingOptions = ["Explique o aplicativo por completo 📱", "Explique o que são Sucoins 💰", "Explique como ativar as compras coletivas 🛒", "Só bater papo 💬"];
     }
 
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
@@ -578,7 +574,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
             {isAdminMode
               ? "🔓 Modo Admin • ilimitado"
               : remaining > 0
-              ? `IA do Sulista • ${remaining} restantes hoje`
+              ? `IA do Vento Sul • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>
         </div>

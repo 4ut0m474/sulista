@@ -324,6 +324,43 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
       }
     }
 
+    // SulCoin keyword detection — show role picker
+    if (isSulcoinTrigger(text) && !showWalletActions) {
+      setInput("");
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: "Oi! Bora mexer com SulCoins! 💰\n\nPrimeiro, me diz: quem tu é?", options: ["🏖️ Turista", "🏪 Comerciante", "🏡 Usuário comum"] },
+      ]);
+      return;
+    }
+
+    // Handle role selection
+    if (text.includes("Turista") && !userRole) { handleRoleSelect("turista"); return; }
+    if (text.includes("Comerciante") && !userRole) { handleRoleSelect("comerciante"); return; }
+    if (text.includes("comum") && !userRole) { handleRoleSelect("comum"); return; }
+
+    // Handle wallet action selections
+    if (text.includes("Receber SulCoin") || text.includes("Enviar SulCoin") || text.includes("Enviar mais") || text.includes("Convidar alguém")) {
+      handleWalletAction(text);
+      setMessages(prev => [...prev, { role: "user", content: text }]);
+      return;
+    }
+
+    // Reset wallet mode if going back to chat
+    if (text.includes("Voltar ao chat")) {
+      setShowWalletActions(false);
+      setShowInlineQR(false);
+      setShowInlineTransfer(false);
+      setShowInlineInvite(false);
+      setUserRole(null);
+      setMessages(prev => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: "Beleza! Voltei pro modo conversa 💬 O que tu quer saber?", options: ["Ver promoções 🔥", "Eventos próximos 🎉", "Só bater papo 💬"] }
+      ]);
+      return;
+    }
+
     const userMsg: Msg = { role: "user", content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput("");

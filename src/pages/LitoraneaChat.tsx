@@ -627,7 +627,92 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
           </div>
         ))}
 
-        {/* Speaking indicator */}
+        {/* Inline QR Code */}
+        {showInlineQR && walletUserId && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">Teu QR Code</span>
+            </div>
+            <div className="flex justify-center bg-background rounded-xl p-4">
+              <QRCodeSVG value={walletUserId} size={200} bgColor="transparent" fgColor="currentColor" className="text-foreground" />
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">Mostre isso pra quem quiser te enviar SulCoins. Ninguém vê teu ID real 🔒</p>
+            <button onClick={() => setShowInlineQR(false)} className="w-full py-2 rounded-xl bg-muted text-foreground text-xs font-bold">Fechar</button>
+          </div>
+        )}
+
+        {/* Inline Transfer */}
+        {showInlineTransfer && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Coins className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">
+                {transferStep === "amount" ? "Quanto enviar?" : transferStep === "target" ? "Pra quem?" : "Confirmar envio"}
+              </span>
+            </div>
+            {transferStep === "amount" && (
+              <>
+                <input type="number" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}
+                  placeholder="Ex: 5" min="1"
+                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border text-center font-bold" />
+                <p className="text-[10px] text-muted-foreground text-center">Saldo: {walletSaldo ?? 0} SulCoins</p>
+                <button onClick={() => { if (parseInt(transferAmount) > 0) setTransferStep("target"); }}
+                  disabled={!transferAmount || parseInt(transferAmount) <= 0}
+                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Próximo →</button>
+              </>
+            )}
+            {transferStep === "target" && (
+              <>
+                <input value={transferTarget} onChange={e => setTransferTarget(e.target.value)}
+                  placeholder="Cole o UUID do destinatário"
+                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border font-mono text-xs" />
+                <p className="text-[10px] text-muted-foreground text-center">Ou escaneie o QR na tela da Carteira 📷</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setTransferStep("amount")} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">← Voltar</button>
+                  <button onClick={() => { if (transferTarget.length >= 10) setTransferStep("confirm"); }}
+                    disabled={transferTarget.length < 10}
+                    className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Confirmar →</button>
+                </div>
+              </>
+            )}
+            {transferStep === "confirm" && (
+              <>
+                <p className="text-sm text-foreground text-center">Enviar <strong className="text-primary">{transferAmount} SulCoins</strong> pro ID <span className="font-mono text-xs">{transferTarget.substring(0, 8)}...</span>?</p>
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowInlineTransfer(false); }} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">Não</button>
+                  <button onClick={executeTransfer} className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">Sim, enviar!</button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Inline Invite */}
+        {showInlineInvite && walletUserId && (
+          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              <span className="text-sm font-bold text-foreground">Convidar alguém</span>
+            </div>
+            <p className="text-xs text-foreground">Manda esse link pro teu amigo:</p>
+            <div className="bg-muted rounded-xl p-3 text-center">
+              <p className="text-xs font-mono text-primary break-all select-all">sulista.app/invite?ref={walletUserId.substring(0, 8)}</p>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3 space-y-1">
+              <p className="text-[10px] text-foreground font-bold">Recompensas:</p>
+              <p className="text-[10px] text-muted-foreground">• Quem entra ganha <strong className="text-primary">+0,05 SulC</strong></p>
+              <p className="text-[10px] text-muted-foreground">• Tu ganha: Comerciante <strong className="text-primary">+0,25</strong>, Turista <strong className="text-primary">+0,30</strong>, Comum <strong className="text-primary">+0,15</strong></p>
+            </div>
+            <button onClick={() => {
+              navigator.clipboard?.writeText(`https://sulista.app/invite?ref=${walletUserId.substring(0, 8)}`);
+              setMessages(prev => [...prev, { role: "assistant", content: "Link copiado! 📋 Manda pro teu amigo! 🎉" }]);
+              setShowInlineInvite(false);
+            }} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">📋 Copiar link</button>
+          </div>
+        )}
+
+
         {isSpeaking && (
           <div className="flex items-center gap-2 ml-9">
             <div className="flex gap-0.5 items-center">

@@ -447,6 +447,80 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
     // Profile data is saved when user responds to specific questions
   };
 
+  // SulCoin detection & inline actions
+  const isSulcoinTrigger = (text: string) => {
+    const lower = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return SULCOIN_KEYWORDS.some(k => lower.includes(k));
+  };
+
+  const fetchWalletData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setWalletSaldo(0); return; }
+    setWalletUserId(user.id);
+    const { data } = await supabase.from("sulcoins").select("saldo").eq("user_id", user.id).maybeSingle();
+    setWalletSaldo(data?.saldo ?? 0);
+  };
+
+  const handleRoleSelect = async (role: string) => {
+    setUserRole(role);
+    await fetchWalletData();
+    setShowWalletActions(true);
+    const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+    const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
+    setMessages(prev => [
+      ...prev,
+      { role: "user", content: roleLabel },
+      { role: "assistant", content: `Beleza, ${roleLabel}! ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins!\n\n" : ""}Teu saldo: **${walletSaldo ?? 0} SulCoins** 💰\n\nO que tu quer fazer?`,
+        options: ["💰 Receber SulCoin", "📤 Enviar SulCoin", "🤝 Convidar alguém"] },
+    ]);
+  };
+
+  const handleWalletAction = (action: string) => {
+    if (action.includes("Receber")) {
+      setShowInlineQR(true);
+      setShowInlineTransfer(false);
+      setShowInlineInvite(false);
+    } else if (action.includes("Enviar")) {
+      setShowInlineTransfer(true);
+      setShowInlineQR(false);
+      setShowInlineInvite(false);
+      setTransferStep("amount");
+      setTransferAmount("");
+      setTransferTarget("");
+    } else if (action.includes("Convidar")) {
+      setShowInlineInvite(true);
+      setShowInlineQR(false);
+      setShowInlineTransfer(false);
+    }
+  };
+
+  const executeTransfer = async () => {
+    if (!walletUserId || !transferTarget || !transferAmount) return;
+    const amount = parseInt(transferAmount);
+    if (amount <= 0 || amount > (walletSaldo ?? 0)) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Valor inválido ou saldo insuficiente! 😅" }]);
+      return;
+    }
+    try {
+      const { error } = await supabase.rpc("transfer_sulcoins", {
+        p_from_user: walletUserId,
+        p_to_user: transferTarget,
+        p_amount: amount,
+        p_reason: "Transferência via chat Litorânea",
+      });
+      if (error) throw error;
+      await fetchWalletData();
+      setShowInlineTransfer(false);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: `Feito! Enviado **${amount} SulCoins** 🎉\n\nSaldo atual: **${(walletSaldo ?? 0) - amount} SulCoins**`,
+        options: ["💰 Receber SulCoin", "📤 Enviar mais", "Voltar ao chat 💬"]
+      }]);
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: "assistant", content: `Erro: ${e.message || "Tente novamente."} 😅` }]);
+    }
+  };
+
   useEffect(() => {
     sendMessageRef.current = sendMessage;
   });

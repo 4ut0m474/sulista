@@ -56,7 +56,7 @@ const CityHome = () => {
   const { activeIncentive, isPulsing } = useIconIncentives();
   
   const [showNotifModal, setShowNotifModal] = useState(() => {
-    return !localStorage.getItem("sulista-notification-setup-done");
+    return !localStorage.getItem("vento-sul-notification-setup-done");
   });
 
   // Async admin data

@@ -46,8 +46,8 @@ const Landing = () => {
   }, []);
 
   const handleCancelPersistence = () => {
-    localStorage.removeItem("sulista-persistent");
-    localStorage.removeItem("sulista-uuid");
+    localStorage.removeItem("vento-sul-persistent");
+    localStorage.removeItem("vento-sul-uuid");
     setIsPersistent(false);
     setPinVerified(false);
     supabase.auth.signOut();

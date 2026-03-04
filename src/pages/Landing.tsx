@@ -39,7 +39,7 @@ const Landing = () => {
         } else {
           // No session, persistence is stale
           setIsPersistent(false);
-          localStorage.removeItem("sulista-persistent");
+          localStorage.removeItem("vento-sul-persistent");
         }
       });
     }

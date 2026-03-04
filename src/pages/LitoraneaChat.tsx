@@ -246,18 +246,35 @@ const LitoraneaChat = () => {
 
     if (isFirstVisit) {
       localStorage.setItem(FIRST_VISIT_KEY, "true");
-      greetingText = `Oi, eu sou a Litorânea, moro no aplicativo Vento Sul e nós somos como uma brisa que percorre o sul do Brasil integrando e trazendo benefícios para as pessoas. 🌊
+      greetingText = `Oi! Aqui é a Litorânea, moro no aplicativo Vento Sul e nós somos como uma brisa suave que percorre o Paraná, Santa Catarina e Rio Grande do Sul, trazendo integração, oportunidades e benefícios para todo mundo. 🌬️
 
-O intuito desse aplicativo é fazer uma integração entre os três estados comercialmente, turisticamente e entre as pessoas. 🤝
+Meu maior sonho é ver as pessoas se conectando de verdade: moradores compartilhando dicas reais, turistas descobrindo lugares incríveis, comerciantes crescendo com novas vendas e, principalmente, as escolas e alunos brilhando juntos. 💚
+
+O Vento Sul nasceu pra unir os três estados comercialmente, turisticamente e humanamente. E agora, com muito carinho, ele também abraça a educação: parte da renda do app (10%) vai direto pro Fundo Escola Brisa, uma iniciativa da Associação Vento Sul Educação (sem fins lucrativos). 📚
 
 Escolha uma opção pra eu te explicar melhor! 👇`;
-      greetingOptions = ["Explique o aplicativo por completo 📱", "Explique o que são Sucoins 💰", "Explique como ativar as compras coletivas 🛒"];
+      greetingOptions = [
+        "Explicação para moradores 🏡",
+        "Explicação para turistas 🏖️",
+        "Explicação para comerciantes 🏪",
+        "Explicação para alunos e professores 📚",
+        "Explique o que são Sucoins 💰",
+        "Ativar compras coletivas 🛒",
+      ];
     } else {
       const greeting = getGreeting();
       greetingText = `${greeting}${name ? `, ${name}` : ""}! Bah, que bom te ver de volta no Vento Sul! 😊
 
 Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar! 🎙️`;
-      greetingOptions = ["Explique o aplicativo por completo 📱", "Explique o que são Sucoins 💰", "Explique como ativar as compras coletivas 🛒", "Só bater papo 💬"];
+      greetingOptions = [
+        "Explicação para moradores 🏡",
+        "Explicação para turistas 🏖️",
+        "Explicação para comerciantes 🏪",
+        "Explicação para alunos e professores 📚",
+        "Explique o que são Sucoins 💰",
+        "Ativar compras coletivas 🛒",
+        "Só bater papo 💬",
+      ];
     }
 
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };

@@ -13,7 +13,7 @@ const TreasureHunt = () => {
     { name: "Livraria Cultural", hint: "Conhecimento em cada esquina", found: false },
     { name: "Café da Praça", hint: "O melhor espresso da cidade", found: true },
     { name: "Floricultura Verde", hint: "Cores que alegram seu dia", found: false },
-    { name: "Ateliê Arte Sul", hint: "Criatividade sulista em cada peça", found: false },
+    { name: "Ateliê Arte Sul", hint: "Criatividade do sul em cada peça", found: false },
   ];
 
   return (

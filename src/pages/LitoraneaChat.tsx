@@ -498,7 +498,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
     setUserRole(role);
     await fetchWalletData();
     setShowWalletActions(true);
-    const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+    const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
     const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
     setMessages(prev => [
       ...prev,

@@ -59,6 +59,10 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
     }
     setLoading(true);
     try {
+      // Save PIN and pending flag so we can complete after magic link redirect
+      sessionStorage.setItem("vento-sul-pending-pin", pin);
+      sessionStorage.setItem("vento-sul-pending-persist", "true");
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {

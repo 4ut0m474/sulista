@@ -118,15 +118,15 @@ const SubLocationDetail = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
-                const persistent = localStorage.getItem("sulista-persistent") === "true";
+                const persistent = localStorage.getItem("vento-sul-persistent") === "true";
                 if (!persistent) navigate("/");
               }}
               className={`w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border flex items-center justify-center shadow-card ${
-                localStorage.getItem("sulista-persistent") === "true" ? "border-green-500" : "border-destructive/50"
+                localStorage.getItem("vento-sul-persistent") === "true" ? "border-green-500" : "border-destructive/50"
               }`}
               aria-label="Status persistência"
             >
-              <Shield className={`w-4 h-4 ${localStorage.getItem("sulista-persistent") === "true" ? "text-green-500" : "text-destructive"}`} />
+              <Shield className={`w-4 h-4 ${localStorage.getItem("vento-sul-persistent") === "true" ? "text-green-500" : "text-destructive"}`} />
             </button>
             <button
               onClick={() => toggleFavorite(state || "", favKey)}

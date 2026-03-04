@@ -11,7 +11,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("sulista-theme");
+    const stored = localStorage.getItem("vento-sul-theme");
     return (stored as Theme) || "light";
   });
 

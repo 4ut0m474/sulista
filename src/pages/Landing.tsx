@@ -25,7 +25,7 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
-  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("sulista-persistent") === "true");
+  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("vento-sul-persistent") === "true");
   const [pinVerified, setPinVerified] = useState(false);
   const [showPinLogin, setShowPinLogin] = useState(false);
 

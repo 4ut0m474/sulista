@@ -19,10 +19,10 @@ type Establishment = {
 };
 
 const getDeviceFingerprint = () => {
-  let fp = localStorage.getItem("sulista-device-fp");
+  let fp = localStorage.getItem("vento-sul-device-fp");
   if (!fp) {
     fp = crypto.randomUUID();
-    localStorage.setItem("sulista-device-fp", fp);
+    localStorage.setItem("vento-sul-device-fp", fp);
   }
   return fp;
 };

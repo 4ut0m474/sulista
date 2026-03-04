@@ -23,7 +23,7 @@ export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem("sulista-font-size", fontSize);
+    localStorage.setItem("vento-sul-font-size", fontSize);
     document.documentElement.dataset.fontSize = fontSize;
   }, [fontSize]);
 

@@ -13,7 +13,7 @@ import EarnList from "@/components/wallet/EarnList";
 
 const Wallet = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
-  const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+  const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
 
   const [activeTab, setActiveTab] = useState<"saldo" | "historico" | "ganhar">("saldo");
   const [saldo, setSaldo] = useState(0);

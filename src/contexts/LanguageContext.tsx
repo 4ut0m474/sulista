@@ -171,7 +171,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang);
-    localStorage.setItem("sulista-language", lang);
+    localStorage.setItem("vento-sul-language", lang);
   };
 
   const t = (key: string) => translations[language][key] || key;

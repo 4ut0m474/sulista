@@ -87,8 +87,8 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
           if (error) throw error;
           const userUuid = data.uuid || session.user.id;
           setUuid(userUuid);
-          localStorage.setItem("sulista-persistent", "true");
-          localStorage.setItem("sulista-uuid", userUuid);
+          localStorage.setItem("vento-sul-persistent", "true");
+          localStorage.setItem("vento-sul-uuid", userUuid);
           setStep("done");
           onSuccess(userUuid);
         } catch (err: any) {

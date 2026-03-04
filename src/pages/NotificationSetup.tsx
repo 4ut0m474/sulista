@@ -56,8 +56,8 @@ const NotificationSetup = () => {
 
   const handleFinish = () => {
     const prefs = { period, cities: selectedCities, interests: selectedInterests };
-    localStorage.setItem("sulista-notification-prefs", JSON.stringify(prefs));
-    localStorage.setItem("sulista-notification-setup-done", "true");
+    localStorage.setItem("vento-sul-notification-prefs", JSON.stringify(prefs));
+    localStorage.setItem("vento-sul-notification-setup-done", "true");
     navigate(`/city/${state}/${city}`);
   };
 

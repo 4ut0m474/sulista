@@ -86,7 +86,7 @@ const PlanContractModal = ({ open, onClose, planName, displayPrice, priceDetail,
     const cpfDigits = cpf.replace(/\D/g, "");
     const cnpjDigits = cnpj.replace(/\D/g, "");
 
-    const message = `Olá! Quero adquirir o plano *${planName}* do Sulista.\n\n💰 ${priceDetail}\n\n👤 Nome: ${cleanName}\n📋 CPF: ${cpfDigits}${wantNota ? `\n🏢 CNPJ: ${cnpjDigits}` : ""}\n💳 Pagamento: PIX\n\n✅ Termos aceitos pelo contratante.`;
+    const message = `Olá! Quero adquirir o plano *${planName}* do Vento Sul.\n\n💰 ${priceDetail}\n\n👤 Nome: ${cleanName}\n📋 CPF: ${cpfDigits}${wantNota ? `\n🏢 CNPJ: ${cnpjDigits}` : ""}\n💳 Pagamento: PIX\n\n✅ Termos aceitos pelo contratante.`;
 
     const url = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
     window.open(url, "_blank", "noopener,noreferrer");

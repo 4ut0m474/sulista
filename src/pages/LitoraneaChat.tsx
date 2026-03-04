@@ -701,7 +701,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
               <p className="text-[10px] text-muted-foreground">• Tu ganha: Comerciante <strong className="text-primary">+0,25</strong>, Turista <strong className="text-primary">+0,30</strong>, Comum <strong className="text-primary">+0,15</strong></p>
             </div>
             <button onClick={() => {
-              navigator.clipboard?.writeText(`https://sulista.app/invite?ref=${walletUserId.substring(0, 8)}`);
+              navigator.clipboard?.writeText(`https://ventosul.app/invite?ref=${walletUserId.substring(0, 8)}`);
               setMessages(prev => [...prev, { role: "assistant", content: "Link copiado! 📋 Manda pro teu amigo! 🎉" }]);
               setShowInlineInvite(false);
             }} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">📋 Copiar link</button>

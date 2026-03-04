@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = [
-  "https://sulista.lovable.app",
+  "https://vento-sul.lovable.app",
   "https://id-preview--2c4c0396-2206-46f5-b853-be558ea3b2f4.lovable.app",
   "http://localhost:5173",
   "http://localhost:8080",

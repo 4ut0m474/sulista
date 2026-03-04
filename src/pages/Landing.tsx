@@ -315,7 +315,7 @@ const Landing = () => {
 
         <div className="relative z-10 px-6 pb-6 pt-4">
           <p className="text-center text-primary-foreground/60 text-[10px] leading-relaxed max-w-sm mx-auto">
-            🔒 <strong>Termos de Privacidade:</strong> O Sulista não guarda nenhum dado pessoal do usuário comum. 
+            🔒 <strong>Termos de Privacidade:</strong> O Vento Sul não guarda nenhum dado pessoal do usuário comum. 
             Apenas comerciantes que contratam planos de anúncio possuem dados armazenados para fins de prestação de serviço.
           </p>
         </div>

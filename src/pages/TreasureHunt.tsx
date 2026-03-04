@@ -78,7 +78,7 @@ const TreasureHunt = () => {
         <div className="bg-card rounded-xl border border-border p-4 shadow-card text-center">
           <p className="text-sm text-muted-foreground mb-2">Quer participar como comerciante?</p>
           <a
-            href="https://wa.me/5541992355421?text=Quero participar da Caça ao Tesouro no Sulista!"
+            href="https://wa.me/5541992355421?text=Quero participar da Caça ao Tesouro no Vento Sul!"
             target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-gold text-primary-foreground font-bold text-sm shadow-gold"
           >

@@ -63,7 +63,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
   };
 
   const handleSkip = () => {
-    localStorage.setItem("sulista-notification-setup-done", "true");
+    localStorage.setItem("vento-sul-notification-setup-done", "true");
     onSkip();
   };
 

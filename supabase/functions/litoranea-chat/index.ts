@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ALLOWED_ORIGINS = [
-  "https://sulista.lovable.app",
+  "https://vento-sul.lovable.app",
   "https://id-preview--2c4c0396-2206-46f5-b853-be558ea3b2f4.lovable.app",
   "http://localhost:5173",
   "http://localhost:8080",

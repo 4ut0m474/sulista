@@ -19,10 +19,10 @@ type Establishment = {
 };
 
 const getDeviceFingerprint = () => {
-  let fp = localStorage.getItem("sulista-device-fp");
+  let fp = localStorage.getItem("vento-sul-device-fp");
   if (!fp) {
     fp = crypto.randomUUID();
-    localStorage.setItem("sulista-device-fp", fp);
+    localStorage.setItem("vento-sul-device-fp", fp);
   }
   return fp;
 };
@@ -81,7 +81,7 @@ const Opinion = () => {
         toast({ title: "Erro ao votar", description: error.message, variant: "destructive" });
       }
     } else {
-      const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+      const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
       if (isPersistent) {
         toast({ title: "Voto registrado! +0,05 SulCoin 💰", description: `Obrigado por avaliar ${selectedEstablishment.name}. Você ganhou 0,05 SulCoin!` });
         const currentCoins = parseFloat(localStorage.getItem("sulcoins-balance") || "0");

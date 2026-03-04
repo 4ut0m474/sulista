@@ -18,12 +18,12 @@ const fontClasses: Record<FontSize, string> = {
 
 export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   const [fontSize, setFontSize] = useState<FontSize>(() => {
-    const stored = localStorage.getItem("sulista-font-size");
+    const stored = localStorage.getItem("vento-sul-font-size");
     return (stored as FontSize) || "normal";
   });
 
   useEffect(() => {
-    localStorage.setItem("sulista-font-size", fontSize);
+    localStorage.setItem("vento-sul-font-size", fontSize);
     document.documentElement.dataset.fontSize = fontSize;
   }, [fontSize]);
 

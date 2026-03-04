@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-const STORAGE_KEY = "sulista-favorites";
+const STORAGE_KEY = "vento-sul-favorites";
 
 export interface FavoriteItem {
   state: string;

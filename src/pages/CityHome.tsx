@@ -56,7 +56,7 @@ const CityHome = () => {
   const { activeIncentive, isPulsing } = useIconIncentives();
   
   const [showNotifModal, setShowNotifModal] = useState(() => {
-    return !localStorage.getItem("sulista-notification-setup-done");
+    return !localStorage.getItem("vento-sul-notification-setup-done");
   });
 
   // Async admin data
@@ -143,21 +143,21 @@ const CityHome = () => {
                 </button>
                 <button
                   onClick={() => {
-                    const persistent = localStorage.getItem("sulista-persistent") === "true";
+                    const persistent = localStorage.getItem("vento-sul-persistent") === "true";
                     if (!persistent) {
                       navigate("/");
                     }
                   }}
                   className={`w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border flex items-center justify-center shadow-card ${
-                    localStorage.getItem("sulista-persistent") === "true"
+                    localStorage.getItem("vento-sul-persistent") === "true"
                       ? "border-green-500"
                       : "border-destructive/50"
                   }`}
                   aria-label="Status persistência"
-                  title={localStorage.getItem("sulista-persistent") === "true" ? "Persistência ativa" : "Modo anônimo"}
+                  title={localStorage.getItem("vento-sul-persistent") === "true" ? "Persistência ativa" : "Modo anônimo"}
                 >
                   <Shield className={`w-4 h-4 ${
-                    localStorage.getItem("sulista-persistent") === "true"
+                    localStorage.getItem("vento-sul-persistent") === "true"
                       ? "text-green-500"
                       : "text-destructive"
                   }`} />

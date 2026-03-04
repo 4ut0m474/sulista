@@ -498,7 +498,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
     setUserRole(role);
     await fetchWalletData();
     setShowWalletActions(true);
-    const isPersistent = localStorage.getItem("sulista-persistent") === "true";
+    const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
     const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
     setMessages(prev => [
       ...prev,
@@ -693,7 +693,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
             </div>
             <p className="text-xs text-foreground">Manda esse link pro teu amigo:</p>
             <div className="bg-muted rounded-xl p-3 text-center">
-              <p className="text-xs font-mono text-primary break-all select-all">sulista.app/invite?ref={walletUserId.substring(0, 8)}</p>
+              <p className="text-xs font-mono text-primary break-all select-all">ventosul.app/invite?ref={walletUserId.substring(0, 8)}</p>
             </div>
             <div className="bg-muted/50 rounded-xl p-3 space-y-1">
               <p className="text-[10px] text-foreground font-bold">Recompensas:</p>
@@ -701,7 +701,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
               <p className="text-[10px] text-muted-foreground">• Tu ganha: Comerciante <strong className="text-primary">+0,25</strong>, Turista <strong className="text-primary">+0,30</strong>, Comum <strong className="text-primary">+0,15</strong></p>
             </div>
             <button onClick={() => {
-              navigator.clipboard?.writeText(`https://sulista.app/invite?ref=${walletUserId.substring(0, 8)}`);
+              navigator.clipboard?.writeText(`https://ventosul.app/invite?ref=${walletUserId.substring(0, 8)}`);
               setMessages(prev => [...prev, { role: "assistant", content: "Link copiado! 📋 Manda pro teu amigo! 🎉" }]);
               setShowInlineInvite(false);
             }} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">📋 Copiar link</button>

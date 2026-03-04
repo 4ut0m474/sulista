@@ -25,7 +25,7 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
-  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("sulista-persistent") === "true");
+  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("vento-sul-persistent") === "true");
   const [pinVerified, setPinVerified] = useState(false);
   const [showPinLogin, setShowPinLogin] = useState(false);
 
@@ -39,15 +39,15 @@ const Landing = () => {
         } else {
           // No session, persistence is stale
           setIsPersistent(false);
-          localStorage.removeItem("sulista-persistent");
+          localStorage.removeItem("vento-sul-persistent");
         }
       });
     }
   }, []);
 
   const handleCancelPersistence = () => {
-    localStorage.removeItem("sulista-persistent");
-    localStorage.removeItem("sulista-uuid");
+    localStorage.removeItem("vento-sul-persistent");
+    localStorage.removeItem("vento-sul-uuid");
     setIsPersistent(false);
     setPinVerified(false);
     supabase.auth.signOut();
@@ -77,7 +77,7 @@ const Landing = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         <div className="flex flex-col items-center justify-center px-6 pt-16 pb-4">
           <h1 className="font-display text-5xl font-black text-primary-foreground tracking-tight mb-1 drop-shadow-lg">
-            Sulista
+            Vento Sul
           </h1>
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
             {t("discoverSouth")}
@@ -315,7 +315,7 @@ const Landing = () => {
 
         <div className="relative z-10 px-6 pb-6 pt-4">
           <p className="text-center text-primary-foreground/60 text-[10px] leading-relaxed max-w-sm mx-auto">
-            🔒 <strong>Termos de Privacidade:</strong> O Sulista não guarda nenhum dado pessoal do usuário comum. 
+            🔒 <strong>Termos de Privacidade:</strong> O Vento Sul não guarda nenhum dado pessoal do usuário comum. 
             Apenas comerciantes que contratam planos de anúncio possuem dados armazenados para fins de prestação de serviço.
           </p>
         </div>

@@ -693,7 +693,7 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
             </div>
             <p className="text-xs text-foreground">Manda esse link pro teu amigo:</p>
             <div className="bg-muted rounded-xl p-3 text-center">
-              <p className="text-xs font-mono text-primary break-all select-all">sulista.app/invite?ref={walletUserId.substring(0, 8)}</p>
+              <p className="text-xs font-mono text-primary break-all select-all">ventosul.app/invite?ref={walletUserId.substring(0, 8)}</p>
             </div>
             <div className="bg-muted/50 rounded-xl p-3 space-y-1">
               <p className="text-[10px] text-foreground font-bold">Recompensas:</p>

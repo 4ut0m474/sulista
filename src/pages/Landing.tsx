@@ -77,7 +77,7 @@ const Landing = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         <div className="flex flex-col items-center justify-center px-6 pt-16 pb-4">
           <h1 className="font-display text-5xl font-black text-primary-foreground tracking-tight mb-1 drop-shadow-lg">
-            Sulista
+            Vento Sul
           </h1>
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
             {t("discoverSouth")}

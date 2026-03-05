@@ -173,6 +173,66 @@ export type Database = {
         }
         Relationships: []
       }
+      persistence_verifications: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          back_image_encrypted: string | null
+          created_at: string
+          document_id_encrypted: string | null
+          document_type: string | null
+          email: string
+          front_image_encrypted: string | null
+          full_name_encrypted: string | null
+          id: string
+          pin_hash: string
+          rejection_reason: string | null
+          selfie_image_encrypted: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string
+          verified: boolean
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          back_image_encrypted?: string | null
+          created_at?: string
+          document_id_encrypted?: string | null
+          document_type?: string | null
+          email: string
+          front_image_encrypted?: string | null
+          full_name_encrypted?: string | null
+          id?: string
+          pin_hash: string
+          rejection_reason?: string | null
+          selfie_image_encrypted?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+          verified?: boolean
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          back_image_encrypted?: string | null
+          created_at?: string
+          document_id_encrypted?: string | null
+          document_type?: string | null
+          email?: string
+          front_image_encrypted?: string | null
+          full_name_encrypted?: string | null
+          id?: string
+          pin_hash?: string
+          rejection_reason?: string | null
+          selfie_image_encrypted?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       sulcoins: {
         Row: {
           atualizado_em: string

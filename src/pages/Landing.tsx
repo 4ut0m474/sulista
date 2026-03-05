@@ -294,44 +294,38 @@ const Landing = () => {
               {t("selectToContinue")}
             </p>
 
-            {/* Persistence Button / Status */}
-            {!isPersistent ? (
-              <button
-                onClick={() => setPersistOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-secondary/30 hover:bg-card transition-all shadow-lg group"
-              >
-                <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-secondary" />
+            <button
+              onClick={() => {
+                if (!isPersistent) {
+                  setPersistOpen(true);
+                  return;
+                }
+
+                if (!pinVerified) {
+                  setShowPinLogin(true);
+                  return;
+                }
+
+                setPersistOpen(true);
+              }}
+              className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPersistent ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+                  <Lock className="h-5 w-5" />
                 </div>
-                <div className="text-left flex-1">
-                  <span className="text-sm font-bold text-foreground block">Persistência Anônima</span>
-                  <span className="text-[10px] text-muted-foreground leading-tight">
-                    Não guardamos suas informações pessoais, somente preferências.
-                  </span>
-                </div>
-              </button>
-            ) : (
-              <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-green-500/30 shadow-lg">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-green-500" />
-                </div>
-                <div className="text-left flex-1">
-                  <span className="text-sm font-bold text-foreground block">
-                    Persistência Ativa {pinVerified ? "✅" : "🔒"}
-                  </span>
+                <div className="flex-1 text-left">
+                  <span className="block text-sm font-black text-foreground">{isPersistent ? "Ligado" : "Persistência"}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    {pinVerified ? "Você pode ganhar SulCoins!" : "Verifique seu PIN para continuar"}
+                    {isPersistent
+                      ? persistenceStatus === "approved"
+                        ? "Verificação aprovada"
+                        : "Recebi! Aprovo em minutos"
+                      : "Crie PIN, confirme o e-mail e envie sua identidade"}
                   </span>
                 </div>
-                <button
-                  onClick={handleCancelPersistence}
-                  className="p-1.5 rounded-full hover:bg-destructive/10 transition-colors"
-                  title="Cancelar persistência"
-                >
-                  <X className="w-4 h-4 text-destructive/70 hover:text-destructive" />
-                </button>
               </div>
-            )}
+            </button>
 
             {/* SulCoins banner when persistent and verified */}
             {isPersistent && pinVerified && selectedState && (

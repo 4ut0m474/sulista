@@ -11,6 +11,7 @@ export const MAX_COMMENT = 1000;
 export const MAX_PHONE = 30;
 export const MAX_EMAIL = 255;
 export const MAX_PASSWORD = 128;
+export const MAX_DOCUMENT_ID = 20;
 
 // Sanitize text input - strip control chars, trim
 export const sanitizeText = (input: string): string => {
@@ -40,6 +41,17 @@ export const isValidPhone = (phone: string): boolean => {
   if (!phone) return true;
   return /^[\d\s()\-+]+$/.test(phone) && phone.replace(/\D/g, "").length >= 8;
 };
+
+export const persistenceIdentitySchema = z.object({
+  fullName: z.string().trim().min(3, "Informe seu nome completo").max(MAX_NAME, `Nome deve ter no máximo ${MAX_NAME} caracteres`),
+  documentType: z.enum(["cpf", "rg"]),
+  documentId: z
+    .string()
+    .trim()
+    .min(7, "Informe um CPF ou RG válido")
+    .max(MAX_DOCUMENT_ID, `Documento deve ter no máximo ${MAX_DOCUMENT_ID} caracteres`)
+    .regex(/^[0-9A-Za-z.\-/\s]+$/, "Documento inválido"),
+});
 
 // Admin edit item schema
 export const editItemSchema = z.object({

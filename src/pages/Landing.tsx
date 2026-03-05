@@ -140,6 +140,17 @@ const Landing = () => {
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
             {t("discoverSouth")}
           </p>
+          <button
+            onClick={() => {
+              const nextState = selectedState || "PR";
+              const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
+              navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`);
+            }}
+            className="mt-4 inline-flex min-w-[18rem] items-center justify-center gap-3 rounded-2xl bg-ocean px-6 py-4 text-center text-base font-black text-ocean-foreground shadow-ocean transition-transform hover:-translate-y-0.5"
+          >
+            <MessageCircle className="h-5 w-5" />
+            Falar com Litorânea
+          </button>
         </div>
 
         <div className="flex flex-col items-center px-6 mt-4">

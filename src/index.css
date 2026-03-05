@@ -17,6 +17,8 @@
 
     --primary: 152 45% 28%;
     --primary-foreground: 40 20% 97%;
+    --ocean: 211 64% 24%;
+    --ocean-foreground: 210 40% 98%;
 
     --secondary: 38 65% 55%;
     --secondary-foreground: 40 20% 97%;
@@ -50,6 +52,7 @@
     --gold-foreground: 38 90% 15%;
     --teal: 180 35% 40%;
     --success: 152 45% 40%;
+    --success-foreground: 40 20% 97%;
     --vip: 38 100% 50%;
   }
 
@@ -62,6 +65,8 @@
     --popover-foreground: 40 20% 95%;
     --primary: 152 50% 45%;
     --primary-foreground: 150 30% 8%;
+    --ocean: 211 70% 58%;
+    --ocean-foreground: 222 47% 11%;
     --secondary: 38 65% 50%;
     --secondary-foreground: 40 20% 97%;
     --muted: 150 15% 18%;
@@ -122,11 +127,19 @@
     background: linear-gradient(135deg, hsl(38 100% 50%), hsl(25 100% 45%));
   }
 
+  .bg-gradient-ocean {
+    background: linear-gradient(135deg, hsl(var(--ocean)), hsl(211 70% 18%));
+  }
+
   .shadow-card {
     box-shadow: 0 4px 20px -4px hsl(150 30% 12% / 0.1);
   }
 
   .shadow-gold {
     box-shadow: 0 4px 20px -4px hsl(38 65% 55% / 0.4);
+  }
+
+  .shadow-ocean {
+    box-shadow: 0 12px 30px -12px hsl(var(--ocean) / 0.45);
   }
 }

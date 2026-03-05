@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText, Star, ShoppingCart, TreePalm } from "lucide-react";
+import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText, Star, ShoppingCart, TreePalm, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
 import { getCitySubLocations, type SubLocation } from "@/data/subLocations";
@@ -41,6 +41,20 @@ interface EditableItem {
   // Sub-location fields
   district?: string;
   highlights?: string[];
+}
+
+interface PersistenceReviewItem {
+  id: string;
+  email: string;
+  fullName: string;
+  documentId: string;
+  documentType: string;
+  verification_status: string;
+  verified: boolean;
+  created_at: string;
+  front_image?: string | null;
+  back_image?: string | null;
+  selfie_image?: string | null;
 }
 
 const generateSecretCode = (): string => {
@@ -149,6 +163,10 @@ const AdminPanel = () => {
   // Notification filter
   const [notifFilter, setNotifFilter] = useState<"all" | "purchase" | "city_update" | "merchant_update">("all");
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [persistenceReviews, setPersistenceReviews] = useState<PersistenceReviewItem[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewActionId, setReviewActionId] = useState<string | null>(null);
+  const [reviewMsg, setReviewMsg] = useState("");
 
   // Load notifications from database
   useEffect(() => {
@@ -419,11 +437,51 @@ const AdminPanel = () => {
     await markAllNotificationsRead();
   };
 
+  const loadPersistenceReviews = async () => {
+    setReviewsLoading(true);
+    setReviewMsg("");
+    try {
+      const { data, error } = await supabase.functions.invoke("persist-anonymous", {
+        body: { action: "admin-list" },
+      });
+      if (error) throw error;
+      setPersistenceReviews(data?.items || []);
+    } catch (error: any) {
+      setReviewMsg(error.message || "Erro ao carregar verificações");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleApproveVerification = async (requestId: string) => {
+    setReviewActionId(requestId);
+    setReviewMsg("");
+    try {
+      const { error } = await supabase.functions.invoke("persist-anonymous", {
+        body: { action: "admin-approve", requestId },
+      });
+      if (error) throw error;
+      setPersistenceReviews((current) => current.filter((item) => item.id !== requestId));
+      setReviewMsg("Persistência aprovada e fotos apagadas.");
+    } catch (error: any) {
+      setReviewMsg(error.message || "Erro ao aprovar persistência");
+    } finally {
+      setReviewActionId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "verifications") {
+      loadPersistenceReviews();
+    }
+  }, [activeTab]);
+
   const filteredNotifications = notifFilter === "all" ? notifications : notifications.filter(n => n.type === notifFilter);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const tabs = [
     { id: "notifications", label: "Notificações", icon: Bell, badge: unreadCount },
+    { id: "verifications", label: "Persistência", icon: ShieldCheck },
     { id: "stalls", label: "Barracas", icon: Store },
     { id: "carousel", label: "Carrossel", icon: Image },
     { id: "explore", label: "Explorar", icon: Compass },
@@ -818,8 +876,69 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {activeTab === "verifications" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-lg font-bold text-foreground">Persistências pendentes</h2>
+                  <p className="text-sm text-muted-foreground">Revise identidade, aprove e limpe as fotos automaticamente.</p>
+                </div>
+                <button onClick={loadPersistenceReviews} className="text-xs font-bold text-primary hover:underline">
+                  Atualizar
+                </button>
+              </div>
+              {reviewMsg ? <p className="text-xs font-semibold text-primary">{reviewMsg}</p> : null}
+              {reviewsLoading ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">Carregando verificações...</div>
+              ) : persistenceReviews.length === 0 ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">Nenhuma persistência pendente agora.</div>
+              ) : (
+                persistenceReviews.map((review) => (
+                  <div key={review.id} className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-foreground">{review.fullName || "Sem nome"}</p>
+                        <p className="text-xs text-muted-foreground">{review.email}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          {review.documentType.toUpperCase()}: {review.documentId}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                        {review.verification_status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Recebido em {new Date(review.created_at).toLocaleString("pt-BR")}</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[review.front_image, review.back_image, review.selfie_image].map((image, index) => (
+                        <div key={index} className="overflow-hidden rounded-xl border border-border bg-muted/40">
+                          {image ? (
+                            <img
+                              src={image}
+                              alt={index === 0 ? "Documento frente" : index === 1 ? "Documento verso" : "Selfie"}
+                              className="h-28 w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-28 items-center justify-center text-[11px] text-muted-foreground">Sem imagem</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => handleApproveVerification(review.id)}
+                      disabled={reviewActionId === review.id}
+                      className="w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+                    >
+                      {reviewActionId === review.id ? "Aprovando..." : "Aprovar e apagar fotos"}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
           {/* Content tabs that need city selection */}
-          {!selectedCity && !["notifications","cities","password","settings"].includes(activeTab) && (
+          {!selectedCity && !["notifications","verifications","cities","password","settings"].includes(activeTab) && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">
               <MapPin className="w-10 h-10 text-primary mx-auto mb-2" />
               <p className="text-sm font-bold text-foreground">Selecione um Estado e Cidade acima</p>
@@ -827,7 +946,7 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {(selectedCity || ["notifications","cities","password","settings"].includes(activeTab)) && (
+          {(selectedCity || ["notifications","verifications","cities","password","settings"].includes(activeTab)) && (
             <>
               {activeTab === "stalls" && selectedCity && (
                 <div className="space-y-3">

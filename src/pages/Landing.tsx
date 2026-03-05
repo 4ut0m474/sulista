@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Shield, X } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, MessageCircle } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";
@@ -13,6 +13,7 @@ import PinLoginModal from "@/components/PinLoginModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PERSISTENCE_KEYS, clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
@@ -25,75 +26,91 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
-  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("vento-sul-persistent") === "true");
-  const [pinVerified, setPinVerified] = useState(false);
+  const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
+  const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
+  const [pinVerified, setPinVerified] = useState(sessionStorage.getItem(PERSISTENCE_KEYS.pinVerified) === "true");
   const [showPinLogin, setShowPinLogin] = useState(false);
 
-  // On mount: handle pending persistence (magic link callback) or PIN login
   useEffect(() => {
     const completePendingPersistence = async (session: any) => {
-      const pendingPin = sessionStorage.getItem("vento-sul-pending-pin");
+      const pendingPin = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPin);
+      const pendingEmail = sessionStorage.getItem(PERSISTENCE_KEYS.pendingEmail);
       if (!pendingPin) return false;
-      
+
       try {
         const { data, error } = await supabase.functions.invoke("persist-anonymous", {
-          body: { action: "create", pin: pendingPin },
+          body: { action: "create", pin: pendingPin, email: pendingEmail },
         });
         if (error) throw error;
-        const userUuid = data.uuid || session.user.id;
-        localStorage.setItem("vento-sul-persistent", "true");
-        localStorage.setItem("vento-sul-uuid", userUuid);
+
+        const nextStatus = (data?.status as PersistenceVerificationStatus | undefined) ?? "identity_pending";
+        const userUuid = data?.uuid || session.user.id;
+        syncPersistenceLocalState({ userId: userUuid, status: nextStatus, verified: true });
         setIsPersistent(true);
+        setPersistenceStatus(nextStatus);
         setPinVerified(true);
-        toast.success("Persistência ativada com sucesso! 🎉");
+        setPersistOpen(true);
+        toast.success("Persistência ligada. Complete sua identidade para análise.");
       } catch (err: any) {
         toast.error(err.message || "Erro ao ativar persistência");
       } finally {
-        sessionStorage.removeItem("vento-sul-pending-pin");
-        sessionStorage.removeItem("vento-sul-pending-persist");
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
       }
       return true;
     };
 
+    const syncPersistenceStatus = async (session: any) => {
+      try {
+        const { data, error } = await supabase.functions.invoke("persist-anonymous", {
+          body: { action: "status" },
+        });
+        if (error || !data?.status) return;
+
+        const nextStatus = data.status as PersistenceVerificationStatus;
+        syncPersistenceLocalState({ userId: data.uuid || session.user.id, status: nextStatus, verified: true });
+        setIsPersistent(true);
+        setPersistenceStatus(nextStatus);
+      } catch {
+        // noop
+      }
+    };
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      // Check if returning from magic link with pending persistence
-      const isPending = sessionStorage.getItem("vento-sul-pending-persist") === "true";
+      const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
       if (session && isPending) {
         await completePendingPersistence(session);
         return;
       }
 
-      // Normal flow: if persistent but not verified, show PIN modal
-      if (isPersistent && !pinVerified) {
+      if (session) {
+        await syncPersistenceStatus(session);
+      }
+
+      if (getLocalPersistenceActive() && !pinVerified) {
         if (session) {
           setShowPinLogin(true);
         } else {
+          clearPersistenceLocalState();
           setIsPersistent(false);
-          localStorage.removeItem("vento-sul-persistent");
+          setPersistenceStatus(null);
         }
       }
     });
 
-    // Also listen for auth changes (in case magic link opens in same tab)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        const isPending = sessionStorage.getItem("vento-sul-pending-persist") === "true";
+        const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
         if (isPending) {
           await completePendingPersistence(session);
+          return;
         }
+        await syncPersistenceStatus(session);
       }
     });
     return () => subscription.unsubscribe();
-  }, []);
-
-  const handleCancelPersistence = () => {
-    localStorage.removeItem("vento-sul-persistent");
-    localStorage.removeItem("vento-sul-uuid");
-    setIsPersistent(false);
-    setPinVerified(false);
-    supabase.auth.signOut();
-    toast.success("Persistência desativada");
-  };
+  }, [pinVerified]);
 
   const cities = useMemo(() => {
     if (!selectedState) return [];
@@ -123,6 +140,17 @@ const Landing = () => {
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
             {t("discoverSouth")}
           </p>
+          <button
+            onClick={() => {
+              const nextState = selectedState || "PR";
+              const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
+              navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`);
+            }}
+            className="mt-4 inline-flex min-w-[18rem] items-center justify-center gap-3 rounded-2xl bg-ocean px-6 py-4 text-center text-base font-black text-ocean-foreground shadow-ocean transition-transform hover:-translate-y-0.5"
+          >
+            <MessageCircle className="h-5 w-5" />
+            Falar com Litorânea
+          </button>
         </div>
 
         <div className="flex flex-col items-center px-6 mt-4">
@@ -266,44 +294,38 @@ const Landing = () => {
               {t("selectToContinue")}
             </p>
 
-            {/* Persistence Button / Status */}
-            {!isPersistent ? (
-              <button
-                onClick={() => setPersistOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-secondary/30 hover:bg-card transition-all shadow-lg group"
-              >
-                <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-secondary" />
+            <button
+              onClick={() => {
+                if (!isPersistent) {
+                  setPersistOpen(true);
+                  return;
+                }
+
+                if (!pinVerified) {
+                  setShowPinLogin(true);
+                  return;
+                }
+
+                setPersistOpen(true);
+              }}
+              className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPersistent ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+                  <Lock className="h-5 w-5" />
                 </div>
-                <div className="text-left flex-1">
-                  <span className="text-sm font-bold text-foreground block">Persistência Anônima</span>
-                  <span className="text-[10px] text-muted-foreground leading-tight">
-                    Não guardamos suas informações pessoais, somente preferências.
-                  </span>
-                </div>
-              </button>
-            ) : (
-              <div className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-green-500/30 shadow-lg">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-green-500" />
-                </div>
-                <div className="text-left flex-1">
-                  <span className="text-sm font-bold text-foreground block">
-                    Persistência Ativa {pinVerified ? "✅" : "🔒"}
-                  </span>
+                <div className="flex-1 text-left">
+                  <span className="block text-sm font-black text-foreground">{isPersistent ? "Ligado" : "Persistência"}</span>
                   <span className="text-[10px] text-muted-foreground">
-                    {pinVerified ? "Você pode ganhar SulCoins!" : "Verifique seu PIN para continuar"}
+                    {isPersistent
+                      ? persistenceStatus === "approved"
+                        ? "Verificação aprovada"
+                        : "Recebi! Aprovo em minutos"
+                      : "Crie PIN, confirme o e-mail e envie sua identidade"}
                   </span>
                 </div>
-                <button
-                  onClick={handleCancelPersistence}
-                  className="p-1.5 rounded-full hover:bg-destructive/10 transition-colors"
-                  title="Cancelar persistência"
-                >
-                  <X className="w-4 h-4 text-destructive/70 hover:text-destructive" />
-                </button>
               </div>
-            )}
+            </button>
 
             {/* SulCoins banner when persistent and verified */}
             {isPersistent && pinVerified && selectedState && (
@@ -317,7 +339,7 @@ const Landing = () => {
             )}
 
             <p className="text-center text-primary-foreground/50 text-[10px]">
-              Sem persistência você navega normalmente, mas não acumula SulCoins.
+              Dados criptografados AES-256. Não vendemos. Apagamos quando pedir.
             </p>
           </div>
         </div>
@@ -356,8 +378,7 @@ const Landing = () => {
 
         <div className="relative z-10 px-6 pb-6 pt-4">
           <p className="text-center text-primary-foreground/60 text-[10px] leading-relaxed max-w-sm mx-auto">
-            🔒 <strong>Termos de Privacidade:</strong> O Vento Sul não guarda nenhum dado pessoal do usuário comum. 
-            Apenas comerciantes que contratam planos de anúncio possuem dados armazenados para fins de prestação de serviço.
+            🔒 <strong>Dados criptografados AES-256.</strong> Não vendemos. Apagamos quando pedir.
           </p>
         </div>
       </div>
@@ -365,18 +386,29 @@ const Landing = () => {
       <PersistenceModal
         open={persistOpen}
         onClose={() => setPersistOpen(false)}
-        onSuccess={() => {
+        onSuccess={(userId) => {
           setPersistOpen(false);
           setIsPersistent(true);
+          setPersistenceStatus("pending");
           setPinVerified(true);
+          if (userId) {
+            syncPersistenceLocalState({ userId, status: "pending", verified: true });
+          }
         }}
       />
 
       <PinLoginModal
         open={showPinLogin}
-        onSuccess={() => {
+        onSuccess={async () => {
           setShowPinLogin(false);
           setPinVerified(true);
+          const { data } = await supabase.functions.invoke("persist-anonymous", {
+            body: { action: "status" },
+          });
+          if (data?.status) {
+            setIsPersistent(true);
+            setPersistenceStatus(data.status as PersistenceVerificationStatus);
+          }
         }}
         onCancel={() => {
           setShowPinLogin(false);

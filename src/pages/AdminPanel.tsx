@@ -43,6 +43,20 @@ interface EditableItem {
   highlights?: string[];
 }
 
+interface PersistenceReviewItem {
+  id: string;
+  email: string;
+  fullName: string;
+  documentId: string;
+  documentType: string;
+  verification_status: string;
+  verified: boolean;
+  created_at: string;
+  front_image?: string | null;
+  back_image?: string | null;
+  selfie_image?: string | null;
+}
+
 const generateSecretCode = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const array = new Uint8Array(12);

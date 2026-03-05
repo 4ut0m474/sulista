@@ -26,75 +26,91 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
-  const [isPersistent, setIsPersistent] = useState(localStorage.getItem("vento-sul-persistent") === "true");
-  const [pinVerified, setPinVerified] = useState(false);
+  const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
+  const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
+  const [pinVerified, setPinVerified] = useState(sessionStorage.getItem(PERSISTENCE_KEYS.pinVerified) === "true");
   const [showPinLogin, setShowPinLogin] = useState(false);
 
-  // On mount: handle pending persistence (magic link callback) or PIN login
   useEffect(() => {
     const completePendingPersistence = async (session: any) => {
-      const pendingPin = sessionStorage.getItem("vento-sul-pending-pin");
+      const pendingPin = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPin);
+      const pendingEmail = sessionStorage.getItem(PERSISTENCE_KEYS.pendingEmail);
       if (!pendingPin) return false;
-      
+
       try {
         const { data, error } = await supabase.functions.invoke("persist-anonymous", {
-          body: { action: "create", pin: pendingPin },
+          body: { action: "create", pin: pendingPin, email: pendingEmail },
         });
         if (error) throw error;
-        const userUuid = data.uuid || session.user.id;
-        localStorage.setItem("vento-sul-persistent", "true");
-        localStorage.setItem("vento-sul-uuid", userUuid);
+
+        const nextStatus = (data?.status as PersistenceVerificationStatus | undefined) ?? "identity_pending";
+        const userUuid = data?.uuid || session.user.id;
+        syncPersistenceLocalState({ userId: userUuid, status: nextStatus, verified: true });
         setIsPersistent(true);
+        setPersistenceStatus(nextStatus);
         setPinVerified(true);
-        toast.success("Persistência ativada com sucesso! 🎉");
+        setPersistOpen(true);
+        toast.success("Persistência ligada. Complete sua identidade para análise.");
       } catch (err: any) {
         toast.error(err.message || "Erro ao ativar persistência");
       } finally {
-        sessionStorage.removeItem("vento-sul-pending-pin");
-        sessionStorage.removeItem("vento-sul-pending-persist");
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
+        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
       }
       return true;
     };
 
+    const syncPersistenceStatus = async (session: any) => {
+      try {
+        const { data, error } = await supabase.functions.invoke("persist-anonymous", {
+          body: { action: "status" },
+        });
+        if (error || !data?.status) return;
+
+        const nextStatus = data.status as PersistenceVerificationStatus;
+        syncPersistenceLocalState({ userId: data.uuid || session.user.id, status: nextStatus, verified: true });
+        setIsPersistent(true);
+        setPersistenceStatus(nextStatus);
+      } catch {
+        // noop
+      }
+    };
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      // Check if returning from magic link with pending persistence
-      const isPending = sessionStorage.getItem("vento-sul-pending-persist") === "true";
+      const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
       if (session && isPending) {
         await completePendingPersistence(session);
         return;
       }
 
-      // Normal flow: if persistent but not verified, show PIN modal
-      if (isPersistent && !pinVerified) {
+      if (session) {
+        await syncPersistenceStatus(session);
+      }
+
+      if (getLocalPersistenceActive() && !pinVerified) {
         if (session) {
           setShowPinLogin(true);
         } else {
+          clearPersistenceLocalState();
           setIsPersistent(false);
-          localStorage.removeItem("vento-sul-persistent");
+          setPersistenceStatus(null);
         }
       }
     });
 
-    // Also listen for auth changes (in case magic link opens in same tab)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        const isPending = sessionStorage.getItem("vento-sul-pending-persist") === "true";
+        const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
         if (isPending) {
           await completePendingPersistence(session);
+          return;
         }
+        await syncPersistenceStatus(session);
       }
     });
     return () => subscription.unsubscribe();
-  }, []);
-
-  const handleCancelPersistence = () => {
-    localStorage.removeItem("vento-sul-persistent");
-    localStorage.removeItem("vento-sul-uuid");
-    setIsPersistent(false);
-    setPinVerified(false);
-    supabase.auth.signOut();
-    toast.success("Persistência desativada");
-  };
+  }, [pinVerified]);
 
   const cities = useMemo(() => {
     if (!selectedState) return [];

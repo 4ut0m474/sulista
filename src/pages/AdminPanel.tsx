@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText, Star, ShoppingCart, TreePalm } from "lucide-react";
+import { ChevronLeft, Store, Image, Tag, Calendar, MapPin, Settings, LogOut, Compass, Map, TreePine, Lock, Eye, EyeOff, GripVertical, Plus, Trash2, Save, Edit2, X, Bell, Filter, RefreshCw, Copy, Check, FileText, Star, ShoppingCart, TreePalm, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { states, citiesByState, getCityData } from "@/data/cities";
 import { getCitySubLocations, type SubLocation } from "@/data/subLocations";

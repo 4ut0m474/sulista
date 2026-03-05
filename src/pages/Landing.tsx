@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Shield, X } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, MessageCircle } from "lucide-react";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";
@@ -13,6 +13,7 @@ import PinLoginModal from "@/components/PinLoginModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PERSISTENCE_KEYS, clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");

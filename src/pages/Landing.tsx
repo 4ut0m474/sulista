@@ -339,7 +339,7 @@ const Landing = () => {
             )}
 
             <p className="text-center text-primary-foreground/50 text-[10px]">
-              Sem persistência você navega normalmente, mas não acumula SulCoins.
+              Dados criptografados AES-256. Não vendemos. Apagamos quando pedir.
             </p>
           </div>
         </div>

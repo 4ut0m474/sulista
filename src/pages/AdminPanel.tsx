@@ -877,7 +877,7 @@ const AdminPanel = () => {
           )}
 
           {/* Content tabs that need city selection */}
-          {!selectedCity && !["notifications","cities","password","settings"].includes(activeTab) && (
+          {!selectedCity && !["notifications","verifications","cities","password","settings"].includes(activeTab) && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">
               <MapPin className="w-10 h-10 text-primary mx-auto mb-2" />
               <p className="text-sm font-bold text-foreground">Selecione um Estado e Cidade acima</p>
@@ -885,7 +885,7 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {(selectedCity || ["notifications","cities","password","settings"].includes(activeTab)) && (
+          {(selectedCity || ["notifications","verifications","cities","password","settings"].includes(activeTab)) && (
             <>
               {activeTab === "stalls" && selectedCity && (
                 <div className="space-y-3">

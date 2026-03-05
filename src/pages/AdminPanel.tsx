@@ -876,6 +876,67 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {activeTab === "verifications" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-lg font-bold text-foreground">Persistências pendentes</h2>
+                  <p className="text-sm text-muted-foreground">Revise identidade, aprove e limpe as fotos automaticamente.</p>
+                </div>
+                <button onClick={loadPersistenceReviews} className="text-xs font-bold text-primary hover:underline">
+                  Atualizar
+                </button>
+              </div>
+              {reviewMsg ? <p className="text-xs font-semibold text-primary">{reviewMsg}</p> : null}
+              {reviewsLoading ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">Carregando verificações...</div>
+              ) : persistenceReviews.length === 0 ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">Nenhuma persistência pendente agora.</div>
+              ) : (
+                persistenceReviews.map((review) => (
+                  <div key={review.id} className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-foreground">{review.fullName || "Sem nome"}</p>
+                        <p className="text-xs text-muted-foreground">{review.email}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          {review.documentType.toUpperCase()}: {review.documentId}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                        {review.verification_status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Recebido em {new Date(review.created_at).toLocaleString("pt-BR")}</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[review.front_image, review.back_image, review.selfie_image].map((image, index) => (
+                        <div key={index} className="overflow-hidden rounded-xl border border-border bg-muted/40">
+                          {image ? (
+                            <img
+                              src={image}
+                              alt={index === 0 ? "Documento frente" : index === 1 ? "Documento verso" : "Selfie"}
+                              className="h-28 w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-28 items-center justify-center text-[11px] text-muted-foreground">Sem imagem</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => handleApproveVerification(review.id)}
+                      disabled={reviewActionId === review.id}
+                      className="w-full rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+                    >
+                      {reviewActionId === review.id ? "Aprovando..." : "Aprovar e apagar fotos"}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
           {/* Content tabs that need city selection */}
           {!selectedCity && !["notifications","verifications","cities","password","settings"].includes(activeTab) && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">

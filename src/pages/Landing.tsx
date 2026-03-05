@@ -386,10 +386,14 @@ const Landing = () => {
       <PersistenceModal
         open={persistOpen}
         onClose={() => setPersistOpen(false)}
-        onSuccess={() => {
+        onSuccess={(userId) => {
           setPersistOpen(false);
           setIsPersistent(true);
+          setPersistenceStatus("pending");
           setPinVerified(true);
+          if (userId) {
+            syncPersistenceLocalState({ userId, status: "pending", verified: true });
+          }
         }}
       />
 

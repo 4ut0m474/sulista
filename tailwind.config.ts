@@ -53,6 +53,14 @@ export default {
         },
         gold: "hsl(var(--gold))",
         teal: "hsl(var(--teal))",
+        ocean: {
+          DEFAULT: "hsl(var(--ocean))",
+          foreground: "hsl(var(--ocean-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
         vip: "hsl(var(--vip))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

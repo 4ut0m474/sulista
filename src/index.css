@@ -127,11 +127,19 @@
     background: linear-gradient(135deg, hsl(38 100% 50%), hsl(25 100% 45%));
   }
 
+  .bg-gradient-ocean {
+    background: linear-gradient(135deg, hsl(var(--ocean)), hsl(211 70% 18%));
+  }
+
   .shadow-card {
     box-shadow: 0 4px 20px -4px hsl(150 30% 12% / 0.1);
   }
 
   .shadow-gold {
     box-shadow: 0 4px 20px -4px hsl(38 65% 55% / 0.4);
+  }
+
+  .shadow-ocean {
+    box-shadow: 0 12px 30px -12px hsl(var(--ocean) / 0.45);
   }
 }

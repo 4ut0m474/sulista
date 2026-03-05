@@ -163,6 +163,10 @@ const AdminPanel = () => {
   // Notification filter
   const [notifFilter, setNotifFilter] = useState<"all" | "purchase" | "city_update" | "merchant_update">("all");
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [persistenceReviews, setPersistenceReviews] = useState<PersistenceReviewItem[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewActionId, setReviewActionId] = useState<string | null>(null);
+  const [reviewMsg, setReviewMsg] = useState("");
 
   // Load notifications from database
   useEffect(() => {

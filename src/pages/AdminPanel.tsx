@@ -437,11 +437,51 @@ const AdminPanel = () => {
     await markAllNotificationsRead();
   };
 
+  const loadPersistenceReviews = async () => {
+    setReviewsLoading(true);
+    setReviewMsg("");
+    try {
+      const { data, error } = await supabase.functions.invoke("persist-anonymous", {
+        body: { action: "admin-list" },
+      });
+      if (error) throw error;
+      setPersistenceReviews(data?.items || []);
+    } catch (error: any) {
+      setReviewMsg(error.message || "Erro ao carregar verificações");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleApproveVerification = async (requestId: string) => {
+    setReviewActionId(requestId);
+    setReviewMsg("");
+    try {
+      const { error } = await supabase.functions.invoke("persist-anonymous", {
+        body: { action: "admin-approve", requestId },
+      });
+      if (error) throw error;
+      setPersistenceReviews((current) => current.filter((item) => item.id !== requestId));
+      setReviewMsg("Persistência aprovada e fotos apagadas.");
+    } catch (error: any) {
+      setReviewMsg(error.message || "Erro ao aprovar persistência");
+    } finally {
+      setReviewActionId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "verifications") {
+      loadPersistenceReviews();
+    }
+  }, [activeTab]);
+
   const filteredNotifications = notifFilter === "all" ? notifications : notifications.filter(n => n.type === notifFilter);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const tabs = [
     { id: "notifications", label: "Notificações", icon: Bell, badge: unreadCount },
+    { id: "verifications", label: "Persistência", icon: ShieldCheck },
     { id: "stalls", label: "Barracas", icon: Store },
     { id: "carousel", label: "Carrossel", icon: Image },
     { id: "explore", label: "Explorar", icon: Compass },

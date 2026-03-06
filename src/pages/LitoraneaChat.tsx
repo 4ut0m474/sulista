@@ -483,15 +483,52 @@ Pra eu te ajudar melhor, me diz: você é…`;
 
   const handleRoleSelect = async (role: string) => {
     setUserRole(role);
-    await fetchWalletData();
-    setShowWalletActions(true);
+    saveProfile({ role });
+
+    // Student flow — special persistence for minors
+    if (role === "estudante") {
+      setInput("");
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: "📚 Estudante" },
+        {
+          role: "assistant",
+          content: `Bah, que tri! 📚 Sou tua parceira nos estudos!
+
+Quer ativar a persistência pra eu te ajudar com lição de casa, inglês, frações, história, tudo?
+
+Com persistência ativa, teu progresso fica salvo e tu ganha SulCoins por cada missão! 🎯`,
+          options: ["Sim, quero! ✅", "Depois, só bater papo 💬"],
+        },
+      ]);
+      speakText("Bah, que tri! Sou tua parceira nos estudos! Quer ativar a persistência pra eu te ajudar com lição de casa?", true);
+      return;
+    }
+
+    // For other roles, show the main menu
     const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
-    const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
+    const roleLabels: Record<string, string> = {
+      turista: "Turista 🏖️",
+      comerciante: "Comerciante 🏪",
+      morador: "Morador 🏡",
+    };
+    const roleLabel = roleLabels[role] || role;
+
     setMessages(prev => [
       ...prev,
       { role: "user", content: roleLabel },
-      { role: "assistant", content: `Beleza, ${roleLabel}! ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins!\n\n" : ""}Teu saldo: **${walletSaldo ?? 0} SulCoins** 💰\n\nO que tu quer fazer?`,
-        options: ["💰 Receber SulCoin", "📤 Enviar SulCoin", "🤝 Convidar alguém"] },
+      {
+        role: "assistant",
+        content: `Beleza, ${roleLabel}! Que bom te ter aqui! 💚
+
+${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salvar teus dados!\n\n" : ""}O que tu quer saber?`,
+        options: [
+          "Explicação completa 📖",
+          "Explique SulCoins 💰",
+          "Ativar compras coletivas 🛒",
+          "Só bater papo 💬",
+        ],
+      },
     ]);
   };
 

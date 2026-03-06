@@ -233,6 +233,54 @@ export type Database = {
         }
         Relationships: []
       }
+      student_persistence: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          birth_date_encrypted: string
+          created_at: string
+          face_photo_hash: string | null
+          id: string
+          name_encrypted: string
+          rejection_reason: string | null
+          rg_photo_hash: string | null
+          rg_responsavel_encrypted: string
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          birth_date_encrypted: string
+          created_at?: string
+          face_photo_hash?: string | null
+          id?: string
+          name_encrypted: string
+          rejection_reason?: string | null
+          rg_photo_hash?: string | null
+          rg_responsavel_encrypted: string
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          birth_date_encrypted?: string
+          created_at?: string
+          face_photo_hash?: string | null
+          id?: string
+          name_encrypted?: string
+          rejection_reason?: string | null
+          rg_photo_hash?: string | null
+          rg_responsavel_encrypted?: string
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
       sulcoins: {
         Row: {
           atualizado_em: string

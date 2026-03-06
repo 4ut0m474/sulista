@@ -237,50 +237,19 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
-    const isFirstVisit = !localStorage.getItem(FIRST_VISIT_KEY);
-    const profile = getProfile();
-    const name = profile.name || "";
+    const greetingText = `Oi, tudo bem? Sou a Litorânea, tua amiga do sul! 🌬️💚
 
-    let greetingText: string;
-    let greetingOptions: string[];
-
-    if (isFirstVisit) {
-      localStorage.setItem(FIRST_VISIT_KEY, "true");
-      greetingText = `Oi! Aqui é a Litorânea, moro no aplicativo Vento Sul e nós somos como uma brisa suave que percorre o Paraná, Santa Catarina e Rio Grande do Sul, trazendo integração, oportunidades e benefícios para todo mundo. 🌬️
-
-Meu maior sonho é ver as pessoas se conectando de verdade: moradores compartilhando dicas reais, turistas descobrindo lugares incríveis, comerciantes crescendo com novas vendas e, principalmente, as escolas e alunos brilhando juntos. 💚
-
-O Vento Sul nasceu pra unir os três estados comercialmente, turisticamente e humanamente. E agora, com muito carinho, ele também abraça a educação: parte da renda do app (10%) vai direto pro Fundo Escola Brisa, uma iniciativa da Associação Vento Sul Educação (sem fins lucrativos). 📚
-
-Escolha uma opção pra eu te explicar melhor! 👇`;
-      greetingOptions = [
-        "Explicação para moradores 🏡",
-        "Explicação para turistas 🏖️",
-        "Explicação para comerciantes 🏪",
-        "Explicação para alunos e professores 📚",
-        "Explique o que são Sucoins 💰",
-        "Ativar compras coletivas 🛒",
-      ];
-    } else {
-      const greeting = getGreeting();
-      greetingText = `${greeting}${name ? `, ${name}` : ""}! Bah, que bom te ver de volta no Vento Sul! 😊
-
-Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar! 🎙️`;
-      greetingOptions = [
-        "Explicação para moradores 🏡",
-        "Explicação para turistas 🏖️",
-        "Explicação para comerciantes 🏪",
-        "Explicação para alunos e professores 📚",
-        "Explique o que são Sucoins 💰",
-        "Ativar compras coletivas 🛒",
-        "Só bater papo 💬",
-      ];
-    }
+Pra eu te ajudar melhor, me diz: você é…`;
+    const greetingOptions = [
+      "🏖️ Turista",
+      "🏡 Morador",
+      "🏪 Comerciante",
+      "📚 Estudante",
+    ];
 
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    // Speak the greeting, then auto-activate mic
     setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line
 
@@ -348,10 +317,11 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
       return;
     }
 
-    // Handle role selection
+    // Handle initial role selection (from greeting)
     if (text.includes("Turista") && !userRole) { handleRoleSelect("turista"); return; }
     if (text.includes("Comerciante") && !userRole) { handleRoleSelect("comerciante"); return; }
-    if (text.includes("comum") && !userRole) { handleRoleSelect("comum"); return; }
+    if ((text.includes("comum") || text.includes("Morador")) && !userRole) { handleRoleSelect("morador"); return; }
+    if (text.includes("Estudante") && !userRole) { handleRoleSelect("estudante"); return; }
 
     // Handle wallet action selections
     if (text.includes("Receber SulCoin") || text.includes("Enviar SulCoin") || text.includes("Enviar mais") || text.includes("Convidar alguém")) {
@@ -513,15 +483,52 @@ Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar!
 
   const handleRoleSelect = async (role: string) => {
     setUserRole(role);
-    await fetchWalletData();
-    setShowWalletActions(true);
+    saveProfile({ role });
+
+    // Student flow — special persistence for minors
+    if (role === "estudante") {
+      setInput("");
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: "📚 Estudante" },
+        {
+          role: "assistant",
+          content: `Bah, que tri! 📚 Sou tua parceira nos estudos!
+
+Quer ativar a persistência pra eu te ajudar com lição de casa, inglês, frações, história, tudo?
+
+Com persistência ativa, teu progresso fica salvo e tu ganha SulCoins por cada missão! 🎯`,
+          options: ["Sim, quero! ✅", "Depois, só bater papo 💬"],
+        },
+      ]);
+      speakText("Bah, que tri! Sou tua parceira nos estudos! Quer ativar a persistência pra eu te ajudar com lição de casa?", true);
+      return;
+    }
+
+    // For other roles, show the main menu
     const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
-    const roleLabel = role === "turista" ? "Turista 🏖️" : role === "comerciante" ? "Comerciante 🏪" : "Usuário comum 🏡";
+    const roleLabels: Record<string, string> = {
+      turista: "Turista 🏖️",
+      comerciante: "Comerciante 🏪",
+      morador: "Morador 🏡",
+    };
+    const roleLabel = roleLabels[role] || role;
+
     setMessages(prev => [
       ...prev,
       { role: "user", content: roleLabel },
-      { role: "assistant", content: `Beleza, ${roleLabel}! ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins!\n\n" : ""}Teu saldo: **${walletSaldo ?? 0} SulCoins** 💰\n\nO que tu quer fazer?`,
-        options: ["💰 Receber SulCoin", "📤 Enviar SulCoin", "🤝 Convidar alguém"] },
+      {
+        role: "assistant",
+        content: `Beleza, ${roleLabel}! Que bom te ter aqui! 💚
+
+${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salvar teus dados!\n\n" : ""}O que tu quer saber?`,
+        options: [
+          "Explicação completa 📖",
+          "Explique SulCoins 💰",
+          "Ativar compras coletivas 🛒",
+          "Só bater papo 💬",
+        ],
+      },
     ]);
   };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, MessageCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock } from "lucide-react";
+import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";
@@ -140,16 +141,20 @@ const Landing = () => {
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
             {t("discoverSouth")}
           </p>
+
+          {/* Litorânea round green button */}
           <button
             onClick={() => {
               const nextState = selectedState || "PR";
               const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
               navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`);
             }}
-            className="mt-4 inline-flex min-w-[18rem] items-center justify-center gap-3 rounded-2xl bg-ocean px-6 py-4 text-center text-base font-black text-ocean-foreground shadow-ocean transition-transform hover:-translate-y-0.5"
+            className="mt-5 flex flex-col items-center gap-2 group"
           >
-            <MessageCircle className="h-5 w-5" />
-            Falar com Litorânea
+            <div className="w-20 h-20 rounded-full bg-primary shadow-lg shadow-primary/40 flex items-center justify-center border-4 border-primary-foreground/30 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden">
+              <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
+            </div>
+            <span className="text-primary-foreground text-xs font-black tracking-wide drop-shadow">Falar com Litorânea</span>
           </button>
         </div>
 

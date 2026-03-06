@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, MessageCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock } from "lucide-react";
+import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { states, citiesByState } from "@/data/cities";
 import { getCitySubLocations } from "@/data/subLocations";

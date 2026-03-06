@@ -237,50 +237,19 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
-    const isFirstVisit = !localStorage.getItem(FIRST_VISIT_KEY);
-    const profile = getProfile();
-    const name = profile.name || "";
+    const greetingText = `Oi, tudo bem? Sou a Litorânea, tua amiga do sul! 🌬️💚
 
-    let greetingText: string;
-    let greetingOptions: string[];
-
-    if (isFirstVisit) {
-      localStorage.setItem(FIRST_VISIT_KEY, "true");
-      greetingText = `Oi! Aqui é a Litorânea, moro no aplicativo Vento Sul e nós somos como uma brisa suave que percorre o Paraná, Santa Catarina e Rio Grande do Sul, trazendo integração, oportunidades e benefícios para todo mundo. 🌬️
-
-Meu maior sonho é ver as pessoas se conectando de verdade: moradores compartilhando dicas reais, turistas descobrindo lugares incríveis, comerciantes crescendo com novas vendas e, principalmente, as escolas e alunos brilhando juntos. 💚
-
-O Vento Sul nasceu pra unir os três estados comercialmente, turisticamente e humanamente. E agora, com muito carinho, ele também abraça a educação: parte da renda do app (10%) vai direto pro Fundo Escola Brisa, uma iniciativa da Associação Vento Sul Educação (sem fins lucrativos). 📚
-
-Escolha uma opção pra eu te explicar melhor! 👇`;
-      greetingOptions = [
-        "Explicação para moradores 🏡",
-        "Explicação para turistas 🏖️",
-        "Explicação para comerciantes 🏪",
-        "Explicação para alunos e professores 📚",
-        "Explique o que são Sucoins 💰",
-        "Ativar compras coletivas 🛒",
-      ];
-    } else {
-      const greeting = getGreeting();
-      greetingText = `${greeting}${name ? `, ${name}` : ""}! Bah, que bom te ver de volta no Vento Sul! 😊
-
-Tô aqui pra te ajudar! O que tu quer fazer hoje? Usa o microfone pra me contar! 🎙️`;
-      greetingOptions = [
-        "Explicação para moradores 🏡",
-        "Explicação para turistas 🏖️",
-        "Explicação para comerciantes 🏪",
-        "Explicação para alunos e professores 📚",
-        "Explique o que são Sucoins 💰",
-        "Ativar compras coletivas 🛒",
-        "Só bater papo 💬",
-      ];
-    }
+Pra eu te ajudar melhor, me diz: você é…`;
+    const greetingOptions = [
+      "🏖️ Turista",
+      "🏡 Morador",
+      "🏪 Comerciante",
+      "📚 Estudante",
+    ];
 
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    // Speak the greeting, then auto-activate mic
     setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line
 

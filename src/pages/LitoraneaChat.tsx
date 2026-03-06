@@ -317,10 +317,11 @@ Pra eu te ajudar melhor, me diz: você é…`;
       return;
     }
 
-    // Handle role selection
+    // Handle initial role selection (from greeting)
     if (text.includes("Turista") && !userRole) { handleRoleSelect("turista"); return; }
     if (text.includes("Comerciante") && !userRole) { handleRoleSelect("comerciante"); return; }
-    if (text.includes("comum") && !userRole) { handleRoleSelect("comum"); return; }
+    if ((text.includes("comum") || text.includes("Morador")) && !userRole) { handleRoleSelect("morador"); return; }
+    if (text.includes("Estudante") && !userRole) { handleRoleSelect("estudante"); return; }
 
     // Handle wallet action selections
     if (text.includes("Receber SulCoin") || text.includes("Enviar SulCoin") || text.includes("Enviar mais") || text.includes("Convidar alguém")) {

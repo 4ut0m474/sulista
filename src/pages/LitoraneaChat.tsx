@@ -791,8 +791,8 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
               </div>
               <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-green-400 animate-ping opacity-30" />
             </div>
-            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo... fala comigo!</p>
-            <p className="text-[10px] text-muted-foreground">Silêncio por 10s desativa o mic</p>
+            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo... fala sem pressa!</p>
+            <p className="text-[10px] text-muted-foreground">Espero até 5s de pausa • máx 30s</p>
           </div>
         )}
       </div>

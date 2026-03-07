@@ -12,7 +12,9 @@ type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
-const SILENCE_TIMEOUT_MS = 10000;
+const MIC_MAX_OPEN_MS = 30000; // mic stays open max 30s
+const SILENCE_CANCEL_MS = 15000; // silence > 15s = cancel mic
+const SPEECH_PAUSE_MS = 5000; // wait 5s after last speech before stopping
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);

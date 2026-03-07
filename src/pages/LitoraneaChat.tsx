@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
+import { Slider } from "@/components/ui/slider";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
-const MIC_MAX_OPEN_MS = 30000; // mic stays open max 30s
-const SILENCE_CANCEL_MS = 15000; // silence > 15s = cancel mic
-const SPEECH_PAUSE_MS = 5000; // wait 5s after last speech before stopping
+const MIC_MAX_OPEN_MS = 30000;
+const SILENCE_CANCEL_MS = 15000;
+const SPEECH_PAUSE_MS = 5000;
+const TTS_SPEED_KEY = "litoranea-tts-speed";
+const TTS_SILENCE_STOP_MS = 10000; // silence > 10s after TTS = stop, don't repeat
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);
@@ -95,6 +98,12 @@ const LitoraneaChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [ttsSpeed, setTtsSpeed] = useState(() => {
+    const saved = parseFloat(localStorage.getItem(TTS_SPEED_KEY) || "1.0");
+    return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
+  });
+  const [showSpeedControl, setShowSpeedControl] = useState(false);
+  const hasSpokenFirstRef = useRef(false); // track if user spoke first
 
   // SulCoin inline state
   const [showWalletActions, setShowWalletActions] = useState(false);
@@ -128,21 +137,20 @@ const LitoraneaChat = () => {
   // TTS using native Web Speech API
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
     if (!voiceEnabled) {
-      if (activateMicAfter) setTimeout(() => startListeningWithTimeout(), 500);
+      if (activateMicAfter && hasSpokenFirstRef.current) setTimeout(() => startListeningWithTimeout(), 500);
       return;
     }
     const clean = cleanTextForTTS(text);
     if (!clean || clean.length < 3) return;
-    autoMicAfterSpeakRef.current = activateMicAfter;
+    autoMicAfterSpeakRef.current = activateMicAfter && hasSpokenFirstRef.current;
     try {
       setIsSpeaking(true);
       const synth = window.speechSynthesis;
       synth.cancel();
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.lang = "pt-BR";
-      utterance.rate = 0.95;
+      utterance.rate = ttsSpeed;
       utterance.pitch = 1.1;
-      // Select female pt-BR voice
       const voices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "fernanda", "maria", "ana"];
       const ptBrVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
@@ -159,7 +167,7 @@ const LitoraneaChat = () => {
       utterance.onerror = () => { setIsSpeaking(false); };
       synth.speak(utterance);
     } catch { setIsSpeaking(false); }
-  }, [voiceEnabled]);
+  }, [voiceEnabled, ttsSpeed]);
 
   // STT with continuous listening, 5s speech pause tolerance, 15s silence cancel, 30s max
   const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -264,9 +272,7 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
-    const greetingText = `Oi, tudo bem? Sou a Litorânea, tua amiga do sul! 🌬️💚
-
-Pra eu te ajudar melhor, me diz: você é…`;
+    const greetingText = `Oi, sou a Litorânea, que mora no aplicativo Vento Sul, uma brisa suave que traz conhecimento pro sul do Brasil. Como posso te ajudar hoje? 🌬️💚`;
     const greetingOptions = [
       "🏖️ Turista",
       "🏡 Morador",
@@ -277,16 +283,39 @@ Pra eu te ajudar melhor, me diz: você é…`;
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    setTimeout(() => speakText(greetingText, true), 600);
+    // Speak greeting but DON'T auto-open mic — wait for user to speak first
+    setTimeout(() => speakText(greetingText, false), 600);
   }, []); // eslint-disable-line
 
   // Send message
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    hasSpokenFirstRef.current = true; // user has interacted
 
-    // Admin mode detection — password OR natural language trigger
+    // Speed voice commands
     const trimmed = text.trim();
     const lower = trimmed.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const speedUpMatch = lower.includes("fala mais rapido") || lower.includes("mais rapida") || lower.includes("acelera");
+    const speedDownMatch = lower.includes("fala devagar") || lower.includes("mais devagar") || lower.includes("fala mais lento") || lower.includes("desacelera");
+
+    if (speedUpMatch || speedDownMatch) {
+      const newSpeed = speedUpMatch
+        ? Math.min(1.5, Math.round((ttsSpeed + 0.1) * 10) / 10)
+        : Math.max(0.8, Math.round((ttsSpeed - 0.1) * 10) / 10);
+      setTtsSpeed(newSpeed);
+      localStorage.setItem(TTS_SPEED_KEY, String(newSpeed));
+      const speedMsg = speedUpMatch
+        ? `Bah, agora tô falando a ${newSpeed}x! Mais rápida pra ti! ⚡`
+        : `Beleza, desacelerando pra ${newSpeed}x. Mais calma agora! 🌊`;
+      setMessages(prev => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: speedMsg },
+      ]);
+      setInput("");
+      setTimeout(() => speakText(speedMsg, true), 300);
+      return;
+    }
     const isAdminTrigger =
       trimmed === "EERB19537666" ||
       (lower.includes("modo administrad") && lower.includes("erasto")) ||
@@ -633,8 +662,35 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         >
           {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
+        <button
+          onClick={() => setShowSpeedControl(!showSpeedControl)}
+          className={`p-2 rounded-full transition-colors ${showSpeedControl ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}
+          title={`Velocidade: ${ttsSpeed}x`}
+        >
+          <Gauge className="w-4 h-4" />
+        </button>
         <Sparkles className="w-5 h-5 text-primary" />
       </header>
+
+      {/* Speed control slider */}
+      {showSpeedControl && (
+        <div className="flex-shrink-0 px-4 py-2 bg-card border-b border-border flex items-center gap-3">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">🐢 0.8x</span>
+          <Slider
+            value={[ttsSpeed]}
+            min={0.8}
+            max={1.5}
+            step={0.1}
+            onValueChange={([v]) => {
+              setTtsSpeed(v);
+              localStorage.setItem(TTS_SPEED_KEY, String(v));
+            }}
+            className="flex-1"
+          />
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">1.5x ⚡</span>
+          <span className="text-xs font-bold text-primary min-w-[32px] text-center">{ttsSpeed}x</span>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

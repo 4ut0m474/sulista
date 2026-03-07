@@ -662,8 +662,35 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         >
           {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
+        <button
+          onClick={() => setShowSpeedControl(!showSpeedControl)}
+          className={`p-2 rounded-full transition-colors ${showSpeedControl ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}
+          title={`Velocidade: ${ttsSpeed}x`}
+        >
+          <Gauge className="w-4 h-4" />
+        </button>
         <Sparkles className="w-5 h-5 text-primary" />
       </header>
+
+      {/* Speed control slider */}
+      {showSpeedControl && (
+        <div className="flex-shrink-0 px-4 py-2 bg-card border-b border-border flex items-center gap-3">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">🐢 0.8x</span>
+          <Slider
+            value={[ttsSpeed]}
+            min={0.8}
+            max={1.5}
+            step={0.1}
+            onValueChange={([v]) => {
+              setTtsSpeed(v);
+              localStorage.setItem(TTS_SPEED_KEY, String(v));
+            }}
+            className="flex-1"
+          />
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">1.5x ⚡</span>
+          <span className="text-xs font-bold text-primary min-w-[32px] text-center">{ttsSpeed}x</span>
+        </div>
+      )}
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

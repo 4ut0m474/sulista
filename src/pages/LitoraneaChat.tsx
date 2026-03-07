@@ -252,10 +252,10 @@ const LitoraneaChat = () => {
   }, []);
 
   const stopListening = useCallback(() => {
-    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+    clearAllMicTimers();
     if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }
     setIsListening(false);
-  }, []);
+  }, [clearAllMicTimers]);
 
   const sendMessageRef = useRef<(text: string) => Promise<void>>();
 

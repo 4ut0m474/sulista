@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
+import { Slider } from "@/components/ui/slider";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
-const MIC_MAX_OPEN_MS = 30000; // mic stays open max 30s
-const SILENCE_CANCEL_MS = 15000; // silence > 15s = cancel mic
-const SPEECH_PAUSE_MS = 5000; // wait 5s after last speech before stopping
+const MIC_MAX_OPEN_MS = 30000;
+const SILENCE_CANCEL_MS = 15000;
+const SPEECH_PAUSE_MS = 5000;
+const TTS_SPEED_KEY = "litoranea-tts-speed";
+const TTS_SILENCE_STOP_MS = 10000; // silence > 10s after TTS = stop, don't repeat
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);

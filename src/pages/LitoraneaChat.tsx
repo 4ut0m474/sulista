@@ -137,21 +137,20 @@ const LitoraneaChat = () => {
   // TTS using native Web Speech API
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
     if (!voiceEnabled) {
-      if (activateMicAfter) setTimeout(() => startListeningWithTimeout(), 500);
+      if (activateMicAfter && hasSpokenFirstRef.current) setTimeout(() => startListeningWithTimeout(), 500);
       return;
     }
     const clean = cleanTextForTTS(text);
     if (!clean || clean.length < 3) return;
-    autoMicAfterSpeakRef.current = activateMicAfter;
+    autoMicAfterSpeakRef.current = activateMicAfter && hasSpokenFirstRef.current;
     try {
       setIsSpeaking(true);
       const synth = window.speechSynthesis;
       synth.cancel();
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.lang = "pt-BR";
-      utterance.rate = 0.95;
+      utterance.rate = ttsSpeed;
       utterance.pitch = 1.1;
-      // Select female pt-BR voice
       const voices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const femaleKeywords = ["female", "feminino", "mulher", "woman", "luciana", "vitoria", "fernanda", "maria", "ana"];
       const ptBrVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
@@ -168,7 +167,7 @@ const LitoraneaChat = () => {
       utterance.onerror = () => { setIsSpeaking(false); };
       synth.speak(utterance);
     } catch { setIsSpeaking(false); }
-  }, [voiceEnabled]);
+  }, [voiceEnabled, ttsSpeed]);
 
   // STT with continuous listening, 5s speech pause tolerance, 15s silence cancel, 30s max
   const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -98,6 +98,12 @@ const LitoraneaChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [ttsSpeed, setTtsSpeed] = useState(() => {
+    const saved = parseFloat(localStorage.getItem(TTS_SPEED_KEY) || "1.0");
+    return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
+  });
+  const [showSpeedControl, setShowSpeedControl] = useState(false);
+  const hasSpokenFirstRef = useRef(false); // track if user spoke first
 
   // SulCoin inline state
   const [showWalletActions, setShowWalletActions] = useState(false);

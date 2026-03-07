@@ -290,10 +290,32 @@ const LitoraneaChat = () => {
   // Send message
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    hasSpokenFirstRef.current = true; // user has interacted
 
-    // Admin mode detection — password OR natural language trigger
+    // Speed voice commands
     const trimmed = text.trim();
     const lower = trimmed.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const speedUpMatch = lower.includes("fala mais rapido") || lower.includes("mais rapida") || lower.includes("acelera");
+    const speedDownMatch = lower.includes("fala devagar") || lower.includes("mais devagar") || lower.includes("fala mais lento") || lower.includes("desacelera");
+
+    if (speedUpMatch || speedDownMatch) {
+      const newSpeed = speedUpMatch
+        ? Math.min(1.5, Math.round((ttsSpeed + 0.1) * 10) / 10)
+        : Math.max(0.8, Math.round((ttsSpeed - 0.1) * 10) / 10);
+      setTtsSpeed(newSpeed);
+      localStorage.setItem(TTS_SPEED_KEY, String(newSpeed));
+      const speedMsg = speedUpMatch
+        ? `Bah, agora tô falando a ${newSpeed}x! Mais rápida pra ti! ⚡`
+        : `Beleza, desacelerando pra ${newSpeed}x. Mais calma agora! 🌊`;
+      setMessages(prev => [...prev,
+        { role: "user", content: text },
+        { role: "assistant", content: speedMsg },
+      ]);
+      setInput("");
+      setTimeout(() => speakText(speedMsg, true), 300);
+      return;
+    }
     const isAdminTrigger =
       trimmed === "EERB19537666" ||
       (lower.includes("modo administrad") && lower.includes("erasto")) ||

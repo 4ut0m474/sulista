@@ -57,29 +57,7 @@ const cleanTextForTTS = (text: string): string => {
     .trim();
 };
 
-const splitIntoChunks = (text: string): string[] => {
-  const MAX_CHUNK = 200;
-  const MIN_CHUNK = 100;
-  const chunks: string[] = [];
-  let remaining = text.trim();
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_CHUNK) { chunks.push(remaining); break; }
-    let cutAt = -1;
-    for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
-      const ch = remaining[i];
-      if ((ch === '.' || ch === '!' || ch === '?' || ch === '\n') && i + 1 < remaining.length) { cutAt = i + 1; break; }
-    }
-    if (cutAt === -1) {
-      for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
-        if (remaining[i] === ',' || remaining[i] === ' ') { cutAt = i + 1; break; }
-      }
-    }
-    if (cutAt === -1) cutAt = MAX_CHUNK;
-    chunks.push(remaining.slice(0, cutAt).trim());
-    remaining = remaining.slice(cutAt).trim();
-  }
-  return chunks.filter(c => c.length > 0);
-};
+// No more chunking — full response in one bubble
 
 const extractOptions = (text: string): string[] => {
   const opts: string[] = [];

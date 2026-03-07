@@ -12,7 +12,9 @@ type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
-const SILENCE_TIMEOUT_MS = 10000;
+const MIC_MAX_OPEN_MS = 30000; // mic stays open max 30s
+const SILENCE_CANCEL_MS = 15000; // silence > 15s = cancel mic
+const SPEECH_PAUSE_MS = 5000; // wait 5s after last speech before stopping
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);
@@ -55,29 +57,7 @@ const cleanTextForTTS = (text: string): string => {
     .trim();
 };
 
-const splitIntoChunks = (text: string): string[] => {
-  const MAX_CHUNK = 200;
-  const MIN_CHUNK = 100;
-  const chunks: string[] = [];
-  let remaining = text.trim();
-  while (remaining.length > 0) {
-    if (remaining.length <= MAX_CHUNK) { chunks.push(remaining); break; }
-    let cutAt = -1;
-    for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
-      const ch = remaining[i];
-      if ((ch === '.' || ch === '!' || ch === '?' || ch === '\n') && i + 1 < remaining.length) { cutAt = i + 1; break; }
-    }
-    if (cutAt === -1) {
-      for (let i = Math.min(MAX_CHUNK, remaining.length) - 1; i >= MIN_CHUNK; i--) {
-        if (remaining[i] === ',' || remaining[i] === ' ') { cutAt = i + 1; break; }
-      }
-    }
-    if (cutAt === -1) cutAt = MAX_CHUNK;
-    chunks.push(remaining.slice(0, cutAt).trim());
-    remaining = remaining.slice(cutAt).trim();
-  }
-  return chunks.filter(c => c.length > 0);
-};
+// No more chunking — full response in one bubble
 
 const extractOptions = (text: string): string[] => {
   const opts: string[] = [];
@@ -181,7 +161,11 @@ const LitoraneaChat = () => {
     } catch { setIsSpeaking(false); }
   }, [voiceEnabled]);
 
-  // STT with 10-second silence timeout
+  // STT with continuous listening, 5s speech pause tolerance, 15s silence cancel, 30s max
+  const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const speechPauseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const accumulatedTranscriptRef = useRef("");
+
   const startListeningWithTimeout = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -191,32 +175,69 @@ const LitoraneaChat = () => {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    recognition.continuous = true;
+    accumulatedTranscriptRef.current = "";
 
-    // 10-second silence timeout
-    silenceTimerRef.current = setTimeout(() => {
+    // Hard max: 30s open
+    maxTimerRef.current = setTimeout(() => {
       recognition.stop();
-    }, SILENCE_TIMEOUT_MS);
+    }, MIC_MAX_OPEN_MS);
+
+    // Initial silence cancel: 15s with no speech at all
+    silenceTimerRef.current = setTimeout(() => {
+      if (!accumulatedTranscriptRef.current.trim()) {
+        recognition.stop();
+      }
+    }, SILENCE_CANCEL_MS);
+
+    const resetSpeechPause = () => {
+      if (speechPauseRef.current) clearTimeout(speechPauseRef.current);
+      speechPauseRef.current = setTimeout(() => {
+        // 5s since last speech detected — finalize
+        recognition.stop();
+      }, SPEECH_PAUSE_MS);
+    };
 
     recognition.onresult = (event: any) => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      const transcript = event.results[0][0].transcript;
-      if (transcript.trim()) {
-        setInput(transcript);
-        setTimeout(() => sendMessageRef.current?.(transcript), 300);
+      // Clear initial silence timer once we hear something
+      if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+
+      let finalTranscript = "";
+      let interimTranscript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
       }
+
+      if (finalTranscript.trim()) {
+        accumulatedTranscriptRef.current = finalTranscript.trim();
+      }
+
+      // Show interim in input
+      setInput((finalTranscript + interimTranscript).trim());
+
+      // Reset 5s pause timer on any speech
+      resetSpeechPause();
     };
 
     recognition.onerror = () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      clearAllMicTimers();
       setIsListening(false);
     };
 
     recognition.onend = () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      clearAllMicTimers();
       setIsListening(false);
+      const transcript = accumulatedTranscriptRef.current.trim() || input.trim();
+      if (transcript) {
+        setInput(transcript);
+        setTimeout(() => sendMessageRef.current?.(transcript), 300);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -224,11 +245,17 @@ const LitoraneaChat = () => {
     setIsListening(true);
   }, []);
 
-  const stopListening = useCallback(() => {
+  const clearAllMicTimers = useCallback(() => {
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+    if (maxTimerRef.current) { clearTimeout(maxTimerRef.current); maxTimerRef.current = null; }
+    if (speechPauseRef.current) { clearTimeout(speechPauseRef.current); speechPauseRef.current = null; }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    clearAllMicTimers();
     if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }
     setIsListening(false);
-  }, []);
+  }, [clearAllMicTimers]);
 
   const sendMessageRef = useRef<(text: string) => Promise<void>>();
 
@@ -426,23 +453,18 @@ Pra eu te ajudar melhor, me diz: você é…`;
         }
       }
 
-      // Final: split into chunked bubbles
+      // Final: single bubble with full response
       if (fullResponse) {
-        const finalChunks = splitIntoChunks(fullResponse);
         const extractedOptions = extractOptions(fullResponse);
 
         setMessages(prev => {
-          let lastUserIdx = -1;
-          for (let i = prev.length - 1; i >= 0; i--) {
-            if (prev[i].role === "user") { lastUserIdx = i; break; }
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && !last.options) {
+            return prev.map((m, i) => i === prev.length - 1
+              ? { ...m, content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
+              : m);
           }
-          const before = prev.slice(0, lastUserIdx + 1);
-          const chunkedMsgs: Msg[] = finalChunks.map((chunk, idx) => ({
-            role: "assistant" as const,
-            content: chunk,
-            ...(idx === finalChunks.length - 1 && extractedOptions.length > 0 ? { options: extractedOptions } : {}),
-          }));
-          return [...before, ...chunkedMsgs];
+          return [...prev, { role: "assistant", content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
         });
 
         // Speak and auto-activate mic after
@@ -769,8 +791,8 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
               </div>
               <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-green-400 animate-ping opacity-30" />
             </div>
-            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo... fala comigo!</p>
-            <p className="text-[10px] text-muted-foreground">Silêncio por 10s desativa o mic</p>
+            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo... fala sem pressa!</p>
+            <p className="text-[10px] text-muted-foreground">Espero até 5s de pausa • máx 30s</p>
           </div>
         )}
       </div>

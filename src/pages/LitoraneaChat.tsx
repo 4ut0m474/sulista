@@ -453,23 +453,18 @@ Pra eu te ajudar melhor, me diz: você é…`;
         }
       }
 
-      // Final: split into chunked bubbles
+      // Final: single bubble with full response
       if (fullResponse) {
-        const finalChunks = splitIntoChunks(fullResponse);
         const extractedOptions = extractOptions(fullResponse);
 
         setMessages(prev => {
-          let lastUserIdx = -1;
-          for (let i = prev.length - 1; i >= 0; i--) {
-            if (prev[i].role === "user") { lastUserIdx = i; break; }
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && !last.options) {
+            return prev.map((m, i) => i === prev.length - 1
+              ? { ...m, content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
+              : m);
           }
-          const before = prev.slice(0, lastUserIdx + 1);
-          const chunkedMsgs: Msg[] = finalChunks.map((chunk, idx) => ({
-            role: "assistant" as const,
-            content: chunk,
-            ...(idx === finalChunks.length - 1 && extractedOptions.length > 0 ? { options: extractedOptions } : {}),
-          }));
-          return [...before, ...chunkedMsgs];
+          return [...prev, { role: "assistant", content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
         });
 
         // Speak and auto-activate mic after

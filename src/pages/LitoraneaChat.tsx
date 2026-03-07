@@ -272,9 +272,7 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
-    const greetingText = `Oi, tudo bem? Sou a Litorânea, tua amiga do sul! 🌬️💚
-
-Pra eu te ajudar melhor, me diz: você é…`;
+    const greetingText = `Oi, sou a Litorânea, que mora no aplicativo Vento Sul, uma brisa suave que traz conhecimento pro sul do Brasil. Como posso te ajudar hoje? 🌬️💚`;
     const greetingOptions = [
       "🏖️ Turista",
       "🏡 Morador",
@@ -285,7 +283,8 @@ Pra eu te ajudar melhor, me diz: você é…`;
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    setTimeout(() => speakText(greetingText, true), 600);
+    // Speak greeting but DON'T auto-open mic — wait for user to speak first
+    setTimeout(() => speakText(greetingText, false), 600);
   }, []); // eslint-disable-line
 
   // Send message

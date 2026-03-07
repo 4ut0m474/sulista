@@ -161,7 +161,11 @@ const LitoraneaChat = () => {
     } catch { setIsSpeaking(false); }
   }, [voiceEnabled]);
 
-  // STT with 10-second silence timeout
+  // STT with continuous listening, 5s speech pause tolerance, 15s silence cancel, 30s max
+  const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const speechPauseRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const accumulatedTranscriptRef = useRef("");
+
   const startListeningWithTimeout = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -171,37 +175,80 @@ const LitoraneaChat = () => {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    recognition.continuous = true;
+    accumulatedTranscriptRef.current = "";
 
-    // 10-second silence timeout
-    silenceTimerRef.current = setTimeout(() => {
+    // Hard max: 30s open
+    maxTimerRef.current = setTimeout(() => {
       recognition.stop();
-    }, SILENCE_TIMEOUT_MS);
+    }, MIC_MAX_OPEN_MS);
+
+    // Initial silence cancel: 15s with no speech at all
+    silenceTimerRef.current = setTimeout(() => {
+      if (!accumulatedTranscriptRef.current.trim()) {
+        recognition.stop();
+      }
+    }, SILENCE_CANCEL_MS);
+
+    const resetSpeechPause = () => {
+      if (speechPauseRef.current) clearTimeout(speechPauseRef.current);
+      speechPauseRef.current = setTimeout(() => {
+        // 5s since last speech detected — finalize
+        recognition.stop();
+      }, SPEECH_PAUSE_MS);
+    };
 
     recognition.onresult = (event: any) => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      const transcript = event.results[0][0].transcript;
-      if (transcript.trim()) {
+      // Clear initial silence timer once we hear something
+      if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+
+      let finalTranscript = "";
+      let interimTranscript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript.trim()) {
+        accumulatedTranscriptRef.current = finalTranscript.trim();
+      }
+
+      // Show interim in input
+      setInput((finalTranscript + interimTranscript).trim());
+
+      // Reset 5s pause timer on any speech
+      resetSpeechPause();
+    };
+
+    recognition.onerror = () => {
+      clearAllMicTimers();
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      clearAllMicTimers();
+      setIsListening(false);
+      const transcript = accumulatedTranscriptRef.current.trim() || input.trim();
+      if (transcript) {
         setInput(transcript);
         setTimeout(() => sendMessageRef.current?.(transcript), 300);
       }
     };
 
-    recognition.onerror = () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      setIsListening(false);
-    };
-
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
+  }, []);
+
+  const clearAllMicTimers = useCallback(() => {
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+    if (maxTimerRef.current) { clearTimeout(maxTimerRef.current); maxTimerRef.current = null; }
+    if (speechPauseRef.current) { clearTimeout(speechPauseRef.current); speechPauseRef.current = null; }
   }, []);
 
   const stopListening = useCallback(() => {

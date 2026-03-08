@@ -77,7 +77,7 @@ const CityStateSwitcher = ({ currentState, currentCity, className = "" }: CitySt
           <ChevronDown className={`w-4 h-4 transition-transform ${showCities ? "rotate-180" : ""}`} />
         </button>
         {showCities && (
-          <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-xl shadow-card z-50 min-w-[260px] max-h-[70vh] overflow-y-auto">
+          <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-xl shadow-card min-w-[260px] max-h-[70vh] overflow-y-auto" style={{ zIndex: 9999 }}>
             {cities.map(c => {
               const subLocs = getCitySubLocations(c, currentState);
               const isExpanded = expandedCity === c;

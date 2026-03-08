@@ -17,14 +17,6 @@ type Establishment = {
   address: string | null;
 };
 
-const getDeviceFingerprint = () => {
-  let fp = localStorage.getItem("vento-sul-device-fp");
-  if (!fp) {
-    fp = crypto.randomUUID();
-    localStorage.setItem("vento-sul-device-fp", fp);
-  }
-  return fp;
-};
 
 const Opinion = () => {
   const { state, city } = useParams<{ state: string; city: string }>();

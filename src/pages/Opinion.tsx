@@ -96,57 +96,6 @@ const Opinion = () => {
             </div>
           )}
 
-          {/* Voting panel */}
-          {showVotePanel && (
-            <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-primary/30 p-4 shadow-card animate-fade-in space-y-3">
-              <h3 className="font-bold text-foreground">🗳️ Painel de Votação</h3>
-              
-              {!selectedEstablishment ? (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Selecione um comércio para votar:</p>
-                  {establishments.map(est => (
-                    <button key={est.id} onClick={() => setSelectedEstablishment(est)}
-                      className="w-full flex items-center gap-3 p-2 rounded-xl bg-background/50 border border-border/30 hover:border-primary/50 transition-all text-left">
-                      <img src={est.photo_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&q=60"} alt={est.name} className="w-10 h-10 rounded-lg object-cover" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{est.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{est.category}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-2 bg-primary/5 rounded-xl">
-                    <img src={selectedEstablishment.photo_url || ""} alt={selectedEstablishment.name} className="w-12 h-12 rounded-lg object-cover" />
-                    <div>
-                      <p className="font-bold text-foreground text-sm">{selectedEstablishment.name}</p>
-                      <button onClick={() => setSelectedEstablishment(null)} className="text-[10px] text-primary underline">Trocar</button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-foreground mb-1 block">Sua nota</label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <button key={n} onClick={() => setRating(n)} className="p-0.5">
-                          <Star className={`w-7 h-7 transition-colors ${n <= rating ? "text-secondary fill-secondary" : "text-muted-foreground/30"}`} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-foreground mb-1 block">Comentário (opcional)</label>
-                    <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="O que você achou?" maxLength={MAX_COMMENT}
-                      className="w-full h-20 rounded-xl border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                  </div>
-                  <button onClick={handleVote} disabled={rating === 0 || submitting}
-                    className="w-full py-2.5 rounded-xl bg-gradient-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02] active:scale-95 transition-all">
-                    <Send className="w-4 h-4" /> {submitting ? "Enviando..." : "Enviar Voto"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Top 3 Podium */}
           {loading ? (

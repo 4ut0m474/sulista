@@ -161,6 +161,14 @@ const Opinion = () => {
       </div>
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
+      
+      <VoteModal
+        open={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        city={cityName}
+        stateAbbr={state || ""}
+        onVoted={handleVoteCompleted}
+      />
     </div>
   );
 };

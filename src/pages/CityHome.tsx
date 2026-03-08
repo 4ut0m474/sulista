@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
@@ -21,17 +22,9 @@ const defaultCarouselAds = [
   { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" },
   { title: "Pousada Serra Verde", subtitle: "Conforto e natureza", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80" },
   { title: "Artesanato Local", subtitle: "Peças únicas feitas à mão", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80" },
-  { title: "Café & Confeitaria", subtitle: "Sabores que aquecem", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80" },
 ];
 
-const cityBackgrounds: Record<string, string> = {
-  "Curitiba": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-  "Foz do Iguaçu": "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&q=80",
-  "Florianópolis": "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80",
-  "Gramado": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-  "Porto Alegre": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-  "default": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-};
+const DEFAULT_BG = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80";
 
 const iconThemes = [
   { bg: "from-primary/20 to-primary/5", hoverBg: "from-primary/30 to-primary/10", text: "text-primary" },
@@ -63,15 +56,36 @@ const CityHome = () => {
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
   const [cityData, setCityData] = useState<CityData>(defaultData);
   const [carouselAds, setCarouselAds] = useState(defaultCarouselAds);
+  const [backgroundUrl, setBackgroundUrl] = useState(DEFAULT_BG);
 
   useEffect(() => {
     const loadData = async () => {
-      const [cfg, citySettings, adminCarousel] = await Promise.all([
+      const [cfg, citySettings, adminCarousel, cityImagesResult] = await Promise.all([
         getAdminConfig(),
         getAdminCityData(state || "", cityName, "city_settings"),
         getAdminCityData(state || "", cityName, "carousel"),
+        supabase.from("cidade_imagens").select("*").eq("state_abbr", state || "").eq("cidade", cityName).maybeSingle(),
       ]);
       setConfig(cfg);
+
+      // City images from DB
+      const ci = cityImagesResult.data as any;
+      if (ci?.url_fundo) {
+        setBackgroundUrl(ci.url_fundo);
+      } else {
+        setBackgroundUrl(DEFAULT_BG);
+      }
+
+      // Build carousel from DB images (city-specific photos) + admin carousel ads
+      const dbCarouselImages: typeof defaultCarouselAds = [];
+      if (ci) {
+        [ci.url_carrossel1, ci.url_carrossel2, ci.url_carrossel3, ci.url_carrossel4, ci.url_carrossel5]
+          .filter(Boolean)
+          .forEach((url: string, idx: number) => {
+            dbCarouselImages.push({ title: `${cityName}`, subtitle: `Descubra ${cityName}`, image: url });
+          });
+      }
+
       if (citySettings && typeof citySettings === "object" && !Array.isArray(citySettings)) {
         const s = citySettings as Record<string, string>;
         setCityData({
@@ -82,20 +96,20 @@ const CityHome = () => {
           festivities: s.festivities || defaultData.festivities,
         });
       }
-      if (Array.isArray(adminCarousel)) {
-        setCarouselAds(
-          adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
-            title: c.name || c.title || "",
-            subtitle: c.description || c.subtitle || "",
-            image: c.image || "",
-          }))
-        );
+
+      if (Array.isArray(adminCarousel) && adminCarousel.length > 0) {
+        const adminAds = adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
+          title: c.name || c.title || "",
+          subtitle: c.description || c.subtitle || "",
+          image: c.image || "",
+        }));
+        setCarouselAds(adminAds.length > 0 ? adminAds : dbCarouselImages.length > 0 ? dbCarouselImages : defaultCarouselAds);
+      } else {
+        setCarouselAds(dbCarouselImages.length > 0 ? dbCarouselImages : defaultCarouselAds);
       }
     };
     loadData();
   }, [state, cityName]);
-
-  const backgroundUrl = cityBackgrounds[cityData.name] || cityBackgrounds["default"];
 
   useEffect(() => {
     setCurrentSlide(0);

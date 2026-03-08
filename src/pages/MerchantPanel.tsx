@@ -19,13 +19,6 @@ const MerchantPanel = () => {
   const [error, setError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Admin login state
-  const [adminLogin, setAdminLogin] = useState("");
-  const [adminPass, setAdminPass] = useState("");
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminError, setAdminError] = useState("");
-  const [adminLoading, setAdminLoading] = useState(false);
-  const { signIn: adminSignIn } = useAdminAuth();
 
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
 

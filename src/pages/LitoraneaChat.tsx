@@ -10,6 +10,22 @@ import { Slider } from "@/components/ui/slider";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
+type UserProfile = {
+  id?: string;
+  user_id?: string;
+  user_type?: string;
+  nome?: string;
+  idade?: number;
+  cidade?: string;
+  interesses_geral?: string[];
+  perfil_gastronomico?: Record<string, any>;
+  preferencias_compras_coletivas?: Record<string, any>;
+  necessidades?: Record<string, any>;
+  aprendizado?: Record<string, any>;
+  historico_conversas?: Array<{ data: string; topico: string; resumo: string }>;
+  ultima_interacao?: string;
+};
+
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
@@ -17,7 +33,7 @@ const MIC_MAX_OPEN_MS = 30000;
 const SILENCE_CANCEL_MS = 15000;
 const SPEECH_PAUSE_MS = 5000;
 const TTS_SPEED_KEY = "litoranea-tts-speed";
-const TTS_SILENCE_STOP_MS = 10000; // silence > 10s after TTS = stop, don't repeat
+const TTS_SILENCE_STOP_MS = 10000;
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);

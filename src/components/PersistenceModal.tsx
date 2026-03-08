@@ -6,6 +6,7 @@ import PersistenceIdentityStep from "@/components/persistence/PersistenceIdentit
 import {
   PERSISTENCE_KEYS,
   syncPersistenceLocalState,
+  clearPersistenceLocalState,
   type PersistenceVerificationStatus,
 } from "@/lib/persistence";
 import { isValidEmail, persistenceIdentitySchema, sanitizeText } from "@/lib/validation";
@@ -85,6 +86,13 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
   };
 
   const handleClose = () => {
+    // If not yet done/active, clear all persistence state
+    if (step !== "done" && !isActive) {
+      clearPersistenceLocalState();
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
+    }
     resetState();
     onClose();
   };

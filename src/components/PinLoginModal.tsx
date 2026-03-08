@@ -2,6 +2,7 @@ import { useState } from "react";
 import { KeyRound, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { clearPersistenceLocalState } from "@/lib/persistence";
 
 interface PinLoginModalProps {
   open: boolean;
@@ -83,10 +84,16 @@ const PinLoginModal = ({ open, onSuccess, onCancel }: PinLoginModalProps) => {
             Verificar PIN
           </button>
           <button
-            onClick={onCancel}
+            onClick={() => {
+              // Clear all persistence data — go fully anonymous
+              clearPersistenceLocalState();
+              supabase.auth.signOut().catch(() => {});
+              toast("Modo anônimo ativado. Nenhum dado salvo.", { icon: "🔴" });
+              onCancel();
+            }}
             className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
           >
-            Cancelar
+            Cancelar e ficar anônimo
           </button>
         </div>
       </div>

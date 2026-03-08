@@ -21,18 +21,13 @@ type Establishment = {
 const Opinion = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const base = `/city/${state}/${city}`;
   const cityName = decodeURIComponent(city || "");
   const bgUrl = pageBackgrounds.opinion;
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showVotePanel, setShowVotePanel] = useState(false);
-  const [selectedEstablishment, setSelectedEstablishment] = useState<Establishment | null>(null);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {

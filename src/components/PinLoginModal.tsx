@@ -2,6 +2,7 @@ import { useState } from "react";
 import { KeyRound, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { clearPersistenceLocalState } from "@/lib/persistence";
 
 interface PinLoginModalProps {
   open: boolean;

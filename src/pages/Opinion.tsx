@@ -47,41 +47,8 @@ const Opinion = () => {
     setLoading(false);
   };
 
-  const handleVote = async () => {
-    if (!selectedEstablishment || rating === 0) return;
-    setSubmitting(true);
-    const fp = getDeviceFingerprint();
-    const sanitized = sanitizeText(comment);
-
-    const { error } = await supabase.from("votes").insert({
-      establishment_id: selectedEstablishment.id,
-      rating,
-      comment: sanitized || null,
-      device_fingerprint: fp,
-    } as any);
-
-    if (error) {
-      if (error.code === "23505") {
-        toast({ title: "Você já votou neste comércio!", description: "Cada pessoa pode votar apenas uma vez.", variant: "destructive" });
-      } else {
-        toast({ title: "Erro ao votar", description: error.message, variant: "destructive" });
-      }
-    } else {
-      const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
-      if (isPersistent) {
-        toast({ title: "Voto registrado! +0,05 SulCoin 💰", description: `Obrigado por avaliar ${selectedEstablishment.name}. Você ganhou 0,05 SulCoin!` });
-        const currentCoins = parseFloat(localStorage.getItem("sulcoins-balance") || "0");
-        localStorage.setItem("sulcoins-balance", String(currentCoins + 0.05));
-      } else {
-        toast({ title: "Voto registrado! ✅", description: `Obrigado por avaliar ${selectedEstablishment.name}. Ative a persistência para ganhar SulCoins!` });
-      }
-      setSelectedEstablishment(null);
-      setRating(0);
-      setComment("");
-      setShowVotePanel(false);
-      fetchEstablishments();
-    }
-    setSubmitting(false);
+  const handleVoteCompleted = () => {
+    fetchEstablishments(); // Refresh the list to show updated ratings
   };
 
   const topThree = establishments.slice(0, 3);

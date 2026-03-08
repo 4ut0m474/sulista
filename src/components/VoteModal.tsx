@@ -19,15 +19,6 @@ interface VoteModalProps {
   onVoted?: () => void;
 }
 
-const getDeviceFingerprint = () => {
-  let fp = localStorage.getItem("vento-sul-device-fp");
-  if (!fp) {
-    fp = crypto.randomUUID();
-    localStorage.setItem("vento-sul-device-fp", fp);
-  }
-  return fp;
-};
-
 const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) => {
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [selected, setSelected] = useState<Establishment | null>(null);
@@ -35,13 +26,24 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState(true);
 
   useEffect(() => {
     if (!open) return;
     setSelected(null);
     setRating(0);
     setComment("");
-    const load = async () => {
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.id || null;
+      setUserId(uid);
+      const persistent = localStorage.getItem("vento-sul-persistent") === "true";
+      setIsAnonymous(!uid || !persistent);
+    };
+
+    const loadEstablishments = async () => {
       setLoading(true);
       const { data } = await (supabase as any)
         .from("establishments_public")
@@ -52,31 +54,27 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
       if (data) setEstablishments(data);
       setLoading(false);
     };
-    load();
+
+    checkAuth();
+    loadEstablishments();
   }, [open, city, stateAbbr]);
 
   const handleVote = async () => {
-    if (!selected || rating === 0) return;
+    if (!selected || rating === 0 || !userId) return;
     setSubmitting(true);
-    const fp = getDeviceFingerprint();
     const sanitized = sanitizeText(comment);
 
-    const { error } = await supabase.from("votes").insert({
-      establishment_id: selected.id,
-      rating,
-      comment: sanitized || null,
-      device_fingerprint: fp,
-    } as any);
+    const { error } = await (supabase as any).from("avaliacoes").upsert({
+      comercio_id: selected.id,
+      user_id: userId,
+      nota: rating,
+      comentario: sanitized || null,
+    }, { onConflict: "user_id,comercio_id" });
 
     if (error) {
-      if (error.code === "23505") {
-        toast.error("Você já votou neste comércio!");
-      } else {
-        toast.error("Erro ao votar: " + error.message);
-      }
+      toast.error("Erro ao votar: " + error.message);
     } else {
-      const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
-      toast.success(isPersistent ? "Voto enviado! +0,05 SulCoin 💰" : "Voto enviado! ✅");
+      toast.success("Voto enviado! ✅");
       onVoted?.();
       onClose();
     }
@@ -95,7 +93,14 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
           </button>
         </div>
 
-        {loading ? (
+        {isAnonymous ? (
+          <div className="py-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Ative a persistência para poder votar.</p>
+            <button onClick={onClose} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-sm">
+              Entendi
+            </button>
+          </div>
+        ) : loading ? (
           <div className="py-8 text-center">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           </div>

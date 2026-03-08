@@ -26,20 +26,6 @@ const MerchantPanel = () => {
     getAdminConfig().then(setConfig);
   }, []);
 
-  const handleAdminLogin = async () => {
-    if (!adminLogin || !adminPass) {
-      setAdminError("Preencha todos os campos");
-      return;
-    }
-    setAdminLoading(true);
-    const { error } = await adminSignIn(adminLogin, adminPass);
-    setAdminLoading(false);
-    if (error) {
-      setAdminError(error);
-    } else {
-      navigate(`${base}/admin`);
-    }
-  };
 
   const handleMerchantLogin = async () => {
     const name = sanitizeText(stallName);

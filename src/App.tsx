@@ -18,7 +18,6 @@ import Events from "./pages/Events";
 import Trails from "./pages/Trails";
 import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
-import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import GroupBuy from "./pages/GroupBuy";
 

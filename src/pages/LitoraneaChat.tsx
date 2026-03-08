@@ -583,11 +583,6 @@ const LitoraneaChat = () => {
     }
   };
 
-  // Try to extract profile info from user messages
-  const tryExtractProfileData = (aiResponse: string) => {
-    // This is handled by the AI's system prompt which asks profiling questions
-    // Profile data is saved when user responds to specific questions
-  };
 
   // SulCoin detection & inline actions
   const isSulcoinTrigger = (text: string) => {

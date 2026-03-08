@@ -162,20 +162,21 @@ const CityHome = () => {
                 <button
                   onClick={() => {
                     const persistent = localStorage.getItem("vento-sul-persistent") === "true";
-                    if (!persistent) {
+                    const status = localStorage.getItem("vento-sul-persistence-status");
+                    if (!persistent || status !== "approved") {
                       navigate("/");
                     }
                   }}
                   className={`w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border flex items-center justify-center shadow-card ${
-                    localStorage.getItem("vento-sul-persistent") === "true"
+                    localStorage.getItem("vento-sul-persistence-status") === "approved"
                       ? "border-green-500"
                       : "border-destructive/50"
                   }`}
                   aria-label="Status persistência"
-                  title={localStorage.getItem("vento-sul-persistent") === "true" ? "Persistência ativa" : "Modo anônimo"}
+                  title={localStorage.getItem("vento-sul-persistence-status") === "approved" ? "Persistência aprovada ✅" : "Modo anônimo 🔴"}
                 >
                   <Shield className={`w-4 h-4 ${
-                    localStorage.getItem("vento-sul-persistent") === "true"
+                    localStorage.getItem("vento-sul-persistence-status") === "approved"
                       ? "text-green-500"
                       : "text-destructive"
                   }`} />

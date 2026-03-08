@@ -212,7 +212,7 @@ const LitoraneaChat = () => {
     }
     const clean = cleanTextForTTS(text);
     if (!clean || clean.length < 3) return;
-    autoMicAfterSpeakRef.current = activateMicAfter && hasSpokenFirstRef.current;
+    autoMicAfterSpeakRef.current = activateMicAfter;
     try {
       setIsSpeaking(true);
       const synth = window.speechSynthesis;

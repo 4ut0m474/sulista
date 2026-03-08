@@ -74,7 +74,7 @@ const Opinion = () => {
               <button onClick={() => setShowHowTo(!showHowTo)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card" aria-label="Como votar">
                 <Info className="w-5 h-5 text-primary" />
               </button>
-              <button onClick={() => setShowVotePanel(!showVotePanel)} className="p-2 rounded-full bg-primary text-primary-foreground shadow-card" aria-label="Votar">
+              <button onClick={() => setShowVoteModal(true)} className="p-2 rounded-full bg-primary text-primary-foreground shadow-card" aria-label="Votar">
                 <ThumbsUp className="w-5 h-5" />
               </button>
             </div>

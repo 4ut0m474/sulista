@@ -21,17 +21,9 @@ const defaultCarouselAds = [
   { title: "Restaurante Colonial", subtitle: "A melhor comida do Sul", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" },
   { title: "Pousada Serra Verde", subtitle: "Conforto e natureza", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80" },
   { title: "Artesanato Local", subtitle: "Peças únicas feitas à mão", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80" },
-  { title: "Café & Confeitaria", subtitle: "Sabores que aquecem", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80" },
 ];
 
-const cityBackgrounds: Record<string, string> = {
-  "Curitiba": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-  "Foz do Iguaçu": "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&q=80",
-  "Florianópolis": "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80",
-  "Gramado": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-  "Porto Alegre": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-  "default": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-};
+const DEFAULT_BG = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80";
 
 const iconThemes = [
   { bg: "from-primary/20 to-primary/5", hoverBg: "from-primary/30 to-primary/10", text: "text-primary" },

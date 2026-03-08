@@ -316,6 +316,14 @@ const CityHome = () => {
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
 
+      <VoteModal
+        open={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        city={cityName}
+        stateAbbr={state || ""}
+        onVoted={() => setVoteKey(k => k + 1)}
+      />
+
       {showNotifModal && (
         <NotificationModal
           onComplete={() => {

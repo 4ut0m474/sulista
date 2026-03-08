@@ -386,43 +386,10 @@ const LitoraneaChat = () => {
       setTimeout(() => speakText(speedMsg, true), 300);
       return;
     }
-    const isAdminTrigger =
-      trimmed === "EERB19537666" ||
-      (lower.includes("modo administrad") && lower.includes("erasto")) ||
-      (lower.includes("modo admin") && lower.includes("erasto")) ||
-      (lower.includes("litoranea") && lower.includes("erasto") && (lower.includes("admin") || lower.includes("administrad")));
-
-    if (isAdminTrigger && !isAdminMode) {
-      setInput("");
-      setIsAdminMode(true);
-      const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
-      setMessages(prev => [
-        ...prev,
-        { role: "user", content: "🔑 ****" },
-        { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
-      ]);
-      speakText(adminGreeting, true);
-      return;
-    }
-
-    // Daily limit (except admin) — but ALWAYS allow admin trigger even when blocked
-    if (!isAdminMode) {
+    // Daily limit
+    {
       const usage = getUsageCount();
       if (usage >= DAILY_LIMIT) {
-        // Check if this message is an admin trigger BEFORE blocking
-        if (isAdminTrigger) {
-          // Allow admin activation even when limit is reached
-          setInput("");
-          setIsAdminMode(true);
-          const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
-          setMessages(prev => [
-            ...prev,
-            { role: "user", content: "🔑 ****" },
-            { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
-          ]);
-          speakText(adminGreeting, true);
-          return;
-        }
         setMessages(prev => [
           ...prev,
           { role: "user", content: text },

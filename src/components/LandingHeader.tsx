@@ -15,24 +15,6 @@ const LandingHeader = () => {
 
   const handleThemeClick = () => {
     toggleTheme();
-
-    // Count clicks — secret admin access: font must be A++ (extra-large) + 5 clicks
-    themeClicksRef.current += 1;
-
-    if (themeTimerRef.current) clearTimeout(themeTimerRef.current);
-
-    if (themeClicksRef.current >= 5) {
-      themeClicksRef.current = 0;
-      if (fontSize === "extra-large") {
-        // Secret combo achieved → navigate to admin (uses a placeholder state/city)
-        navigate("/admin-access");
-      }
-    } else {
-      // Reset counter after 3 seconds of inactivity
-      themeTimerRef.current = setTimeout(() => {
-        themeClicksRef.current = 0;
-      }, 3000);
-    }
   };
 
   return (

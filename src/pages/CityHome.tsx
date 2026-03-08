@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield } from "lucide-react";
+import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield, ThumbsUp } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";
@@ -16,6 +16,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
 import TopRatedCarousel from "@/components/TopRatedCarousel";
+import VoteModal from "@/components/VoteModal";
 
 
 const defaultCarouselAds = [
@@ -51,6 +52,8 @@ const CityHome = () => {
   const [showNotifModal, setShowNotifModal] = useState(() => {
     return !localStorage.getItem("vento-sul-notification-setup-done");
   });
+  const [showVoteModal, setShowVoteModal] = useState(false);
+  const [voteKey, setVoteKey] = useState(0);
 
   // Async admin data
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
@@ -150,7 +153,10 @@ const CityHome = () => {
                 <button onClick={() => navigate("/")} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card">
                   <svg className="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
-              </div>
+               </div>
+               <button onClick={() => setShowVoteModal(true)} className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-card hover:scale-105 active:scale-95 transition-all" aria-label="Votar">
+                 <ThumbsUp className="w-4 h-4" />
+               </button>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigate(`/city/${state}/${city}/litoranea`)}
@@ -278,7 +284,7 @@ const CityHome = () => {
             </div>
           </div>
 
-          <TopRatedCarousel city={cityName} stateAbbr={state || ""} />
+          <TopRatedCarousel key={voteKey} city={cityName} stateAbbr={state || ""} />
 
           <div className="px-4 space-y-4 mb-6">
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
@@ -309,6 +315,14 @@ const CityHome = () => {
       </div>
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
+
+      <VoteModal
+        open={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        city={cityName}
+        stateAbbr={state || ""}
+        onVoted={() => setVoteKey(k => k + 1)}
+      />
 
       {showNotifModal && (
         <NotificationModal

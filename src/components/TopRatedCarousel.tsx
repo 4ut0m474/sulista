@@ -41,7 +41,15 @@ const TopRatedCarousel = ({ city, stateAbbr }: TopRatedCarouselProps) => {
     return () => clearInterval(interval);
   }, [items.length]);
 
-  if (items.length === 0) return null;
+  if (items.length === 0) return (
+    <div className="px-4 mb-4">
+      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">⭐ Mais Votados</h3>
+      <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card text-center">
+        <Star className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">Ainda sem votos — seja o primeiro!</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="px-4 mb-4">

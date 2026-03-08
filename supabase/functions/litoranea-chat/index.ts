@@ -108,7 +108,13 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, adminMode } = await req.json();
+    const { messages, adminMode, userProfile } = await req.json();
+
+    // Build personalized system prompt with user profile
+    let personalizedPrompt = adminMode ? ADMIN_SYSTEM_PROMPT : SYSTEM_PROMPT;
+    if (userProfile && !adminMode) {
+      personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a conversa. Se campos estão vazios, pergunte naturalmente.`;
+    }
 
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
       return new Response(

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield } from "lucide-react";
+import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield, ThumbsUp } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
 import NotificationModal from "@/components/NotificationModal";

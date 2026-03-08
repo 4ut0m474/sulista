@@ -47,7 +47,8 @@ const CityHome = () => {
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const starred = isFavorite(state || "", cityName);
-  
+  const { plans } = useCityPlans(state || "", cityName);
+
   
   const [showNotifModal, setShowNotifModal] = useState(() => {
     return !localStorage.getItem("vento-sul-notification-setup-done");

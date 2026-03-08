@@ -284,7 +284,7 @@ const CityHome = () => {
             </div>
           </div>
 
-          <TopRatedCarousel city={cityName} stateAbbr={state || ""} />
+          <TopRatedCarousel key={voteKey} city={cityName} stateAbbr={state || ""} />
 
           <div className="px-4 space-y-4 mb-6">
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">

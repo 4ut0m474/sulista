@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Lock, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Eye, EyeOff } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import { sanitizeText, MAX_NAME } from "@/lib/validation";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const MerchantPanel = () => {

@@ -18,7 +18,6 @@ import Events from "./pages/Events";
 import Trails from "./pages/Trails";
 import LocalCommerce from "./pages/LocalCommerce";
 import MerchantPanel from "./pages/MerchantPanel";
-import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import GroupBuy from "./pages/GroupBuy";
 
@@ -26,7 +25,7 @@ import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
-import AdminAccess from "./pages/AdminAccess";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -55,13 +54,11 @@ const App = () => (
                 <Route path="/city/:state/:city/group-buy" element={<GroupBuy />} />
                 <Route path="/city/:state/:city/commerce" element={<LocalCommerce />} />
                 <Route path="/city/:state/:city/merchant" element={<MerchantPanel />} />
-                <Route path="/city/:state/:city/admin" element={<AdminPanel />} />
                 
                 <Route path="/city/:state/:city/locations" element={<SubLocationsList />} />
                 <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
                 <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
-                <Route path="/admin-access" element={<AdminAccess />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

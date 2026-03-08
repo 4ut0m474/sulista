@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Lock, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Settings, Image, Edit, Phone, LogIn, Eye, EyeOff } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import { sanitizeText, MAX_NAME } from "@/lib/validation";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const MerchantPanel = () => {
@@ -20,13 +19,6 @@ const MerchantPanel = () => {
   const [error, setError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Admin login state
-  const [adminLogin, setAdminLogin] = useState("");
-  const [adminPass, setAdminPass] = useState("");
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminError, setAdminError] = useState("");
-  const [adminLoading, setAdminLoading] = useState(false);
-  const { signIn: adminSignIn } = useAdminAuth();
 
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
 
@@ -34,20 +26,6 @@ const MerchantPanel = () => {
     getAdminConfig().then(setConfig);
   }, []);
 
-  const handleAdminLogin = async () => {
-    if (!adminLogin || !adminPass) {
-      setAdminError("Preencha todos os campos");
-      return;
-    }
-    setAdminLoading(true);
-    const { error } = await adminSignIn(adminLogin, adminPass);
-    setAdminLoading(false);
-    if (error) {
-      setAdminError(error);
-    } else {
-      navigate(`${base}/admin`);
-    }
-  };
 
   const handleMerchantLogin = async () => {
     const name = sanitizeText(stallName);
@@ -170,41 +148,6 @@ const MerchantPanel = () => {
             </p>
           </div>
 
-          {/* Admin backdoor */}
-          <div className="pt-4 border-t border-border">
-            <button
-              onClick={() => setShowAdminLogin(!showAdminLogin)}
-              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
-            >
-              <Lock className="w-3 h-3" /> Área do Administrador
-            </button>
-            {showAdminLogin && (
-              <div className="mt-3 bg-card rounded-xl border border-border p-4 shadow-card space-y-3">
-                <input
-                  type="email"
-                  value={adminLogin}
-                  onChange={e => setAdminLogin(e.target.value)}
-                  placeholder="E-mail"
-                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-                <input
-                  type="password"
-                  value={adminPass}
-                  onChange={e => setAdminPass(e.target.value)}
-                  placeholder="Senha"
-                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-                {adminError && <p className="text-xs text-destructive font-semibold">{adminError}</p>}
-                <button
-                  onClick={handleAdminLogin}
-                  disabled={adminLoading}
-                  className="w-full py-2.5 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50"
-                >
-                  {adminLoading ? "Entrando..." : "Entrar como Admin"}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         <FooterNav stateAbbr={state || ""} cityName={city || ""} />

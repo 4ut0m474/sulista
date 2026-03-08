@@ -109,7 +109,7 @@ const LitoraneaChat = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -386,43 +386,10 @@ const LitoraneaChat = () => {
       setTimeout(() => speakText(speedMsg, true), 300);
       return;
     }
-    const isAdminTrigger =
-      trimmed === "EERB19537666" ||
-      (lower.includes("modo administrad") && lower.includes("erasto")) ||
-      (lower.includes("modo admin") && lower.includes("erasto")) ||
-      (lower.includes("litoranea") && lower.includes("erasto") && (lower.includes("admin") || lower.includes("administrad")));
-
-    if (isAdminTrigger && !isAdminMode) {
-      setInput("");
-      setIsAdminMode(true);
-      const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
-      setMessages(prev => [
-        ...prev,
-        { role: "user", content: "🔑 ****" },
-        { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
-      ]);
-      speakText(adminGreeting, true);
-      return;
-    }
-
-    // Daily limit (except admin) — but ALWAYS allow admin trigger even when blocked
-    if (!isAdminMode) {
+    // Daily limit
+    {
       const usage = getUsageCount();
       if (usage >= DAILY_LIMIT) {
-        // Check if this message is an admin trigger BEFORE blocking
-        if (isAdminTrigger) {
-          // Allow admin activation even when limit is reached
-          setInput("");
-          setIsAdminMode(true);
-          const adminGreeting = `🔓 **Modo Administrador ativado!**\n\nOi Erasto! Tô pronta pra te ajudar com tudo do app. Pode me pedir relatórios, configurar páginas, gerenciar conteúdo… é só falar! 💪\n\nPerguntas ilimitadas.`;
-          setMessages(prev => [
-            ...prev,
-            { role: "user", content: "🔑 ****" },
-            { role: "assistant", content: adminGreeting, options: ["📊 Relatório de vendas", "🔔 Notificações", "⚙️ Configurar páginas", "📋 Status do sistema"] },
-          ]);
-          speakText(adminGreeting, true);
-          return;
-        }
         setMessages(prev => [
           ...prev,
           { role: "user", content: text },
@@ -474,7 +441,7 @@ const LitoraneaChat = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
-    if (!isAdminMode) incrementUsage();
+    incrementUsage();
 
     let fullResponse = "";
     const allMessages = [...messages, userMsg];
@@ -486,7 +453,7 @@ const LitoraneaChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: isAdminMode, userProfile: userProfile || {} }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, userProfile: userProfile || {} }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -715,9 +682,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         <div className="flex-1">
           <h1 className="font-display text-base font-bold text-foreground">Litorânea</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isAdminMode
-              ? "🔓 Modo Admin • ilimitado"
-              : remaining > 0
+            {remaining > 0
               ? `IA do Vento Sul • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>

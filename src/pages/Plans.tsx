@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Check, Star, Crown, Sparkles } from "lucide-react";
-import { plans } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import PlanContractModal from "@/components/PlanContractModal";
+import { useCityPlans } from "@/hooks/useCityPlans";
 
 const Plans = () => {
   const { state, city } = useParams<{ state: string; city: string }>();

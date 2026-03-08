@@ -207,7 +207,7 @@ const LitoraneaChat = () => {
   // TTS using native Web Speech API
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
     if (!voiceEnabled) {
-      if (activateMicAfter && hasSpokenFirstRef.current) setTimeout(() => startListeningWithTimeout(), 500);
+      if (activateMicAfter) setTimeout(() => startListeningWithTimeout(), 500);
       return;
     }
     const clean = cleanTextForTTS(text);

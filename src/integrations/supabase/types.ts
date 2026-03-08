@@ -119,6 +119,48 @@ export type Database = {
         }
         Relationships: []
       }
+      avaliacoes: {
+        Row: {
+          comentario: string | null
+          comercio_id: string
+          created_at: string
+          id: string
+          nota: number
+          user_id: string
+        }
+        Insert: {
+          comentario?: string | null
+          comercio_id: string
+          created_at?: string
+          id?: string
+          nota: number
+          user_id: string
+        }
+        Update: {
+          comentario?: string | null
+          comercio_id?: string
+          created_at?: string
+          id?: string
+          nota?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_comercio_id_fkey"
+            columns: ["comercio_id"]
+            isOneToOne: false
+            referencedRelation: "establishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_comercio_id_fkey"
+            columns: ["comercio_id"]
+            isOneToOne: false
+            referencedRelation: "establishments_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cidade_imagens: {
         Row: {
           cidade: string

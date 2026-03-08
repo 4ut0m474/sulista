@@ -353,8 +353,8 @@ const LitoraneaChat = () => {
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    // Speak greeting but DON'T auto-open mic — wait for user to speak first
-    setTimeout(() => speakText(greetingText, false), 600);
+    // Speak greeting then auto-open mic so user can talk hands-free
+    setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line
 
   // Send message

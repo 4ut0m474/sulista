@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, Send, Trophy, ThumbsUp, Info } from "lucide-react";
+import { ChevronLeft, Star, Trophy, ThumbsUp, Info } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
+import VoteModal from "@/components/VoteModal";
 import { useState, useEffect } from "react";
 import { pageBackgrounds } from "@/lib/adminData";
-import { MAX_COMMENT, sanitizeText } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 type Establishment = {
   id: string;

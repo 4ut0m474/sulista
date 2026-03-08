@@ -10,9 +10,6 @@ const LandingHeader = () => {
   const { fontSize, cycleFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
-  const themeClicksRef = useRef(0);
-  const themeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navigate = useNavigate();
 
   const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
 

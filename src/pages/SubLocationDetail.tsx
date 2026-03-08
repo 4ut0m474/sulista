@@ -7,7 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const defaultCarouselAds = [
@@ -43,7 +43,7 @@ const SubLocationDetail = () => {
   const { fontSize, cycleFontSize } = useFontSize();
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { activeIncentive, isPulsing } = useIconIncentives();
+  
   const base = `/city/${state}/${city}`;
 
   // Use sub-location name as a "virtual city" for favorites
@@ -197,22 +197,16 @@ const SubLocationDetail = () => {
         <div className="grid grid-cols-3 gap-3">
           {iconButtons.map((item, idx) => {
             const thm = iconThemes[idx];
-            const pulsing = isPulsing(item.path);
             return (
-              <div key={item.label} className="relative">
-                {pulsing && activeIncentive && <IncentiveBubble phrase={activeIncentive.phrase} />}
-                <button
-                  onClick={() => navigate(`${base}/${item.path}`)}
-                  className={`w-full group flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-card hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95 ${
-                    pulsing ? "border-primary/50 ring-2 ring-primary/20" : "border-border/50"
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center ${pulsing ? "animate-pulse scale-110" : ""}`}>
-                    <item.icon className={`w-6 h-6 ${thm.text}`} />
-                  </div>
-                  <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
-                </button>
-              </div>
+              <button key={item.label}
+                onClick={() => navigate(`${base}/${item.path}`)}
+                className="w-full flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border border-border/50 shadow-card active:scale-95 transition-all z-[1]"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center`}>
+                  <item.icon className={`w-6 h-6 ${thm.text}`} />
+                </div>
+                <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
+              </button>
             );
           })}
         </div>

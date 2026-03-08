@@ -52,6 +52,8 @@ const CityHome = () => {
   const [showNotifModal, setShowNotifModal] = useState(() => {
     return !localStorage.getItem("vento-sul-notification-setup-done");
   });
+  const [showVoteModal, setShowVoteModal] = useState(false);
+  const [voteKey, setVoteKey] = useState(0);
 
   // Async admin data
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });

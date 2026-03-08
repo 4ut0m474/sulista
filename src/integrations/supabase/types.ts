@@ -356,6 +356,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          aprendizado: Json | null
+          cidade: string | null
+          created_at: string
+          historico_conversas: Json | null
+          id: string
+          idade: number | null
+          interesses_geral: string[] | null
+          necessidades: Json | null
+          nome: string | null
+          perfil_gastronomico: Json | null
+          preferencias_compras_coletivas: Json | null
+          ultima_interacao: string | null
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          aprendizado?: Json | null
+          cidade?: string | null
+          created_at?: string
+          historico_conversas?: Json | null
+          id?: string
+          idade?: number | null
+          interesses_geral?: string[] | null
+          necessidades?: Json | null
+          nome?: string | null
+          perfil_gastronomico?: Json | null
+          preferencias_compras_coletivas?: Json | null
+          ultima_interacao?: string | null
+          updated_at?: string
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          aprendizado?: Json | null
+          cidade?: string | null
+          created_at?: string
+          historico_conversas?: Json | null
+          id?: string
+          idade?: number | null
+          interesses_geral?: string[] | null
+          necessidades?: Json | null
+          nome?: string | null
+          perfil_gastronomico?: Json | null
+          preferencias_compras_coletivas?: Json | null
+          ultima_interacao?: string | null
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

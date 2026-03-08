@@ -234,24 +234,14 @@ const CityHome = () => {
           <div className="px-4 grid grid-cols-3 gap-3 mb-6">
             {iconButtons.map((item, idx) => {
               const thm = iconThemes[idx];
-              const pulsing = isPulsing(item.path);
               return (
-                <div key={item.label} className="relative">
-                  {pulsing && activeIncentive && (
-                    <IncentiveBubble phrase={activeIncentive.phrase} />
-                  )}
-                  <button onClick={() => navigate(`/city/${state}/${city}/${item.path}`)}
-                    className={`w-full group flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-card hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95 ${
-                      pulsing ? "border-primary/50 ring-2 ring-primary/20" : "border-border/50"
-                    }`}>
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center transition-all ${
-                      pulsing ? "animate-pulse scale-110" : ""
-                    }`}>
-                      <item.icon className={`w-7 h-7 ${thm.text}`} />
-                    </div>
-                    <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
-                  </button>
-                </div>
+                <button key={item.label} onClick={() => navigate(`/city/${state}/${city}/${item.path}`)}
+                  className="w-full flex flex-col items-center gap-2 p-4 rounded-2xl bg-card/90 backdrop-blur-sm border border-border/50 shadow-card active:scale-95 transition-all z-[1]">
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center`}>
+                    <item.icon className={`w-7 h-7 ${thm.text}`} />
+                  </div>
+                  <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
+                </button>
               );
             })}
           </div>

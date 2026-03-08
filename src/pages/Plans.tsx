@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Check, Star, Crown, Sparkles } from "lucide-react";
-import { plans } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import PlanContractModal from "@/components/PlanContractModal";
+import { useCityPlans } from "@/hooks/useCityPlans";
 
 const Plans = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -13,6 +13,8 @@ const Plans = () => {
   const [contractModal, setContractModal] = useState<{ planName: string; displayPrice: string; priceDetail: string } | null>(null);
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.plans;
+  const cityName = decodeURIComponent(city || "");
+  const { plans, loading: plansLoading } = useCityPlans(state || "", cityName);
 
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
 

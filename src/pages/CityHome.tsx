@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield, ThumbsUp } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import NotificationModal from "@/components/NotificationModal";
-import { getCityData, type CityData, plans } from "@/data/cities";
+import { getCityData, type CityData } from "@/data/cities";
 
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
@@ -16,6 +16,7 @@ import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
 import TopRatedCarousel from "@/components/TopRatedCarousel";
 import VoteModal from "@/components/VoteModal";
+import { useCityPlans } from "@/hooks/useCityPlans";
 
 
 const defaultCarouselAds = [
@@ -46,7 +47,8 @@ const CityHome = () => {
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const starred = isFavorite(state || "", cityName);
-  
+  const { plans } = useCityPlans(state || "", cityName);
+
   
   const [showNotifModal, setShowNotifModal] = useState(() => {
     return !localStorage.getItem("vento-sul-notification-setup-done");

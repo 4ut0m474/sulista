@@ -317,6 +317,45 @@ export type Database = {
         }
         Relationships: []
       }
+      planos_cidade: {
+        Row: {
+          ativo: boolean
+          beneficios: string[] | null
+          city: string
+          created_at: string
+          descricao: string | null
+          id: string
+          plano_nome: string
+          preco: number
+          state_abbr: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          beneficios?: string[] | null
+          city: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          plano_nome: string
+          preco: number
+          state_abbr: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          beneficios?: string[] | null
+          city?: string
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          plano_nome?: string
+          preco?: number
+          state_abbr?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_persistence: {
         Row: {
           approved_at: string | null

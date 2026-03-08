@@ -6,6 +6,7 @@ import PersistenceIdentityStep from "@/components/persistence/PersistenceIdentit
 import {
   PERSISTENCE_KEYS,
   syncPersistenceLocalState,
+  clearPersistenceLocalState,
   type PersistenceVerificationStatus,
 } from "@/lib/persistence";
 import { isValidEmail, persistenceIdentitySchema, sanitizeText } from "@/lib/validation";

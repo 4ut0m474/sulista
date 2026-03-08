@@ -682,9 +682,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         <div className="flex-1">
           <h1 className="font-display text-base font-bold text-foreground">Litorânea</h1>
           <p className="text-[10px] text-muted-foreground">
-            {isAdminMode
-              ? "🔓 Modo Admin • ilimitado"
-              : remaining > 0
+            {remaining > 0
               ? `IA do Vento Sul • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>

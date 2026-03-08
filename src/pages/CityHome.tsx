@@ -56,15 +56,36 @@ const CityHome = () => {
   const [config, setConfig] = useState({ whatsapp: "(41) 99235-4211", whatsappNumber: "5541992354211", email: "eerb1976@gmail.com" });
   const [cityData, setCityData] = useState<CityData>(defaultData);
   const [carouselAds, setCarouselAds] = useState(defaultCarouselAds);
+  const [backgroundUrl, setBackgroundUrl] = useState(DEFAULT_BG);
 
   useEffect(() => {
     const loadData = async () => {
-      const [cfg, citySettings, adminCarousel] = await Promise.all([
+      const [cfg, citySettings, adminCarousel, cityImagesResult] = await Promise.all([
         getAdminConfig(),
         getAdminCityData(state || "", cityName, "city_settings"),
         getAdminCityData(state || "", cityName, "carousel"),
+        supabase.from("cidade_imagens").select("*").eq("state_abbr", state || "").eq("cidade", cityName).maybeSingle(),
       ]);
       setConfig(cfg);
+
+      // City images from DB
+      const ci = cityImagesResult.data as any;
+      if (ci?.url_fundo) {
+        setBackgroundUrl(ci.url_fundo);
+      } else {
+        setBackgroundUrl(DEFAULT_BG);
+      }
+
+      // Build carousel from DB images (city-specific photos) + admin carousel ads
+      const dbCarouselImages: typeof defaultCarouselAds = [];
+      if (ci) {
+        [ci.url_carrossel1, ci.url_carrossel2, ci.url_carrossel3, ci.url_carrossel4, ci.url_carrossel5]
+          .filter(Boolean)
+          .forEach((url: string, idx: number) => {
+            dbCarouselImages.push({ title: `${cityName}`, subtitle: `Descubra ${cityName}`, image: url });
+          });
+      }
+
       if (citySettings && typeof citySettings === "object" && !Array.isArray(citySettings)) {
         const s = citySettings as Record<string, string>;
         setCityData({
@@ -75,20 +96,20 @@ const CityHome = () => {
           festivities: s.festivities || defaultData.festivities,
         });
       }
-      if (Array.isArray(adminCarousel)) {
-        setCarouselAds(
-          adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
-            title: c.name || c.title || "",
-            subtitle: c.description || c.subtitle || "",
-            image: c.image || "",
-          }))
-        );
+
+      if (Array.isArray(adminCarousel) && adminCarousel.length > 0) {
+        const adminAds = adminCarousel.filter((c: any) => c.active !== false).map((c: any) => ({
+          title: c.name || c.title || "",
+          subtitle: c.description || c.subtitle || "",
+          image: c.image || "",
+        }));
+        setCarouselAds(adminAds.length > 0 ? adminAds : dbCarouselImages.length > 0 ? dbCarouselImages : defaultCarouselAds);
+      } else {
+        setCarouselAds(dbCarouselImages.length > 0 ? dbCarouselImages : defaultCarouselAds);
       }
     };
     loadData();
   }, [state, cityName]);
-
-  const backgroundUrl = cityBackgrounds[cityData.name] || cityBackgrounds["default"];
 
   useEffect(() => {
     setCurrentSlide(0);

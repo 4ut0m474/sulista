@@ -98,6 +98,10 @@ const CityHome = () => {
   const backgroundUrl = cityBackgrounds[cityData.name] || cityBackgrounds["default"];
 
   useEffect(() => {
+    setCurrentSlide(0);
+  }, [state, cityName]);
+
+  useEffect(() => {
     if (carouselAds.length === 0) return;
     const interval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % carouselAds.length);

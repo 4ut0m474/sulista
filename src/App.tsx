@@ -25,7 +25,7 @@ import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
-import AdminAccess from "./pages/AdminAccess";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();

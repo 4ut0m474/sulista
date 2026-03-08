@@ -7,7 +7,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useIconIncentives, IncentiveBubble } from "@/components/IconIncentives";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const defaultCarouselAds = [

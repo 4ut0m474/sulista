@@ -207,12 +207,12 @@ const LitoraneaChat = () => {
   // TTS using native Web Speech API
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
     if (!voiceEnabled) {
-      if (activateMicAfter && hasSpokenFirstRef.current) setTimeout(() => startListeningWithTimeout(), 500);
+      if (activateMicAfter) setTimeout(() => startListeningWithTimeout(), 500);
       return;
     }
     const clean = cleanTextForTTS(text);
     if (!clean || clean.length < 3) return;
-    autoMicAfterSpeakRef.current = activateMicAfter && hasSpokenFirstRef.current;
+    autoMicAfterSpeakRef.current = activateMicAfter;
     try {
       setIsSpeaking(true);
       const synth = window.speechSynthesis;
@@ -353,8 +353,8 @@ const LitoraneaChat = () => {
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
 
-    // Speak greeting but DON'T auto-open mic — wait for user to speak first
-    setTimeout(() => speakText(greetingText, false), 600);
+    // Speak greeting then auto-open mic so user can talk hands-free
+    setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line
 
   // Send message

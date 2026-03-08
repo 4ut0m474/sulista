@@ -119,6 +119,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cidade_imagens: {
+        Row: {
+          cidade: string
+          filtro_cor: string | null
+          id: string
+          state_abbr: string
+          updated_at: string
+          url_carrossel1: string | null
+          url_carrossel2: string | null
+          url_carrossel3: string | null
+          url_carrossel4: string | null
+          url_carrossel5: string | null
+          url_fundo: string
+        }
+        Insert: {
+          cidade: string
+          filtro_cor?: string | null
+          id?: string
+          state_abbr: string
+          updated_at?: string
+          url_carrossel1?: string | null
+          url_carrossel2?: string | null
+          url_carrossel3?: string | null
+          url_carrossel4?: string | null
+          url_carrossel5?: string | null
+          url_fundo: string
+        }
+        Update: {
+          cidade?: string
+          filtro_cor?: string | null
+          id?: string
+          state_abbr?: string
+          updated_at?: string
+          url_carrossel1?: string | null
+          url_carrossel2?: string | null
+          url_carrossel3?: string | null
+          url_carrossel4?: string | null
+          url_carrossel5?: string | null
+          url_fundo?: string
+        }
+        Relationships: []
+      }
       establishments: {
         Row: {
           address: string | null

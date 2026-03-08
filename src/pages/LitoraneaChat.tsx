@@ -10,6 +10,22 @@ import { Slider } from "@/components/ui/slider";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
+type UserProfile = {
+  id?: string;
+  user_id?: string;
+  user_type?: string;
+  nome?: string;
+  idade?: number;
+  cidade?: string;
+  interesses_geral?: string[];
+  perfil_gastronomico?: Record<string, any>;
+  preferencias_compras_coletivas?: Record<string, any>;
+  necessidades?: Record<string, any>;
+  aprendizado?: Record<string, any>;
+  historico_conversas?: Array<{ data: string; topico: string; resumo: string }>;
+  ultima_interacao?: string;
+};
+
 const DAILY_LIMIT = 5;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
 const FIRST_VISIT_KEY = "litoranea-first-visit-done";
@@ -17,7 +33,7 @@ const MIC_MAX_OPEN_MS = 30000;
 const SILENCE_CANCEL_MS = 15000;
 const SPEECH_PAUSE_MS = 5000;
 const TTS_SPEED_KEY = "litoranea-tts-speed";
-const TTS_SILENCE_STOP_MS = 10000; // silence > 10s after TTS = stop, don't repeat
+const TTS_SILENCE_STOP_MS = 10000;
 
 const getUsageKey = () => `litoranea-usage-${new Date().toISOString().slice(0, 10)}`;
 const getUsageCount = () => parseInt(localStorage.getItem(getUsageKey()) || "0", 10);
@@ -103,7 +119,10 @@ const LitoraneaChat = () => {
     return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
   });
   const [showSpeedControl, setShowSpeedControl] = useState(false);
-  const hasSpokenFirstRef = useRef(false); // track if user spoke first
+  const hasSpokenFirstRef = useRef(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [supaUserId, setSupaUserId] = useState<string | null>(null);
+  const profileLoadedRef = useRef(false);
 
   // SulCoin inline state
   const [showWalletActions, setShowWalletActions] = useState(false);
@@ -129,6 +148,57 @@ const LitoraneaChat = () => {
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
     return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
   }, []);
+
+  // Load user profile from Supabase
+  useEffect(() => {
+    if (profileLoadedRef.current) return;
+    profileLoadedRef.current = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setSupaUserId(user.id);
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setUserProfile(data as unknown as UserProfile);
+      } else {
+        // Create empty profile
+        const newProfile: any = { user_id: user.id, user_type: 'morador_comum', cidade: city || '' };
+        const { data: inserted } = await supabase
+          .from("user_profiles")
+          .insert(newProfile)
+          .select()
+          .single();
+        if (inserted) setUserProfile(inserted as unknown as UserProfile);
+      }
+    })();
+  }, [city]);
+
+  // Save profile updates to Supabase
+  const updateProfileInSupabase = useCallback(async (updates: Partial<UserProfile>) => {
+    if (!supaUserId) return;
+    const newProfile = { ...userProfile, ...updates, ultima_interacao: new Date().toISOString() };
+    setUserProfile(newProfile as UserProfile);
+    await supabase
+      .from("user_profiles")
+      .update({ ...updates, ultima_interacao: new Date().toISOString() } as any)
+      .eq("user_id", supaUserId);
+  }, [supaUserId, userProfile]);
+
+  // Extract profile updates from AI response
+  const extractAndApplyProfileUpdates = useCallback((aiResponse: string) => {
+    const regex = /<<<PROFILE_UPDATE>>>([\s\S]*?)<<<END_PROFILE_UPDATE>>>/g;
+    let match;
+    while ((match = regex.exec(aiResponse)) !== null) {
+      try {
+        const updates = JSON.parse(match[1]);
+        updateProfileInSupabase(updates);
+      } catch { /* ignore parse errors */ }
+    }
+  }, [updateProfileInSupabase]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -416,7 +486,7 @@ const LitoraneaChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: isAdminMode }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: isAdminMode, userProfile: userProfile || {} }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -484,23 +554,24 @@ const LitoraneaChat = () => {
 
       // Final: single bubble with full response
       if (fullResponse) {
-        const extractedOptions = extractOptions(fullResponse);
+        // Extract and apply profile updates from AI, then clean response
+        extractAndApplyProfileUpdates(fullResponse);
+        const cleanResponse = fullResponse.replace(/<<<PROFILE_UPDATE>>>[\s\S]*?<<<END_PROFILE_UPDATE>>>/g, "").trim();
+        
+        const extractedOptions = extractOptions(cleanResponse);
 
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && !last.options) {
             return prev.map((m, i) => i === prev.length - 1
-              ? { ...m, content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
+              ? { ...m, content: cleanResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
               : m);
           }
-          return [...prev, { role: "assistant", content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
+          return [...prev, { role: "assistant", content: cleanResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
         });
 
         // Speak and auto-activate mic after
-        speakText(fullResponse, true);
-
-        // Save profile data from conversation context
-        tryExtractProfileData(fullResponse);
+        speakText(cleanResponse, true);
       }
     } catch (e: any) {
       setMessages(prev => [
@@ -512,11 +583,6 @@ const LitoraneaChat = () => {
     }
   };
 
-  // Try to extract profile info from user messages
-  const tryExtractProfileData = (aiResponse: string) => {
-    // This is handled by the AI's system prompt which asks profiling questions
-    // Profile data is saved when user responds to specific questions
-  };
 
   // SulCoin detection & inline actions
   const isSulcoinTrigger = (text: string) => {
@@ -535,6 +601,9 @@ const LitoraneaChat = () => {
   const handleRoleSelect = async (role: string) => {
     setUserRole(role);
     saveProfile({ role });
+    // Save user_type to Supabase
+    const typeMap: Record<string, string> = { turista: 'turista', comerciante: 'comerciante', morador: 'morador_comum', estudante: 'estudante' };
+    updateProfileInSupabase({ user_type: typeMap[role] || role } as any);
 
     // Student flow — special persistence for minors
     if (role === "estudante") {

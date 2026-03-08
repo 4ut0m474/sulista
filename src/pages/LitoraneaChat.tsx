@@ -166,7 +166,7 @@ const LitoraneaChat = () => {
         setUserProfile(data as unknown as UserProfile);
       } else {
         // Create empty profile
-        const newProfile: any = { user_id: user.id, user_type: '', cidade: city || '' };
+        const newProfile: any = { user_id: user.id, user_type: 'morador_comum', cidade: city || '' };
         const { data: inserted } = await supabase
           .from("user_profiles")
           .insert(newProfile)

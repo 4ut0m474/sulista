@@ -57,7 +57,7 @@ const CityStateSwitcher = ({ currentState, currentCity, className = "" }: CitySt
           <ChevronDown className={`w-3 h-3 transition-transform ${showStates ? "rotate-180" : ""}`} />
         </button>
         {showStates && (
-          <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-xl shadow-card z-50 min-w-[180px] overflow-hidden">
+          <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-xl shadow-card min-w-[180px] overflow-hidden" style={{ zIndex: 9999 }}>
             {states.map(s => (
               <button key={s.abbr} onClick={() => handleStateChange(s.abbr)}
                 className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors ${currentState === s.abbr ? "bg-primary/10 text-primary font-bold" : "text-foreground"}`}

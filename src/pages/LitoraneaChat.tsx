@@ -554,23 +554,24 @@ const LitoraneaChat = () => {
 
       // Final: single bubble with full response
       if (fullResponse) {
-        const extractedOptions = extractOptions(fullResponse);
+        // Extract and apply profile updates from AI, then clean response
+        extractAndApplyProfileUpdates(fullResponse);
+        const cleanResponse = fullResponse.replace(/<<<PROFILE_UPDATE>>>[\s\S]*?<<<END_PROFILE_UPDATE>>>/g, "").trim();
+        
+        const extractedOptions = extractOptions(cleanResponse);
 
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && !last.options) {
             return prev.map((m, i) => i === prev.length - 1
-              ? { ...m, content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
+              ? { ...m, content: cleanResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }
               : m);
           }
-          return [...prev, { role: "assistant", content: fullResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
+          return [...prev, { role: "assistant", content: cleanResponse, ...(extractedOptions.length > 0 ? { options: extractedOptions } : {}) }];
         });
 
         // Speak and auto-activate mic after
-        speakText(fullResponse, true);
-
-        // Save profile data from conversation context
-        tryExtractProfileData(fullResponse);
+        speakText(cleanResponse, true);
       }
     } catch (e: any) {
       setMessages(prev => [

@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, Send, Trophy, ThumbsUp, Info } from "lucide-react";
+import { ChevronLeft, Star, Trophy, ThumbsUp, Info } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
+import VoteModal from "@/components/VoteModal";
 import { useState, useEffect } from "react";
 import { pageBackgrounds } from "@/lib/adminData";
-import { MAX_COMMENT, sanitizeText } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 type Establishment = {
   id: string;
@@ -18,30 +17,17 @@ type Establishment = {
   address: string | null;
 };
 
-const getDeviceFingerprint = () => {
-  let fp = localStorage.getItem("vento-sul-device-fp");
-  if (!fp) {
-    fp = crypto.randomUUID();
-    localStorage.setItem("vento-sul-device-fp", fp);
-  }
-  return fp;
-};
 
 const Opinion = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const base = `/city/${state}/${city}`;
   const cityName = decodeURIComponent(city || "");
   const bgUrl = pageBackgrounds.opinion;
 
   const [establishments, setEstablishments] = useState<Establishment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showVotePanel, setShowVotePanel] = useState(false);
-  const [selectedEstablishment, setSelectedEstablishment] = useState<Establishment | null>(null);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
   const [showHowTo, setShowHowTo] = useState(false);
 
   useEffect(() => {
@@ -61,41 +47,8 @@ const Opinion = () => {
     setLoading(false);
   };
 
-  const handleVote = async () => {
-    if (!selectedEstablishment || rating === 0) return;
-    setSubmitting(true);
-    const fp = getDeviceFingerprint();
-    const sanitized = sanitizeText(comment);
-
-    const { error } = await supabase.from("votes").insert({
-      establishment_id: selectedEstablishment.id,
-      rating,
-      comment: sanitized || null,
-      device_fingerprint: fp,
-    } as any);
-
-    if (error) {
-      if (error.code === "23505") {
-        toast({ title: "Você já votou neste comércio!", description: "Cada pessoa pode votar apenas uma vez.", variant: "destructive" });
-      } else {
-        toast({ title: "Erro ao votar", description: error.message, variant: "destructive" });
-      }
-    } else {
-      const isPersistent = localStorage.getItem("vento-sul-persistent") === "true";
-      if (isPersistent) {
-        toast({ title: "Voto registrado! +0,05 SulCoin 💰", description: `Obrigado por avaliar ${selectedEstablishment.name}. Você ganhou 0,05 SulCoin!` });
-        const currentCoins = parseFloat(localStorage.getItem("sulcoins-balance") || "0");
-        localStorage.setItem("sulcoins-balance", String(currentCoins + 0.05));
-      } else {
-        toast({ title: "Voto registrado! ✅", description: `Obrigado por avaliar ${selectedEstablishment.name}. Ative a persistência para ganhar SulCoins!` });
-      }
-      setSelectedEstablishment(null);
-      setRating(0);
-      setComment("");
-      setShowVotePanel(false);
-      fetchEstablishments();
-    }
-    setSubmitting(false);
+  const handleVoteCompleted = () => {
+    fetchEstablishments(); // Refresh the list to show updated ratings
   };
 
   const topThree = establishments.slice(0, 3);
@@ -121,7 +74,7 @@ const Opinion = () => {
               <button onClick={() => setShowHowTo(!showHowTo)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 shadow-card" aria-label="Como votar">
                 <Info className="w-5 h-5 text-primary" />
               </button>
-              <button onClick={() => setShowVotePanel(!showVotePanel)} className="p-2 rounded-full bg-primary text-primary-foreground shadow-card" aria-label="Votar">
+              <button onClick={() => setShowVoteModal(true)} className="p-2 rounded-full bg-primary text-primary-foreground shadow-card" aria-label="Votar">
                 <ThumbsUp className="w-5 h-5" />
               </button>
             </div>
@@ -143,57 +96,6 @@ const Opinion = () => {
             </div>
           )}
 
-          {/* Voting panel */}
-          {showVotePanel && (
-            <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-primary/30 p-4 shadow-card animate-fade-in space-y-3">
-              <h3 className="font-bold text-foreground">🗳️ Painel de Votação</h3>
-              
-              {!selectedEstablishment ? (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Selecione um comércio para votar:</p>
-                  {establishments.map(est => (
-                    <button key={est.id} onClick={() => setSelectedEstablishment(est)}
-                      className="w-full flex items-center gap-3 p-2 rounded-xl bg-background/50 border border-border/30 hover:border-primary/50 transition-all text-left">
-                      <img src={est.photo_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=100&q=60"} alt={est.name} className="w-10 h-10 rounded-lg object-cover" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-foreground truncate">{est.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{est.category}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-2 bg-primary/5 rounded-xl">
-                    <img src={selectedEstablishment.photo_url || ""} alt={selectedEstablishment.name} className="w-12 h-12 rounded-lg object-cover" />
-                    <div>
-                      <p className="font-bold text-foreground text-sm">{selectedEstablishment.name}</p>
-                      <button onClick={() => setSelectedEstablishment(null)} className="text-[10px] text-primary underline">Trocar</button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-foreground mb-1 block">Sua nota</label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <button key={n} onClick={() => setRating(n)} className="p-0.5">
-                          <Star className={`w-7 h-7 transition-colors ${n <= rating ? "text-secondary fill-secondary" : "text-muted-foreground/30"}`} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-foreground mb-1 block">Comentário (opcional)</label>
-                    <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="O que você achou?" maxLength={MAX_COMMENT}
-                      className="w-full h-20 rounded-xl border border-border bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                  </div>
-                  <button onClick={handleVote} disabled={rating === 0 || submitting}
-                    className="w-full py-2.5 rounded-xl bg-gradient-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02] active:scale-95 transition-all">
-                    <Send className="w-4 h-4" /> {submitting ? "Enviando..." : "Enviar Voto"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Top 3 Podium */}
           {loading ? (
@@ -259,6 +161,14 @@ const Opinion = () => {
       </div>
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
+      
+      <VoteModal
+        open={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        city={cityName}
+        stateAbbr={state || ""}
+        onVoted={handleVoteCompleted}
+      />
     </div>
   );
 };

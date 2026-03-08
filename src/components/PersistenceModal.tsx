@@ -85,6 +85,13 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
   };
 
   const handleClose = () => {
+    // If not yet done/active, clear all persistence state
+    if (step !== "done" && !isActive) {
+      clearPersistenceLocalState();
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
+      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
+    }
     resetState();
     onClose();
   };

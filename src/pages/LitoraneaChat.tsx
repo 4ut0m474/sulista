@@ -441,7 +441,7 @@ const LitoraneaChat = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
-    if (!isAdminMode) incrementUsage();
+    incrementUsage();
 
     let fullResponse = "";
     const allMessages = [...messages, userMsg];

@@ -149,6 +149,57 @@ const LitoraneaChat = () => {
     return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
   }, []);
 
+  // Load user profile from Supabase
+  useEffect(() => {
+    if (profileLoadedRef.current) return;
+    profileLoadedRef.current = true;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setSupaUserId(user.id);
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setUserProfile(data as unknown as UserProfile);
+      } else {
+        // Create empty profile
+        const newProfile: any = { user_id: user.id, user_type: '', cidade: city || '' };
+        const { data: inserted } = await supabase
+          .from("user_profiles")
+          .insert(newProfile)
+          .select()
+          .single();
+        if (inserted) setUserProfile(inserted as unknown as UserProfile);
+      }
+    })();
+  }, [city]);
+
+  // Save profile updates to Supabase
+  const updateProfileInSupabase = useCallback(async (updates: Partial<UserProfile>) => {
+    if (!supaUserId) return;
+    const newProfile = { ...userProfile, ...updates, ultima_interacao: new Date().toISOString() };
+    setUserProfile(newProfile as UserProfile);
+    await supabase
+      .from("user_profiles")
+      .update({ ...updates, ultima_interacao: new Date().toISOString() } as any)
+      .eq("user_id", supaUserId);
+  }, [supaUserId, userProfile]);
+
+  // Extract profile updates from AI response
+  const extractAndApplyProfileUpdates = useCallback((aiResponse: string) => {
+    const regex = /<<<PROFILE_UPDATE>>>([\s\S]*?)<<<END_PROFILE_UPDATE>>>/g;
+    let match;
+    while ((match = regex.exec(aiResponse)) !== null) {
+      try {
+        const updates = JSON.parse(match[1]);
+        updateProfileInSupabase(updates);
+      } catch { /* ignore parse errors */ }
+    }
+  }, [updateProfileInSupabase]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);

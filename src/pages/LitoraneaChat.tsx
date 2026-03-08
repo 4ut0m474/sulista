@@ -119,7 +119,10 @@ const LitoraneaChat = () => {
     return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
   });
   const [showSpeedControl, setShowSpeedControl] = useState(false);
-  const hasSpokenFirstRef = useRef(false); // track if user spoke first
+  const hasSpokenFirstRef = useRef(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [supaUserId, setSupaUserId] = useState<string | null>(null);
+  const profileLoadedRef = useRef(false);
 
   // SulCoin inline state
   const [showWalletActions, setShowWalletActions] = useState(false);

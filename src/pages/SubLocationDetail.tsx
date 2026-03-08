@@ -43,7 +43,7 @@ const SubLocationDetail = () => {
   const { fontSize, cycleFontSize } = useFontSize();
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { activeIncentive, isPulsing } = useIconIncentives();
+  
   const base = `/city/${state}/${city}`;
 
   // Use sub-location name as a "virtual city" for favorites

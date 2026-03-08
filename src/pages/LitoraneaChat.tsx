@@ -601,6 +601,9 @@ const LitoraneaChat = () => {
   const handleRoleSelect = async (role: string) => {
     setUserRole(role);
     saveProfile({ role });
+    // Save user_type to Supabase
+    const typeMap: Record<string, string> = { turista: 'turista', comerciante: 'comerciante', morador: 'morador_comum', estudante: 'estudante' };
+    updateProfileInSupabase({ user_type: typeMap[role] || role } as any);
 
     // Student flow — special persistence for minors
     if (role === "estudante") {

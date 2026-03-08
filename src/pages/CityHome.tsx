@@ -16,6 +16,7 @@ import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
 import TopRatedCarousel from "@/components/TopRatedCarousel";
 import VoteModal from "@/components/VoteModal";
+import { useCityPlans } from "@/hooks/useCityPlans";
 
 
 const defaultCarouselAds = [

@@ -45,13 +45,24 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
 
     const loadEstablishments = async () => {
       setLoading(true);
-      const { data } = await (supabase as any)
-        .from("establishments_public")
-        .select("id, name, photo_url, category")
-        .eq("city", city)
-        .eq("state_abbr", stateAbbr)
-        .order("name");
-      if (data) setEstablishments(data);
+      try {
+        const { data, error } = await supabase
+          .from("establishments_public")
+          .select("id, name, photo_url, category")
+          .eq("city", city)
+          .eq("state_abbr", stateAbbr)
+          .order("name");
+        
+        if (error) {
+          console.error("Erro ao carregar estabelecimentos:", error);
+          toast.error("Erro ao carregar comércios");
+        } else if (data) {
+          setEstablishments(data);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar estabelecimentos:", err);
+        toast.error("Erro ao carregar comércios");
+      }
       setLoading(false);
     };
 
@@ -61,22 +72,31 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
 
   const handleVote = async () => {
     if (!selected || rating === 0 || !userId) return;
+    
     setSubmitting(true);
-    const sanitized = sanitizeText(comment);
+    try {
+      const sanitized = sanitizeText(comment);
 
-    const { error } = await (supabase as any).from("avaliacoes").upsert({
-      comercio_id: selected.id,
-      user_id: userId,
-      nota: rating,
-      comentario: sanitized || null,
-    }, { onConflict: "user_id,comercio_id" });
+      const { error } = await supabase.from("avaliacoes").upsert({
+        comercio_id: selected.id,
+        user_id: userId,
+        nota: rating,
+        comentario: sanitized || null,
+      }, { 
+        onConflict: "user_id,comercio_id" 
+      });
 
-    if (error) {
-      toast.error("Erro ao votar: " + error.message);
-    } else {
-      toast.success("Voto enviado! ✅");
-      onVoted?.();
-      onClose();
+      if (error) {
+        console.error("Erro ao votar:", error);
+        toast.error("Erro ao votar: " + error.message);
+      } else {
+        toast.success("Voto enviado! ✅");
+        onVoted?.();
+        onClose();
+      }
+    } catch (err) {
+      console.error("Erro ao votar:", err);
+      toast.error("Erro ao enviar voto");
     }
     setSubmitting(false);
   };

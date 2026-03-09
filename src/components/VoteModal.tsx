@@ -45,13 +45,24 @@ const VoteModal = ({ open, onClose, city, stateAbbr, onVoted }: VoteModalProps) 
 
     const loadEstablishments = async () => {
       setLoading(true);
-      const { data } = await (supabase as any)
-        .from("establishments_public")
-        .select("id, name, photo_url, category")
-        .eq("city", city)
-        .eq("state_abbr", stateAbbr)
-        .order("name");
-      if (data) setEstablishments(data);
+      try {
+        const { data, error } = await supabase
+          .from("establishments_public")
+          .select("id, name, photo_url, category")
+          .eq("city", city)
+          .eq("state_abbr", stateAbbr)
+          .order("name");
+        
+        if (error) {
+          console.error("Erro ao carregar estabelecimentos:", error);
+          toast.error("Erro ao carregar comércios");
+        } else if (data) {
+          setEstablishments(data);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar estabelecimentos:", err);
+        toast.error("Erro ao carregar comércios");
+      }
       setLoading(false);
     };
 

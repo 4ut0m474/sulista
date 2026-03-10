@@ -27,6 +27,7 @@ import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
 
 import ScrollToTop from "./components/ScrollToTop";
+import FontSizeToggle from "./components/FontSizeToggle";
 
 const queryClient = new QueryClient();
 

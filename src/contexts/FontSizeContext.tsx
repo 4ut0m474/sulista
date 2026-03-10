@@ -36,7 +36,7 @@ export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <FontSizeContext.Provider value={{ fontSize, fontClass: fontClasses[fontSize], cycleFontSize }}>
+    <FontSizeContext.Provider value={{ fontSize, fontClass: "", cycleFontSize }}>
       {children}
     </FontSizeContext.Provider>
   );

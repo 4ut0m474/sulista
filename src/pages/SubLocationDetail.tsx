@@ -205,7 +205,7 @@ const SubLocationDetail = () => {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center`}>
                   <item.icon className={`w-6 h-6 ${thm.text}`} />
                 </div>
-                <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
+                <span className={`font-bold text-foreground text-center leading-tight ${Number(fontSize) >= 4 ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
               </button>
             );
           })}

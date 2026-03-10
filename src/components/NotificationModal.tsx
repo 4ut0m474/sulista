@@ -104,7 +104,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
 
         {/* Social phrase */}
         <div className="mx-5 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
-          <p className={`text-primary font-semibold text-center ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>
+          <p className={`text-primary font-semibold text-center ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>
             {socialPhrase}
           </p>
         </div>

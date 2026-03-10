@@ -288,7 +288,7 @@ const CityHome = () => {
             </div>
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-1">{t("history")}</h3>
-              <p className={`text-muted-foreground leading-relaxed ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>{cityData.history}</p>
+              <p className={`text-muted-foreground leading-relaxed ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>{cityData.history}</p>
             </div>
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-2">{t("contact")}</h3>

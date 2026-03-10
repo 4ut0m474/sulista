@@ -295,7 +295,7 @@ const Landing = () => {
               )}
             </div>
 
-            <p className={`text-center text-primary-foreground/70 ${fontSize === "extra-large" ? "text-base" : "text-xs"}`}>
+            <p className={`text-center text-primary-foreground/70 ${Number(fontSize) >= 4 ? "text-base" : "text-xs"}`}>
               {t("selectToContinue")}
             </p>
 

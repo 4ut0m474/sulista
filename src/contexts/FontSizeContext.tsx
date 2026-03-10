@@ -23,7 +23,12 @@ export const fontSizeLabel = (fs: FontSize) => labels[fs];
 export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   const [fontSize, setFontSize] = useState<FontSize>(() => {
     const stored = localStorage.getItem("vento-sul-font-size");
-    return (stored as FontSize) || "1";
+    // Migrate old values
+    if (stored === "normal") return "1";
+    if (stored === "large") return "3";
+    if (stored === "extra-large") return "5";
+    if (stored && ["1","2","3","4","5"].includes(stored)) return stored as FontSize;
+    return "1";
   });
 
   useEffect(() => {

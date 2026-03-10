@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-type FontSize = "normal" | "large" | "extra-large";
+type FontSize = "1" | "2" | "3" | "4" | "5";
 
 interface FontSizeContextType {
   fontSize: FontSize;
@@ -10,16 +10,20 @@ interface FontSizeContextType {
 
 const FontSizeContext = createContext<FontSizeContextType | undefined>(undefined);
 
-const fontMultipliers: Record<FontSize, number> = {
-  normal: 1,
-  large: 1.22,
-  "extra-large": 1.55,
+const labels: Record<FontSize, string> = {
+  "1": "A",
+  "2": "A+",
+  "3": "A++",
+  "4": "A+++",
+  "5": "A++++",
 };
+
+export const fontSizeLabel = (fs: FontSize) => labels[fs];
 
 export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   const [fontSize, setFontSize] = useState<FontSize>(() => {
     const stored = localStorage.getItem("vento-sul-font-size");
-    return (stored as FontSize) || "normal";
+    return (stored as FontSize) || "1";
   });
 
   useEffect(() => {
@@ -29,9 +33,8 @@ export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
 
   const cycleFontSize = () => {
     setFontSize(prev => {
-      if (prev === "normal") return "large";
-      if (prev === "large") return "extra-large";
-      return "normal";
+      const next = String(Number(prev) >= 5 ? 1 : Number(prev) + 1) as FontSize;
+      return next;
     });
   };
 

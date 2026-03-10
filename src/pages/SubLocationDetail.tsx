@@ -4,7 +4,7 @@ import { getCitySubLocations } from "@/data/subLocations";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useFontSize } from "@/contexts/FontSizeContext";
+import { useFontSize, fontSizeLabel } from "@/contexts/FontSizeContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -102,8 +102,8 @@ const SubLocationDetail = () => {
   ];
 
   const visibleStalls = stallsData.filter(s => !s.available).slice(0, visibleCount);
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
-  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
+  const fLabel = fontSizeLabel(fontSize as any);
+  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
 
   return (
     <div className="min-h-screen pb-20 bg-background">
@@ -139,7 +139,7 @@ const SubLocationDetail = () => {
               {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
             </button>
             <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card">
-              <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
+              <span className="text-xs font-black text-primary">{fLabel}</span>
             </button>
           </div>
         </div>
@@ -205,7 +205,7 @@ const SubLocationDetail = () => {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center`}>
                   <item.icon className={`w-6 h-6 ${thm.text}`} />
                 </div>
-                <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
+                <span className={`font-bold text-foreground text-center leading-tight ${Number(fontSize) >= 4 ? "text-sm" : "text-[10px]"}`}>{item.label}</span>
               </button>
             );
           })}

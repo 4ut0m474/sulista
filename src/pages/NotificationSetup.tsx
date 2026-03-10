@@ -63,7 +63,7 @@ const NotificationSetup = () => {
 
   const canAdvance = step === 0 ? !!period : step === 1 ? selectedCities.length > 0 : selectedInterests.length > 0;
 
-  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
+  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

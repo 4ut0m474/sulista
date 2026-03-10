@@ -68,7 +68,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
   };
 
   const canAdvance = step === 0 ? !!period : step === 1 ? selectedCities.length > 0 : selectedInterests.length > 0;
-  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
+  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
   const socialPhrase = socialPhrases[step] || socialPhrases[0];
 
   return (
@@ -88,7 +88,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
               <h2 className="font-display text-lg font-bold text-foreground">
                 {step === 0 ? "Fique por dentro!" : step === 1 ? "Suas cidades" : "Seus interesses"}
               </h2>
-              <p className={`text-muted-foreground ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>
+              <p className={`text-muted-foreground ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>
                 Saiba das novidades das suas cidades preferidas ✨
               </p>
             </div>
@@ -104,7 +104,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
 
         {/* Social phrase */}
         <div className="mx-5 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
-          <p className={`text-primary font-semibold text-center ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>
+          <p className={`text-primary font-semibold text-center ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>
             {socialPhrase}
           </p>
         </div>

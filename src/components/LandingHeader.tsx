@@ -1,6 +1,6 @@
 import { Sun, Moon, Type, Globe, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useFontSize } from "@/contexts/FontSizeContext";
+import { useFontSize, fontSizeLabel } from "@/contexts/FontSizeContext";
 import { useLanguage, languageLabels } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ const LandingHeader = () => {
   const { language, setLanguage } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
 
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const label = fontSizeLabel(fontSize as any);
 
   const handleThemeClick = () => {
     toggleTheme();
@@ -68,7 +68,7 @@ const LandingHeader = () => {
           className="w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-all active:scale-95"
           aria-label="Aumentar fonte"
         >
-          <span className="text-lg font-black text-primary leading-none">{fontSizeLabel}</span>
+          <span className="text-lg font-black text-primary leading-none">{label}</span>
         </button>
       </div>
     </header>

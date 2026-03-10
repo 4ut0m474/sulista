@@ -88,7 +88,7 @@ const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
               <h2 className="font-display text-lg font-bold text-foreground">
                 {step === 0 ? "Fique por dentro!" : step === 1 ? "Suas cidades" : "Seus interesses"}
               </h2>
-              <p className={`text-muted-foreground ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>
+              <p className={`text-muted-foreground ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>
                 Saiba das novidades das suas cidades preferidas ✨
               </p>
             </div>

@@ -118,7 +118,7 @@ const Landing = () => {
     return citiesByState[selectedState] || [];
   }, [selectedState]);
 
-  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
+  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
 
   const cityFavorites = favorites.filter(f => !f.subLocation);
   const subLocationFavorites = favorites.filter(f => !!f.subLocation);

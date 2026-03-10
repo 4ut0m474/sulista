@@ -41,6 +41,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <FontSizeToggle />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/city/:state/:city" element={<CityHome />} />

@@ -4,7 +4,7 @@ import { getCitySubLocations } from "@/data/subLocations";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useFontSize } from "@/contexts/FontSizeContext";
+import { useFontSize, fontSizeLabel } from "@/contexts/FontSizeContext";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useLanguage } from "@/contexts/LanguageContext";
 

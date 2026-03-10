@@ -102,8 +102,8 @@ const SubLocationDetail = () => {
   ];
 
   const visibleStalls = stallsData.filter(s => !s.available).slice(0, visibleCount);
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
-  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
+  const fLabel = fontSizeLabel(fontSize as any);
+  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
 
   return (
     <div className="min-h-screen pb-20 bg-background">

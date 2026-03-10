@@ -331,7 +331,7 @@ const CityHome = () => {
 const InfoCard = ({ title, content, fontSize }: { title: string; content: string; fontSize: string }) => (
   <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-card">
     <h3 className="font-bold text-xs text-muted-foreground uppercase tracking-wider mb-1">{title}</h3>
-    <p className={`text-foreground font-semibold ${fontSize === "extra-large" ? "text-base" : "text-sm"}`}>{content}</p>
+    <p className={`text-foreground font-semibold ${Number(fontSize) >= 4 ? "text-base" : "text-sm"}`}>{content}</p>
   </div>
 );
 

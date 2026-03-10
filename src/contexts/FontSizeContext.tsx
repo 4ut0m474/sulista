@@ -12,10 +12,10 @@ const FontSizeContext = createContext<FontSizeContextType | undefined>(undefined
 
 const labels: Record<FontSize, string> = {
   "1": "A",
-  "2": "A+",
-  "3": "A++",
-  "4": "A+++",
-  "5": "A++++",
+  "2": "A",
+  "3": "A",
+  "4": "A",
+  "5": "A",
 };
 
 export const fontSizeLabel = (fs: FontSize) => labels[fs];

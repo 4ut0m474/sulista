@@ -130,19 +130,8 @@
     --fs-xs: 12px;
   }
 
-  /* Level 2: +40% */
+  /* Level 2: +80% */
   [data-font-size="2"] {
-    --fs-base: 25.2px;
-    --fs-h1: 33.6px;
-    --fs-h2: 28px;
-    --fs-h3: 25.2px;
-    --fs-btn: 28px;
-    --fs-small: 19.6px;
-    --fs-xs: 16.8px;
-  }
-
-  /* Level 3: +80% */
-  [data-font-size="3"] {
     --fs-base: 32.4px;
     --fs-h1: 43.2px;
     --fs-h2: 36px;
@@ -152,26 +141,37 @@
     --fs-xs: 21.6px;
   }
 
-  /* Level 4: +140% */
-  [data-font-size="4"] {
-    --fs-base: 43.2px;
-    --fs-h1: 57.6px;
-    --fs-h2: 48px;
-    --fs-h3: 43.2px;
-    --fs-btn: 48px;
-    --fs-small: 33.6px;
-    --fs-xs: 28.8px;
+  /* Level 3: +160% */
+  [data-font-size="3"] {
+    --fs-base: 46.8px;
+    --fs-h1: 62.4px;
+    --fs-h2: 52px;
+    --fs-h3: 46.8px;
+    --fs-btn: 52px;
+    --fs-small: 36.4px;
+    --fs-xs: 31.2px;
   }
 
-  /* Level 5: +240% */
+  /* Level 4: +280% */
+  [data-font-size="4"] {
+    --fs-base: 68.4px;
+    --fs-h1: 91.2px;
+    --fs-h2: 76px;
+    --fs-h3: 68.4px;
+    --fs-btn: 76px;
+    --fs-small: 53.2px;
+    --fs-xs: 45.6px;
+  }
+
+  /* Level 5: +480% */
   [data-font-size="5"] {
-    --fs-base: 61.2px;
-    --fs-h1: 81.6px;
-    --fs-h2: 68px;
-    --fs-h3: 61.2px;
-    --fs-btn: 68px;
-    --fs-small: 47.6px;
-    --fs-xs: 40.8px;
+    --fs-base: 104.4px;
+    --fs-h1: 139.2px;
+    --fs-h2: 116px;
+    --fs-h3: 104.4px;
+    --fs-btn: 116px;
+    --fs-small: 81.2px;
+    --fs-xs: 69.6px;
   }
 }
 

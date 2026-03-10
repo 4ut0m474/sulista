@@ -10,7 +10,7 @@ const LandingHeader = () => {
   const { language, setLanguage } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
 
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const label = fontSizeLabel(fontSize as any);
 
   const handleThemeClick = () => {
     toggleTheme();

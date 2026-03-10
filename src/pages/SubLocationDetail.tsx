@@ -139,7 +139,7 @@ const SubLocationDetail = () => {
               {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
             </button>
             <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card">
-              <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
+              <span className="text-xs font-black text-primary">{fLabel}</span>
             </button>
           </div>
         </div>

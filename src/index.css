@@ -119,8 +119,8 @@
     font-size: var(--fs-btn, 20px);
   }
 
-  /* Font size level: normal (18px base) */
-  :root, [data-font-size="normal"] {
+  /* Level 1: normal (18px base) */
+  :root, [data-font-size="1"] {
     --fs-base: 18px;
     --fs-h1: 24px;
     --fs-h2: 20px;
@@ -130,26 +130,48 @@
     --fs-xs: 12px;
   }
 
-  /* Font size level: large (22px base ≈ 1.22x) */
-  [data-font-size="large"] {
-    --fs-base: 22px;
-    --fs-h1: 30px;
-    --fs-h2: 26px;
-    --fs-h3: 22px;
-    --fs-btn: 26px;
-    --fs-small: 18px;
-    --fs-xs: 16px;
+  /* Level 2: +20% */
+  [data-font-size="2"] {
+    --fs-base: 21.6px;
+    --fs-h1: 28.8px;
+    --fs-h2: 24px;
+    --fs-h3: 21.6px;
+    --fs-btn: 24px;
+    --fs-small: 16.8px;
+    --fs-xs: 14.4px;
   }
 
-  /* Font size level: extra-large (28px base ≈ 1.55x) */
-  [data-font-size="extra-large"] {
-    --fs-base: 28px;
-    --fs-h1: 38px;
-    --fs-h2: 32px;
-    --fs-h3: 28px;
-    --fs-btn: 32px;
-    --fs-small: 22px;
-    --fs-xs: 20px;
+  /* Level 3: +40% */
+  [data-font-size="3"] {
+    --fs-base: 25.2px;
+    --fs-h1: 33.6px;
+    --fs-h2: 28px;
+    --fs-h3: 25.2px;
+    --fs-btn: 28px;
+    --fs-small: 19.6px;
+    --fs-xs: 16.8px;
+  }
+
+  /* Level 4: +70% */
+  [data-font-size="4"] {
+    --fs-base: 30.6px;
+    --fs-h1: 40.8px;
+    --fs-h2: 34px;
+    --fs-h3: 30.6px;
+    --fs-btn: 34px;
+    --fs-small: 23.8px;
+    --fs-xs: 20.4px;
+  }
+
+  /* Level 5: +120% */
+  [data-font-size="5"] {
+    --fs-base: 39.6px;
+    --fs-h1: 52.8px;
+    --fs-h2: 44px;
+    --fs-h3: 39.6px;
+    --fs-btn: 44px;
+    --fs-small: 30.8px;
+    --fs-xs: 26.4px;
   }
 }
 

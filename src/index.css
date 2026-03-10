@@ -133,23 +133,23 @@
   /* Font size level: large (22px base ≈ 1.22x) */
   [data-font-size="large"] {
     --fs-base: 22px;
-    --fs-h1: 29px;
-    --fs-h2: 24px;
+    --fs-h1: 30px;
+    --fs-h2: 26px;
     --fs-h3: 22px;
-    --fs-btn: 24px;
-    --fs-small: 17px;
-    --fs-xs: 15px;
+    --fs-btn: 26px;
+    --fs-small: 18px;
+    --fs-xs: 16px;
   }
 
   /* Font size level: extra-large (28px base ≈ 1.55x) */
   [data-font-size="extra-large"] {
     --fs-base: 28px;
-    --fs-h1: 37px;
-    --fs-h2: 31px;
+    --fs-h1: 38px;
+    --fs-h2: 32px;
     --fs-h3: 28px;
-    --fs-btn: 31px;
+    --fs-btn: 32px;
     --fs-small: 22px;
-    --fs-xs: 18px;
+    --fs-xs: 20px;
   }
 }
 

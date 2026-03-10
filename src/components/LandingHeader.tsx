@@ -65,10 +65,10 @@ const LandingHeader = () => {
         {/* Font Size Toggle — must be A++ for admin secret */}
         <button
           onClick={cycleFontSize}
-          className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-colors"
+          className="w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-all active:scale-95"
           aria-label="Aumentar fonte"
         >
-          <span className="text-sm font-black text-primary">{fontSizeLabel}</span>
+          <span className="text-lg font-black text-primary leading-none">{fontSizeLabel}</span>
         </button>
       </div>
     </header>

@@ -27,7 +27,6 @@ import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
 
 import ScrollToTop from "./components/ScrollToTop";
-import FontSizeToggle from "./components/FontSizeToggle";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +40,6 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
-              <FontSizeToggle />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/city/:state/:city" element={<CityHome />} />

@@ -10,10 +10,10 @@ interface FontSizeContextType {
 
 const FontSizeContext = createContext<FontSizeContextType | undefined>(undefined);
 
-const fontClasses: Record<FontSize, string> = {
-  normal: "",
-  large: "text-lg",
-  "extra-large": "text-xl",
+const fontMultipliers: Record<FontSize, number> = {
+  normal: 1,
+  large: 1.22,
+  "extra-large": 1.55,
 };
 
 export const FontSizeProvider = ({ children }: { children: ReactNode }) => {

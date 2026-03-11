@@ -38,6 +38,7 @@ interface NotificationModalProps {
 
 const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
   const { fontSize } = useFontSize();
+  const { states, citiesByState } = useLocalidades();
   const [step, setStep] = useState(0);
   const [period, setPeriod] = useState<Period | null>(null);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);

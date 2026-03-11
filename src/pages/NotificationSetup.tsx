@@ -32,6 +32,7 @@ const NotificationSetup = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { fontSize } = useFontSize();
+  const { states, citiesByState } = useLocalidades();
 
   const [step, setStep] = useState(0);
   const [period, setPeriod] = useState<Period | null>(null);

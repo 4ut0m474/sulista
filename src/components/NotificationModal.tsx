@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, ChevronRight, Check, MapPin, Sparkles, X } from "lucide-react";
-import { states, citiesByState } from "@/data/cities";
+import { useLocalidades } from "@/hooks/useLocalidades";
 import { useFontSize } from "@/contexts/FontSizeContext";
 
 type Period = "daily" | "weekly" | "monthly";
@@ -38,6 +38,7 @@ interface NotificationModalProps {
 
 const NotificationModal = ({ onComplete, onSkip }: NotificationModalProps) => {
   const { fontSize } = useFontSize();
+  const { states, citiesByState } = useLocalidades();
   const [step, setStep] = useState(0);
   const [period, setPeriod] = useState<Period | null>(null);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);

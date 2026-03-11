@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map, TreePine, ShoppingCart, Shield } from "lucide-react";
-import { getCitySubLocations } from "@/data/subLocations";
+import { useSubLocations } from "@/hooks/useLocalidades";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -50,7 +50,7 @@ const SubLocationDetail = () => {
   const favKey = `${cityName}:${subLocName}`;
   const starred = isFavorite(state || "", favKey);
 
-  const cityData = getCitySubLocations(cityName, state || "");
+  const cityData = useSubLocations(cityName, state || "");
   const loc = cityData?.subLocations.find(s => s.name === subLocName);
 
   const [visibleCount, setVisibleCount] = useState(STALLS_PER_PAGE);

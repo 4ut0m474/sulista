@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, ChevronLeft, Waves, Star } from "lucide-react";
-import { getCitySubLocations } from "@/data/subLocations";
+import { useSubLocations } from "@/hooks/useLocalidades";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Moon, Sun } from "lucide-react";
@@ -11,7 +11,7 @@ const SubLocationsList = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const cityName = decodeURIComponent(city || "");
-  const data = getCitySubLocations(cityName, state || "");
+  const data = useSubLocations(cityName, state || "");
   const { theme, toggleTheme } = useTheme();
   const [activeDistrict, setActiveDistrict] = useState<string | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();

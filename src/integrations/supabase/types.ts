@@ -257,6 +257,57 @@ export type Database = {
         }
         Relationships: []
       }
+      localidades: {
+        Row: {
+          city: string | null
+          created_at: string
+          description: string | null
+          district: string | null
+          group_label: string | null
+          highlights: string[] | null
+          id: string
+          image_url: string | null
+          name: string
+          sort_order: number | null
+          state_abbr: string
+          state_name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          group_label?: string | null
+          highlights?: string[] | null
+          id?: string
+          image_url?: string | null
+          name: string
+          sort_order?: number | null
+          state_abbr: string
+          state_name: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          group_label?: string | null
+          highlights?: string[] | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          sort_order?: number | null
+          state_abbr?: string
+          state_name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       persistence_verifications: {
         Row: {
           approved_at: string | null

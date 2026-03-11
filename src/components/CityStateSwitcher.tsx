@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight, Palmtree, Building2 } from "lucide-react";
-import { states, citiesByState } from "@/data/cities";
-import { getCitySubLocations, SubLocationGroup } from "@/data/subLocations";
+import { useLocalidades, getCachedSubLocations, type SubLocationGroup } from "@/hooks/useLocalidades";
 
 interface CityStateSwitcherProps {
   currentState: string;
@@ -16,6 +15,7 @@ const CityStateSwitcher = ({ currentState, currentCity, className = "" }: CitySt
   const [showCities, setShowCities] = useState(false);
   const [expandedCity, setExpandedCity] = useState<string | null>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const { states, citiesByState } = useLocalidades();
 
   const stateName = states.find(s => s.abbr === currentState)?.name || currentState;
   const decodedCity = decodeURIComponent(currentCity);
@@ -79,7 +79,7 @@ const CityStateSwitcher = ({ currentState, currentCity, className = "" }: CitySt
         {showCities && (
           <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-xl shadow-card min-w-[260px] max-h-[70vh] overflow-y-auto" style={{ zIndex: 9999 }}>
             {cities.map(c => {
-              const subLocs = getCitySubLocations(c, currentState);
+              const subLocs = getCachedSubLocations(c, currentState);
               const isExpanded = expandedCity === c;
 
               return (

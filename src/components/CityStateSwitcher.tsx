@@ -15,6 +15,7 @@ const CityStateSwitcher = ({ currentState, currentCity, className = "" }: CitySt
   const [showCities, setShowCities] = useState(false);
   const [expandedCity, setExpandedCity] = useState<string | null>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const { states, citiesByState } = useLocalidades();
 
   const stateName = states.find(s => s.abbr === currentState)?.name || currentState;
   const decodedCity = decodeURIComponent(currentCity);

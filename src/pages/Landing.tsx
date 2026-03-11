@@ -137,7 +137,7 @@ const Landing = () => {
               {cityOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-card z-50 max-h-72 overflow-y-auto">
                   {cities.map(city => {
-                    const subLocs = selectedState ? getCitySubLocations(city, selectedState) : null;
+                    const subLocs = selectedState ? getCachedSubLocations(city, selectedState) : null;
                     const isExpanded = expandedCity === city;
                     const groupIcon = (type: string) => type === "praias"
                       ? <Palmtree className="w-3 h-3" />

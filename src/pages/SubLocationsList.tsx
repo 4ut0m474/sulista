@@ -11,7 +11,7 @@ const SubLocationsList = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const cityName = decodeURIComponent(city || "");
-  const data = getCitySubLocations(cityName, state || "");
+  const data = useSubLocations(cityName, state || "");
   const { theme, toggleTheme } = useTheme();
   const [activeDistrict, setActiveDistrict] = useState<string | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();

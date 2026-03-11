@@ -50,7 +50,7 @@ const SubLocationDetail = () => {
   const favKey = `${cityName}:${subLocName}`;
   const starred = isFavorite(state || "", favKey);
 
-  const cityData = getCitySubLocations(cityName, state || "");
+  const cityData = useSubLocations(cityName, state || "");
   const loc = cityData?.subLocations.find(s => s.name === subLocName);
 
   const [visibleCount, setVisibleCount] = useState(STALLS_PER_PAGE);

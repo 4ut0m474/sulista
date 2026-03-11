@@ -10,7 +10,7 @@ import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useFontSize, fontSizeLabel } from "@/contexts/FontSizeContext";
+import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminConfig, getAdminCityData } from "@/lib/adminData";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -136,8 +136,8 @@ const CityHome = () => {
     { label: t("groupBuy"), icon: ShoppingCart, path: "group-buy" },
   ];
 
-  const fLabel = fontSizeLabel(fontSize as any);
-  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
+  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   return (
     <div className="min-h-screen pb-20 relative">
@@ -199,7 +199,7 @@ const CityHome = () => {
                   {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
                 </button>
                 <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card" aria-label="Aumentar fonte">
-                  <span className="text-xs font-black text-primary">{fLabel}</span>
+                  <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
                 </button>
               </div>
             </div>
@@ -242,7 +242,7 @@ const CityHome = () => {
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${thm.bg} flex items-center justify-center`}>
                     <item.icon className={`w-7 h-7 ${thm.text}`} />
                   </div>
-                  <span className={`font-bold text-foreground text-center leading-tight ${Number(fontSize) >= 4 ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
+                  <span className={`font-bold text-foreground text-center leading-tight ${fontSize === "extra-large" ? "text-sm" : "text-[11px]"}`}>{item.label}</span>
                 </button>
               );
             })}
@@ -288,7 +288,7 @@ const CityHome = () => {
             </div>
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-1">{t("history")}</h3>
-              <p className={`text-muted-foreground leading-relaxed ${Number(fontSize) >= 4 ? "text-sm" : "text-xs"}`}>{cityData.history}</p>
+              <p className={`text-muted-foreground leading-relaxed ${fontSize === "extra-large" ? "text-sm" : "text-xs"}`}>{cityData.history}</p>
             </div>
             <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-4 shadow-card">
               <h3 className="font-bold text-sm text-foreground mb-2">{t("contact")}</h3>
@@ -331,7 +331,7 @@ const CityHome = () => {
 const InfoCard = ({ title, content, fontSize }: { title: string; content: string; fontSize: string }) => (
   <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-card">
     <h3 className="font-bold text-xs text-muted-foreground uppercase tracking-wider mb-1">{title}</h3>
-    <p className={`text-foreground font-semibold ${Number(fontSize) >= 4 ? "text-base" : "text-sm"}`}>{content}</p>
+    <p className={`text-foreground font-semibold ${fontSize === "extra-large" ? "text-base" : "text-sm"}`}>{content}</p>
   </div>
 );
 

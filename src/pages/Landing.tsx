@@ -118,7 +118,7 @@ const Landing = () => {
     return citiesByState[selectedState] || [];
   }, [selectedState]);
 
-  const textSizeClass = Number(fontSize) >= 4 ? "text-lg" : Number(fontSize) >= 2 ? "text-base" : "text-sm";
+  const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   const cityFavorites = favorites.filter(f => !f.subLocation);
   const subLocationFavorites = favorites.filter(f => !!f.subLocation);
@@ -295,7 +295,7 @@ const Landing = () => {
               )}
             </div>
 
-            <p className={`text-center text-primary-foreground/70 ${Number(fontSize) >= 4 ? "text-base" : "text-xs"}`}>
+            <p className={`text-center text-primary-foreground/70 ${fontSize === "extra-large" ? "text-base" : "text-xs"}`}>
               {t("selectToContinue")}
             </p>
 

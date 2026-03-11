@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, ChevronRight, Check, MapPin, Sparkles, X } from "lucide-react";
-import { states, citiesByState } from "@/data/cities";
+import { useLocalidades } from "@/hooks/useLocalidades";
 import { useFontSize } from "@/contexts/FontSizeContext";
 
 type Period = "daily" | "weekly" | "monthly";

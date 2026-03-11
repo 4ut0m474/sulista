@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Bell, ChevronRight, ChevronLeft, Check, MapPin, Sparkles } from "lucide-react";
-import { states, citiesByState } from "@/data/cities";
+import { useLocalidades } from "@/hooks/useLocalidades";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 

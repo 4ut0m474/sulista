@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight, Palmtree, Building2 } from "lucide-react";
-import { states, citiesByState } from "@/data/cities";
-import { getCitySubLocations, SubLocationGroup } from "@/data/subLocations";
+import { useLocalidades, getCachedSubLocations, type SubLocationGroup } from "@/hooks/useLocalidades";
 
 interface CityStateSwitcherProps {
   currentState: string;

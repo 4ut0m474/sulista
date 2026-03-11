@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, MapPin, Star, Waves, Sun, Moon, Store, Tag, Calendar, Map, TreePine, ShoppingCart, Shield } from "lucide-react";
-import { getCitySubLocations } from "@/data/subLocations";
+import { useSubLocations } from "@/hooks/useLocalidades";
 import { stallsData } from "@/data/cities";
 import FooterNav from "@/components/FooterNav";
 import { useTheme } from "@/contexts/ThemeContext";

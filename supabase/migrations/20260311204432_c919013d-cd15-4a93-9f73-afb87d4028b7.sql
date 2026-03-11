@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS idx_establishments_name_city_state ON public.establishments (name, city, state_abbr);

@@ -57,26 +57,26 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 11%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 11%;
-    --popover-foreground: 0 0% 100%;
+    --background: 150 20% 8%;
+    --foreground: 40 20% 95%;
+    --card: 150 20% 12%;
+    --card-foreground: 40 20% 95%;
+    --popover: 150 20% 12%;
+    --popover-foreground: 40 20% 95%;
     --primary: 152 50% 45%;
-    --primary-foreground: 0 0% 7%;
+    --primary-foreground: 150 30% 8%;
     --ocean: 211 70% 58%;
     --ocean-foreground: 222 47% 11%;
     --secondary: 38 65% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 70%;
+    --secondary-foreground: 40 20% 97%;
+    --muted: 150 15% 18%;
+    --muted-foreground: 40 10% 60%;
     --accent: 180 35% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 40 20% 97%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 150 15% 22%;
+    --input: 150 15% 22%;
     --ring: 152 50% 45%;
   }
 }
@@ -89,34 +89,10 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
   }
 
-  h1 {
+  h1, h2, h3 {
     font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    line-height: 1.3;
-  }
-
-  h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    line-height: 1.3;
-  }
-
-  h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    line-height: 1.4;
-  }
-
-  p, span, label, li {
-    font-size: 1rem;
-  }
-
-  button, a {
-    font-size: 1.125rem;
   }
 
   /* Font size adjustments for accessibility */

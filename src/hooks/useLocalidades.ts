@@ -49,16 +49,9 @@ export function useLocalidades(): LocalidadesState {
   }, []);
 
   const states = useMemo(() => {
-    const stateRows = data.filter(d => d.type === "estado");
-    if (stateRows.length === 0) {
-      // fallback
-      return [
-        { name: "Paraná", abbr: "PR" },
-        { name: "Santa Catarina", abbr: "SC" },
-        { name: "Rio Grande do Sul", abbr: "RS" },
-      ];
-    }
-    return stateRows.map(s => ({ name: s.name, abbr: s.state_abbr }));
+    return data
+      .filter(d => d.type === "estado")
+      .map(s => ({ name: s.name, abbr: s.state_abbr }));
   }, [data]);
 
   const citiesByState = useMemo(() => {

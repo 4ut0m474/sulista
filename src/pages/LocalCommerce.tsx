@@ -1,68 +1,58 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, UtensilsCrossed, Bed, Coffee, Sandwich, Palette, Store } from "lucide-react";
+import { ChevronLeft, UtensilsCrossed, Bed, Coffee, Sandwich, Palette, Store, Loader2 } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import CityStateSwitcher from "@/components/CityStateSwitcher";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { pageBackgrounds } from "@/lib/adminData";
+import { supabase } from "@/integrations/supabase/client";
 
-const categories = [
-  {
-    id: "restaurants", label: "Restaurantes", icon: UtensilsCrossed, color: "bg-destructive/10 text-destructive",
-    shops: [
-      { name: "Restaurante Colonial", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80", address: "Rua Central, 100" },
-      { name: "Cantina Italiana", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80", address: "Av. Principal, 200" },
-      { name: "Churrascaria Gaúcha", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80", address: "Rua XV, 50" },
-      { name: "Bistrô da Praça", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80", address: "Praça Central, 10" },
-    ],
-  },
-  {
-    id: "inns", label: "Pousadas", icon: Bed, color: "bg-primary/10 text-primary",
-    shops: [
-      { name: "Pousada Serra Verde", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80", address: "Estrada da Serra, km 5" },
-      { name: "Hotel Colonial", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80", address: "Rua das Flores, 300" },
-      { name: "Chalé da Montanha", image: "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=400&q=80", address: "Rua do Mirante, 80" },
-    ],
-  },
-  {
-    id: "breakfast", label: "Café da Manhã", icon: Coffee, color: "bg-secondary/10 text-secondary",
-    shops: [
-      { name: "Café & Confeitaria", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80", address: "Av. Principal, 150" },
-      { name: "Padaria Tradição", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80", address: "Rua XV, 300" },
-      { name: "Casa do Pão", image: "https://images.unsplash.com/photo-1555507036-ab1f4038024a?w=400&q=80", address: "Rua do Comércio, 45" },
-    ],
-  },
-  {
-    id: "snacks", label: "Lanches", icon: Sandwich, color: "bg-gold/10 text-secondary",
-    shops: [
-      { name: "Lanchonete Central", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", address: "Rua Central, 75" },
-      { name: "Food Truck Sul", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", address: "Praça de Alimentação" },
-    ],
-  },
-  {
-    id: "crafts", label: "Artesanato", icon: Palette, color: "bg-accent/10 text-accent",
-    shops: [
-      { name: "Artesanato do Sul", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&q=80", address: "Praça da Matriz, 25" },
-      { name: "Ateliê Arte Sul", image: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=400&q=80", address: "Rua das Artes, 60" },
-    ],
-  },
-  {
-    id: "local", label: "Comércio Local", icon: Store, color: "bg-teal/10 text-accent",
-    shops: [
-      { name: "Mercearia Colonial", image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&q=80", address: "Rua Central, 100" },
-      { name: "Farmácia Vida", image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400&q=80", address: "Rua das Flores, 50" },
-      { name: "Bazar da Esquina", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&q=80", address: "Rua do Comércio, 75" },
-    ],
-  },
+const categoryConfig = [
+  { id: "restaurante", label: "Restaurantes", icon: UtensilsCrossed, color: "bg-destructive/10 text-destructive" },
+  { id: "pousada", label: "Pousadas", icon: Bed, color: "bg-primary/10 text-primary" },
+  { id: "cafe", label: "Café da Manhã", icon: Coffee, color: "bg-secondary/10 text-secondary" },
+  { id: "lanche", label: "Lanches", icon: Sandwich, color: "bg-gold/10 text-secondary" },
+  { id: "artesanato", label: "Artesanato", icon: Palette, color: "bg-accent/10 text-accent" },
+  { id: "comercio", label: "Comércio Local", icon: Store, color: "bg-teal/10 text-accent" },
 ];
+
+type Establishment = {
+  id: string;
+  name: string;
+  photo_url: string | null;
+  address: string | null;
+  description: string | null;
+  category: string | null;
+  avg_rating: number | null;
+  total_votes: number | null;
+};
 
 const LocalCommerce = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const base = `/city/${state}/${city}`;
-  const [activeCategory, setActiveCategory] = useState("restaurants");
+  const [activeCategory, setActiveCategory] = useState("restaurante");
+  const [shops, setShops] = useState<Establishment[]>([]);
+  const [loading, setLoading] = useState(true);
   const bgUrl = pageBackgrounds.commerce;
 
-  const currentCategory = categories.find(c => c.id === activeCategory)!;
+  useEffect(() => {
+    const fetchShops = async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from("establishments_public")
+        .select("id, name, photo_url, address, description, category, avg_rating, total_votes")
+        .eq("city", city || "")
+        .eq("state_abbr", state || "")
+        .eq("category", activeCategory)
+        .order("is_vip", { ascending: false })
+        .order("avg_rating", { ascending: false });
+      setShops((data as Establishment[]) || []);
+      setLoading(false);
+    };
+    fetchShops();
+  }, [city, state, activeCategory]);
+
+  const currentCat = categoryConfig.find(c => c.id === activeCategory)!;
 
   return (
     <div className="min-h-screen pb-20 relative">
@@ -87,7 +77,7 @@ const LocalCommerce = () => {
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-            {categories.map(cat => (
+            {categoryConfig.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
@@ -103,19 +93,37 @@ const LocalCommerce = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {currentCategory.shops.map((shop, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden shadow-card border border-border/50 bg-card/90 backdrop-blur-sm">
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img src={shop.image} alt={shop.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : shops.length === 0 ? (
+            <div className="bg-card/90 backdrop-blur-sm rounded-2xl border border-border/50 p-6 shadow-card text-center">
+              <currentCat.icon className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Nenhum estabelecimento cadastrado nesta categoria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {shops.map((shop) => (
+                <div key={shop.id} className="rounded-2xl overflow-hidden shadow-card border border-border/50 bg-card/90 backdrop-blur-sm">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={shop.photo_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&q=60"}
+                      alt={shop.name || ""}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-bold text-sm text-foreground">{shop.name}</h3>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{shop.address}</p>
+                    {shop.description && (
+                      <p className="text-[10px] text-muted-foreground/70 mt-1 line-clamp-2">{shop.description}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="p-3">
-                  <h3 className="font-bold text-sm text-foreground">{shop.name}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{shop.address}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

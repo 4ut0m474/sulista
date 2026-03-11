@@ -31,91 +31,12 @@ const Landing = () => {
   const [pinVerified, setPinVerified] = useState(sessionStorage.getItem(PERSISTENCE_KEYS.pinVerified) === "true");
   const [showPinLogin, setShowPinLogin] = useState(false);
 
-  useEffect(() => {
-    const completePendingPersistence = async (session: any) => {
-      const pendingPin = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPin);
-      const pendingEmail = sessionStorage.getItem(PERSISTENCE_KEYS.pendingEmail);
-      if (!pendingPin) return false;
-
-      try {
-        const { data, error } = await supabase.functions.invoke("persist-anonymous", {
-          body: { action: "create", pin: pendingPin, email: pendingEmail },
-        });
-        if (error) throw error;
-
-        const nextStatus = (data?.status as PersistenceVerificationStatus | undefined) ?? "identity_pending";
-        const userUuid = data?.uuid || session.user.id;
-        syncPersistenceLocalState({ userId: userUuid, status: nextStatus, verified: true });
-        setIsPersistent(true);
-        setPersistenceStatus(nextStatus);
-        setPinVerified(true);
-        setPersistOpen(true);
-        toast.success("Persistência ligada. Complete sua identidade para análise.");
-      } catch (err: any) {
-        toast.error(err.message || "Erro ao ativar persistência");
-      } finally {
-        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
-        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
-        sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
-      }
-      return true;
-    };
-
-    const syncPersistenceStatus = async (session: any) => {
-      try {
-        const { data, error } = await supabase.functions.invoke("persist-anonymous", {
-          body: { action: "status" },
-        });
-        if (error || !data?.status) return;
-
-        const nextStatus = data.status as PersistenceVerificationStatus;
-        syncPersistenceLocalState({ userId: data.uuid || session.user.id, status: nextStatus, verified: true });
-        setIsPersistent(true);
-        setPersistenceStatus(nextStatus);
-      } catch {
-        // noop
-      }
-    };
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
-      if (session && isPending) {
-        await completePendingPersistence(session);
-        return;
-      }
-
-      if (session) {
-        await syncPersistenceStatus(session);
-      }
-
-      if (getLocalPersistenceActive() && !pinVerified) {
-        if (session) {
-          setShowPinLogin(true);
-        } else {
-          clearPersistenceLocalState();
-          setIsPersistent(false);
-          setPersistenceStatus(null);
-        }
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        const isPending = sessionStorage.getItem(PERSISTENCE_KEYS.pendingPersist) === "true";
-        if (isPending) {
-          await completePendingPersistence(session);
-          return;
-        }
-        await syncPersistenceStatus(session);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [pinVerified]);
+  const { states, citiesByState } = useLocalidades();
 
   const cities = useMemo(() => {
     if (!selectedState) return [];
     return citiesByState[selectedState] || [];
-  }, [selectedState]);
+  }, [selectedState, citiesByState]);
 
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 

@@ -68,6 +68,7 @@ const App = () => (
         </LanguageProvider>
       </FontSizeProvider>
     </ThemeProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

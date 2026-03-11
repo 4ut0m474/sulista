@@ -36,12 +36,12 @@ const Opinion = () => {
 
   const fetchEstablishments = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from("establishments_public")
       .select("id, name, description, category, photo_url, avg_rating, total_votes, address")
       .eq("city", cityName)
       .eq("state_abbr", state || "")
-      .order("avg_rating", { ascending: false });
+      .order("total_votes", { ascending: false });
     
     if (!error && data) setEstablishments(data as Establishment[]);
     setLoading(false);

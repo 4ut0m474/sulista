@@ -9,11 +9,11 @@ import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
-import PinLoginModal from "@/components/PinLoginModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { PERSISTENCE_KEYS, clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
+import { useAuth } from "@/contexts/AuthContext";
+import { clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");

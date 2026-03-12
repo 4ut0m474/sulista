@@ -311,23 +311,6 @@ const Landing = () => {
         }}
       />
 
-      <PinLoginModal
-        open={showPinLogin}
-        onSuccess={async () => {
-          setShowPinLogin(false);
-          setPinVerified(true);
-          const { data } = await supabase.functions.invoke("persist-anonymous", {
-            body: { action: "status" },
-          });
-          if (data?.status) {
-            setIsPersistent(true);
-            setPersistenceStatus(data.status as PersistenceVerificationStatus);
-          }
-        }}
-        onCancel={() => {
-          setShowPinLogin(false);
-        }}
-      />
     </div>
   );
 };

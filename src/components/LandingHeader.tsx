@@ -69,7 +69,7 @@ const LandingHeader = () => {
           className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-colors"
           aria-label="Aumentar fonte"
         >
-          <span className="text-sm font-black text-primary">{fontSizeLabel}</span>
+          <span className={`${fontSizeScale} font-black text-primary transition-all`}>{fontSizeLabel}</span>
         </button>
       </div>
     </header>

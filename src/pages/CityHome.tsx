@@ -136,7 +136,8 @@ const CityHome = () => {
     { label: t("groupBuy"), icon: ShoppingCart, path: "group-buy" },
   ];
 
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const fontSizeLabel = "A";
+  const fontSizeScale = fontSize === "normal" ? "text-xs" : fontSize === "large" ? "text-sm" : "text-base";
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   return (

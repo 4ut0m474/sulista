@@ -102,7 +102,8 @@ const SubLocationDetail = () => {
   ];
 
   const visibleStalls = stallsData.filter(s => !s.available).slice(0, visibleCount);
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const fontSizeLabel = "A";
+  const fontSizeScale = fontSize === "normal" ? "text-xs" : fontSize === "large" ? "text-sm" : "text-base";
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   return (

@@ -9,11 +9,11 @@ import { useFontSize } from "@/contexts/FontSizeContext";
 import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
-import PinLoginModal from "@/components/PinLoginModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { PERSISTENCE_KEYS, clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
+import { useAuth } from "@/contexts/AuthContext";
+import { clearPersistenceLocalState, getLocalPersistenceActive, getLocalPersistenceStatus, syncPersistenceLocalState, type PersistenceVerificationStatus } from "@/lib/persistence";
 
 const Landing = () => {
   const [selectedState, setSelectedState] = useState<string>("");
@@ -28,8 +28,7 @@ const Landing = () => {
   const [persistOpen, setPersistOpen] = useState(false);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
-  const [pinVerified, setPinVerified] = useState(sessionStorage.getItem(PERSISTENCE_KEYS.pinVerified) === "true");
-  const [showPinLogin, setShowPinLogin] = useState(false);
+  const { pinVerified, confirmPin } = useAuth();
 
   const { states, citiesByState } = useLocalidades();
 
@@ -221,16 +220,6 @@ const Landing = () => {
 
             <button
               onClick={() => {
-                if (!isPersistent) {
-                  setPersistOpen(true);
-                  return;
-                }
-
-                if (!pinVerified) {
-                  setShowPinLogin(true);
-                  return;
-                }
-
                 setPersistOpen(true);
               }}
               className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"
@@ -315,30 +304,13 @@ const Landing = () => {
           setPersistOpen(false);
           setIsPersistent(true);
           setPersistenceStatus("pending");
-          setPinVerified(true);
+          confirmPin();
           if (userId) {
             syncPersistenceLocalState({ userId, status: "pending", verified: true });
           }
         }}
       />
 
-      <PinLoginModal
-        open={showPinLogin}
-        onSuccess={async () => {
-          setShowPinLogin(false);
-          setPinVerified(true);
-          const { data } = await supabase.functions.invoke("persist-anonymous", {
-            body: { action: "status" },
-          });
-          if (data?.status) {
-            setIsPersistent(true);
-            setPersistenceStatus(data.status as PersistenceVerificationStatus);
-          }
-        }}
-        onCancel={() => {
-          setShowPinLogin(false);
-        }}
-      />
     </div>
   );
 };

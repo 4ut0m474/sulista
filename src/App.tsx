@@ -28,6 +28,7 @@ import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
 
 import ScrollToTop from "./components/ScrollToTop";
+import PinGate from "./components/PinGate";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <PinGate>
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/city/:state/:city" element={<CityHome />} />
@@ -63,6 +65,7 @@ const App = () => (
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </PinGate>
             </BrowserRouter>
           </TooltipProvider>
         </LanguageProvider>

@@ -220,16 +220,6 @@ const Landing = () => {
 
             <button
               onClick={() => {
-                if (!isPersistent) {
-                  setPersistOpen(true);
-                  return;
-                }
-
-                if (!pinVerified) {
-                  setShowPinLogin(true);
-                  return;
-                }
-
                 setPersistOpen(true);
               }}
               className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"

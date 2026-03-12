@@ -28,8 +28,7 @@ const Landing = () => {
   const [persistOpen, setPersistOpen] = useState(false);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
-  const [pinVerified, setPinVerified] = useState(sessionStorage.getItem(PERSISTENCE_KEYS.pinVerified) === "true");
-  const [showPinLogin, setShowPinLogin] = useState(false);
+  const { pinVerified, confirmPin } = useAuth();
 
   const { states, citiesByState } = useLocalidades();
 

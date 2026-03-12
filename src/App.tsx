@@ -65,6 +65,7 @@ const App = () => (
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </PinGate>
             </BrowserRouter>
           </TooltipProvider>
         </LanguageProvider>

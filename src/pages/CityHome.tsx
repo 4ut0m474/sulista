@@ -136,7 +136,8 @@ const CityHome = () => {
     { label: t("groupBuy"), icon: ShoppingCart, path: "group-buy" },
   ];
 
-  const fontSizeLabel = fontSize === "normal" ? "A" : fontSize === "large" ? "A+" : "A++";
+  const fontSizeLabel = "A";
+  const fontSizeScale = fontSize === "normal" ? "text-xs" : fontSize === "large" ? "text-sm" : "text-base";
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   return (
@@ -199,7 +200,7 @@ const CityHome = () => {
                   {theme === "light" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-secondary" />}
                 </button>
                 <button onClick={cycleFontSize} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card" aria-label="Aumentar fonte">
-                  <span className="text-xs font-black text-primary">{fontSizeLabel}</span>
+                  <span className={`${fontSizeScale} font-black text-primary transition-all`}>{fontSizeLabel}</span>
                 </button>
               </div>
             </div>

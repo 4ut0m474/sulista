@@ -213,6 +213,8 @@ export type Database = {
           description: string | null
           id: string
           is_vip: boolean | null
+          latitude: number | null
+          longitude: number | null
           name: string
           phone: string | null
           photo_url: string | null
@@ -230,6 +232,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_vip?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           name: string
           phone?: string | null
           photo_url?: string | null
@@ -247,6 +251,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_vip?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           phone?: string | null
           photo_url?: string | null
@@ -662,6 +668,8 @@ export type Database = {
           description: string | null
           id: string | null
           is_vip: boolean | null
+          latitude: number | null
+          longitude: number | null
           name: string | null
           photo_url: string | null
           state_abbr: string | null
@@ -678,6 +686,8 @@ export type Database = {
           description?: string | null
           id?: string | null
           is_vip?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string | null
           photo_url?: string | null
           state_abbr?: string | null
@@ -694,6 +704,8 @@ export type Database = {
           description?: string | null
           id?: string | null
           is_vip?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string | null
           photo_url?: string | null
           state_abbr?: string | null

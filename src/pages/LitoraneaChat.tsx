@@ -447,13 +447,48 @@ const LitoraneaChat = () => {
     const allMessages = [...messages, userMsg];
 
     try {
+      // Detect nearby intent
+      const nearbyKeywords = ["perto", "próximo", "perto de mim", "ofertas perto", "o que tem aqui", "por perto", "nearby", "ao redor"];
+      const isNearbyIntent = nearbyKeywords.some(kw => text.toLowerCase().includes(kw));
+      let nearbyData: any = null;
+
+      if (isNearbyIntent && navigator.geolocation) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 })
+          );
+          const { data: establishments } = await supabase
+            .from("establishments_public")
+            .select("*")
+            .eq("state_abbr", state || "")
+            .eq("city", decodeURIComponent(city || ""));
+
+          if (establishments?.length) {
+            const withDist = establishments
+              .filter((e: any) => e.latitude && e.longitude)
+              .map((e: any) => {
+                const R = 6371000;
+                const toRad = (d: number) => (d * Math.PI) / 180;
+                const dLat = toRad(e.latitude - pos.coords.latitude);
+                const dLon = toRad(e.longitude - pos.coords.longitude);
+                const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(pos.coords.latitude)) * Math.cos(toRad(e.latitude)) * Math.sin(dLon / 2) ** 2;
+                const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return { name: e.name, category: e.category, address: e.address, distance_m: Math.round(dist), description: e.description };
+              })
+              .sort((a: any, b: any) => a.distance_m - b.distance_m)
+              .slice(0, 10);
+            nearbyData = { userLat: pos.coords.latitude, userLng: pos.coords.longitude, nearby: withDist };
+          }
+        } catch { /* GPS denied, proceed without */ }
+      }
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, userProfile: userProfile || {} }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, userProfile: userProfile || {}, nearbyData }),
       });
 
       if (!resp.ok || !resp.body) {

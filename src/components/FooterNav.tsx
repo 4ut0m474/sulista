@@ -1,5 +1,5 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { Home, Compass, Briefcase, Coins } from "lucide-react";
+import { Home, MapPin, Briefcase, Coins } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 
 interface FooterNavProps {

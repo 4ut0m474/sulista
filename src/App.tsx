@@ -26,6 +26,7 @@ import SubLocationsList from "./pages/SubLocationsList";
 import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
+import NearbyOffers from "./pages/NearbyOffers";
 
 import ScrollToTop from "./components/ScrollToTop";
 import PinGate from "./components/PinGate";

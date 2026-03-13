@@ -201,6 +201,15 @@ const Wallet = () => {
         />
       )}
 
+      {showMessage && userId && (
+        <SendMessageModal
+          currentUserId={userId}
+          saldo={saldo}
+          onClose={() => setShowMessage(false)}
+          onSuccess={() => { setShowMessage(false); fetchData(); }}
+        />
+      )}
+
       {/* Footer */}
       {state && city && <FooterNav stateAbbr={state} cityName={city} />}
     </div>

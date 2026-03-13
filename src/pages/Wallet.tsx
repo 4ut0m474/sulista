@@ -74,19 +74,18 @@ const Wallet = () => {
       </div>
 
       {/* Big Action Buttons */}
-      <div className="grid grid-cols-2 gap-3 px-4 mt-4">
+      <div className="grid grid-cols-3 gap-2 px-4 mt-4">
         <button
           onClick={() => {
             if (!isPersistent) { toast.error("Ative a persistência primeiro!"); return; }
             setShowQR(true);
           }}
-          className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
+          className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
         >
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <QrCode className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <QrCode className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-sm font-bold text-foreground">Compartilhar meu ID</span>
-          <span className="text-[10px] text-muted-foreground text-center">Gera QR Code pra receber</span>
+          <span className="text-xs font-bold text-foreground">Compartilhar ID</span>
         </button>
 
         <button
@@ -94,13 +93,25 @@ const Wallet = () => {
             if (!isPersistent) { toast.error("Ative a persistência primeiro!"); return; }
             setShowScanner(true);
           }}
-          className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
+          className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
         >
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Camera className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Camera className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-sm font-bold text-foreground">Escanear QR</span>
-          <span className="text-[10px] text-muted-foreground text-center">Enviar SulCoins</span>
+          <span className="text-xs font-bold text-foreground">Escanear QR</span>
+        </button>
+
+        <button
+          onClick={() => {
+            if (!isPersistent) { toast.error("Ative a persistência primeiro!"); return; }
+            setShowMessage(true);
+          }}
+          className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all"
+        >
+          <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+            <Mail className="w-5 h-5 text-secondary" />
+          </div>
+          <span className="text-xs font-bold text-foreground">Enviar Recado</span>
         </button>
       </div>
 

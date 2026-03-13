@@ -22,6 +22,7 @@ const Wallet = () => {
   const [showQR, setShowQR] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scannedId, setScannedId] = useState<string | null>(null);
+  const [showMessage, setShowMessage] = useState(false);
   const [logs, setLogs] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {

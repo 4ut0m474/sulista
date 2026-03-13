@@ -461,7 +461,7 @@ const LitoraneaChat = () => {
             .from("establishments_public")
             .select("*")
             .eq("state_abbr", state || "")
-            .eq("city", cityName);
+            .eq("city", decodeURIComponent(city || ""));
 
           if (establishments?.length) {
             const withDist = establishments

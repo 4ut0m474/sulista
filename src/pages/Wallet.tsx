@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Coins, QrCode, Camera, History, Share2 } from "lucide-react";
+import { Coins, QrCode, Camera, History, Share2, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import FooterNav from "@/components/FooterNav";
@@ -9,6 +9,7 @@ import PersistenceBanner from "@/components/wallet/PersistenceBanner";
 import QRShareModal from "@/components/wallet/QRShareModal";
 import QRScannerModal from "@/components/wallet/QRScannerModal";
 import TransferConfirmModal from "@/components/wallet/TransferConfirmModal";
+import SendMessageModal from "@/components/wallet/SendMessageModal";
 import EarnList from "@/components/wallet/EarnList";
 
 const Wallet = () => {

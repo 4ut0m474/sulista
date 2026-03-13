@@ -156,8 +156,8 @@ const CityHome = () => {
                   <svg className="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
                </div>
-               <button onClick={() => setShowVoteModal(true)} className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-card hover:scale-105 active:scale-95 transition-all" aria-label="Votar">
-                 <ThumbsUp className="w-4 h-4" />
+               <button onClick={() => navigate(`/city/${state}/${city}/commerce`)} className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-card hover:scale-105 active:scale-95 transition-all" aria-label="Explorar">
+                 <Compass className="w-4 h-4" />
                </button>
               <div className="flex items-center gap-2">
                 <button

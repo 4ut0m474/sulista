@@ -64,6 +64,7 @@ const App = () => (
                 <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
                 <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
+                <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </PinGate>

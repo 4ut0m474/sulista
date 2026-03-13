@@ -13,7 +13,7 @@ const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
 
   const items = [
     { label: "Início", icon: Home, path: base },
-    { label: "Explorar", icon: Compass, path: `${base}/commerce` },
+    { label: "Ofertas perto", icon: MapPin, path: `${base}/nearby` },
     { label: "Litorânea", icon: null, path: `${base}/litoranea`, isCenter: true },
     { label: "Comerciante", icon: Briefcase, path: `${base}/merchant` },
     { label: "Carteira", icon: Coins, path: `${base}/wallet` },

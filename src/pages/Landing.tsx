@@ -334,6 +334,7 @@ const Landing = () => {
           }
         }}
       />
+      <DeleteAccountModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />
 
     </div>
   );

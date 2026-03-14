@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, Trash2 } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { useLocalidades, getCachedSubLocations, type SubLocationGroup } from "@/hooks/useLocalidades";
@@ -10,6 +10,7 @@ import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +27,7 @@ const Landing = () => {
   const { fontSize } = useFontSize();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
   const { pinVerified, confirmPin } = useAuth();
@@ -256,6 +258,24 @@ const Landing = () => {
               }} />
             )}
 
+            {/* LGPD Delete button */}
+            {isPersistent && pinVerified && (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="w-full rounded-2xl border border-destructive/30 bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-destructive/10"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+                    <Trash2 className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="block text-sm font-black text-destructive">Excluir meus dados</span>
+                    <span className="text-[10px] text-muted-foreground">LGPD – Apagar conta e dados pessoais</span>
+                  </div>
+                </div>
+              </button>
+            )}
+
             <p className="text-center text-primary-foreground/50 text-[10px]">
               Dados criptografados AES-256. Não vendemos. Apagamos quando pedir.
             </p>
@@ -314,6 +334,7 @@ const Landing = () => {
           }
         }}
       />
+      <DeleteAccountModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />
 
     </div>
   );

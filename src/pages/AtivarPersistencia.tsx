@@ -105,7 +105,7 @@ const AtivarPersistencia = () => {
     syncPersistenceLocalState({ userId, status: "approved", verified: true });
     confirmPin();
     toast.success("Persistência ativada com sucesso!");
-    navigate(-1);
+    navigate("/");
   };
 
   return (

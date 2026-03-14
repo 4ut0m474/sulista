@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, Trash2 } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { useLocalidades, getCachedSubLocations, type SubLocationGroup } from "@/hooks/useLocalidades";
@@ -10,6 +10,7 @@ import LandingHeader from "@/components/LandingHeader";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";

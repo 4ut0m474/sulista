@@ -258,6 +258,24 @@ const Landing = () => {
               }} />
             )}
 
+            {/* LGPD Delete button */}
+            {isPersistent && pinVerified && (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="w-full rounded-2xl border border-destructive/30 bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-destructive/10"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+                    <Trash2 className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="block text-sm font-black text-destructive">Excluir meus dados</span>
+                    <span className="text-[10px] text-muted-foreground">LGPD – Apagar conta e dados pessoais</span>
+                  </div>
+                </div>
+              </button>
+            )}
+
             <p className="text-center text-primary-foreground/50 text-[10px]">
               Dados criptografados AES-256. Não vendemos. Apagamos quando pedir.
             </p>

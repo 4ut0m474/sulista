@@ -22,7 +22,7 @@ const PersistenceBanner = ({ isPersistent }: { isPersistent: boolean }) => {
       </div>
       {!isPersistent && (
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/ativar-persistencia")}
           className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold"
         >
           Ativar

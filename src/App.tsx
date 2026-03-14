@@ -27,6 +27,7 @@ import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
+import AtivarPersistencia from "./pages/AtivarPersistencia";
 
 import ScrollToTop from "./components/ScrollToTop";
 import PinGate from "./components/PinGate";
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
+                <Route path="/ativar-persistencia" element={<AtivarPersistencia />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </PinGate>

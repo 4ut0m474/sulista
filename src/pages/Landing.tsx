@@ -220,7 +220,11 @@ const Landing = () => {
 
             <button
               onClick={() => {
-                setPersistOpen(true);
+                if (isPersistent) {
+                  setPersistOpen(true);
+                } else {
+                  navigate("/ativar-persistencia");
+                }
               }}
               className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"
             >

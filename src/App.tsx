@@ -76,6 +76,7 @@ const App = () => (
           </TooltipProvider>
         </LanguageProvider>
       </FontSizeProvider>
+      </AuroraProvider>
     </ThemeProvider>
     </AuthProvider>
   </QueryClientProvider>

@@ -908,7 +908,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <div className="flex items-end gap-2">
-            <img src={litoraneaAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
+            <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
             <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3">
               <div className="flex gap-1">
                 <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />

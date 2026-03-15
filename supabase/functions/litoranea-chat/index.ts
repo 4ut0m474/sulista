@@ -146,10 +146,14 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, adminMode, userProfile, nearbyData } = await req.json();
+    const { messages, adminMode, auroraMode, userProfile, nearbyData } = await req.json();
 
     // Build personalized system prompt with user profile
-    let personalizedPrompt = adminMode ? ADMIN_SYSTEM_PROMPT : SYSTEM_PROMPT;
+    let personalizedPrompt = adminMode
+      ? ADMIN_SYSTEM_PROMPT
+      : auroraMode
+        ? AURORA_SYSTEM_PROMPT
+        : SYSTEM_PROMPT;
     if (userProfile && !adminMode) {
       personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a conversa. Se campos estão vazios, pergunte naturalmente.`;
     }

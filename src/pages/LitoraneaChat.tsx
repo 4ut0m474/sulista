@@ -3,10 +3,12 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
+import auroraAvatar from "@/assets/aurora-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Slider } from "@/components/ui/slider";
+import { useAurora } from "@/contexts/AuroraContext";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 

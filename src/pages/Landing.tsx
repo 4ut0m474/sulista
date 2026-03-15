@@ -35,6 +35,7 @@ const Landing = () => {
   const { pinVerified, confirmPin } = useAuth();
 
   const { states, citiesByState } = useLocalidades();
+  const { isAurora } = useAurora();
 
   const cities = useMemo(() => {
     if (!selectedState) return [];

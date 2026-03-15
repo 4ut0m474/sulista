@@ -106,6 +106,9 @@ const extractOptions = (text: string): string[] => {
 const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira", "saldo", "transferir", "qr", "indicar", "moeda", "coin"];
 
 const LitoraneaChat = () => {
+  const { isAurora } = useAurora();
+  const chatAvatar = isAurora ? auroraAvatar : litoraneaAvatar;
+  const chatName = isAurora ? "Aurora" : "Litorânea";
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);

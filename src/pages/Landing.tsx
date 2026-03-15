@@ -51,8 +51,14 @@ const Landing = () => {
     <div className="relative min-h-screen flex flex-col">
       {/* Hero background */}
       <div className="absolute inset-0">
-        <img src={heroImage} alt="Paisagem do Sul do Brasil" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-hero" />
+        {isAurora ? (
+          <div className="w-full h-full bg-gradient-to-b from-[hsl(222,47%,8%)] via-[hsl(222,40%,14%)] to-[hsl(38,60%,20%)]" />
+        ) : (
+          <>
+            <img src={heroImage} alt="Paisagem do Sul do Brasil" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-hero" />
+          </>
+        )}
       </div>
 
       <LandingHeader />
@@ -60,13 +66,18 @@ const Landing = () => {
       <div className="relative z-10 flex flex-col min-h-screen">
         <div className="flex flex-col items-center justify-center px-6 pt-16 pb-4">
           <h1 className="font-display text-5xl font-black text-primary-foreground tracking-tight mb-1 drop-shadow-lg">
-            Vento Sul
+            {isAurora ? "Aurora" : "Vento Sul"}
           </h1>
           <p className="text-primary-foreground/80 text-sm font-semibold tracking-widest uppercase">
-            {t("discoverSouth")}
+            {isAurora ? "Espelho da Alma" : t("discoverSouth")}
           </p>
+          {isAurora && (
+            <p className="text-primary-foreground/60 text-xs mt-2 max-w-xs text-center leading-relaxed">
+              Bem-vindo à Aurora. Aqui você vê o que já é — e o que pode ser.
+            </p>
+          )}
 
-          {/* Litorânea round green button */}
+          {/* Avatar button */}
           <button
             onClick={() => {
               const nextState = selectedState || "PR";
@@ -75,10 +86,16 @@ const Landing = () => {
             }}
             className="mt-5 flex flex-col items-center gap-2 group"
           >
-            <div className="w-20 h-20 rounded-full bg-primary shadow-lg shadow-primary/40 flex items-center justify-center border-4 border-primary-foreground/30 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden">
-              <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
+            <div className={`w-20 h-20 rounded-full shadow-lg flex items-center justify-center border-4 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden ${
+              isAurora
+                ? "bg-secondary shadow-gold border-secondary/40"
+                : "bg-primary shadow-primary/40 border-primary-foreground/30"
+            }`}>
+              <img src={isAurora ? auroraAvatar : litoraneaAvatar} alt={isAurora ? "Aurora" : "Litorânea"} className="w-full h-full object-cover" />
             </div>
-            <span className="text-primary-foreground text-xs font-black tracking-wide drop-shadow">Falar com Litorânea</span>
+            <span className="text-primary-foreground text-xs font-black tracking-wide drop-shadow">
+              {isAurora ? "Falar com Aurora" : "Falar com Litorânea"}
+            </span>
           </button>
         </div>
 

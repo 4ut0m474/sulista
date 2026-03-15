@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { FontSizeProvider } from "@/contexts/FontSizeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AuroraProvider } from "@/contexts/AuroraContext";
 import Landing from "./pages/Landing";
 import CityHome from "./pages/CityHome";
 import DigitalMarket from "./pages/DigitalMarket";
@@ -38,6 +39,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
     <ThemeProvider>
+      <AuroraProvider>
       <FontSizeProvider>
         <LanguageProvider>
           <TooltipProvider>
@@ -74,6 +76,7 @@ const App = () => (
           </TooltipProvider>
         </LanguageProvider>
       </FontSizeProvider>
+      </AuroraProvider>
     </ThemeProvider>
     </AuthProvider>
   </QueryClientProvider>

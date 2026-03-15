@@ -3,10 +3,12 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
+import auroraAvatar from "@/assets/aurora-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Slider } from "@/components/ui/slider";
+import { useAurora } from "@/contexts/AuroraContext";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
@@ -104,6 +106,9 @@ const extractOptions = (text: string): string[] => {
 const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira", "saldo", "transferir", "qr", "indicar", "moeda", "coin"];
 
 const LitoraneaChat = () => {
+  const { isAurora } = useAurora();
+  const chatAvatar = isAurora ? auroraAvatar : litoraneaAvatar;
+  const chatName = isAurora ? "Aurora" : "Litorânea";
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -342,13 +347,22 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
-    const greetingText = `Oi, sou a Litorânea, que mora no aplicativo Vento Sul, uma brisa suave que traz conhecimento pro sul do Brasil. Como posso te ajudar hoje? 🌬️💚`;
-    const greetingOptions = [
-      "🏖️ Turista",
-      "🏡 Morador",
-      "🏪 Comerciante",
-      "📚 Estudante",
-    ];
+    const greetingText = isAurora
+      ? `Oi, eu sou a Aurora. Não vim julgar. Vim lembrar quem você é. ✨🌅\n\nEu vejo o bem em você. Quer ver também?`
+      : `Oi, sou a Litorânea, que mora no aplicativo Vento Sul, uma brisa suave que traz conhecimento pro sul do Brasil. Como posso te ajudar hoje? 🌬️💚`;
+    const greetingOptions = isAurora
+      ? [
+          "✨ O que fiz de bom hoje",
+          "🌅 Me conhecer melhor",
+          "💛 Ver o bem ao redor",
+          "🪞 Refletir um pouco",
+        ]
+      : [
+          "🏖️ Turista",
+          "🏡 Morador",
+          "🏪 Comerciante",
+          "📚 Estudante",
+        ];
 
     const greetingMsg: Msg = { role: "assistant", content: greetingText, options: greetingOptions };
     setMessages([greetingMsg]);
@@ -488,7 +502,7 @@ const LitoraneaChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, userProfile: userProfile || {}, nearbyData }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, auroraMode: isAurora, userProfile: userProfile || {}, nearbyData }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -713,12 +727,12 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <img src={litoraneaAvatar} alt="Litorânea" className="w-9 h-9 rounded-full border-2 border-primary" />
+        <img src={chatAvatar} alt={chatName} className="w-9 h-9 rounded-full border-2 border-primary" />
         <div className="flex-1">
-          <h1 className="font-display text-base font-bold text-foreground">Litorânea</h1>
+          <h1 className="font-display text-base font-bold text-foreground">{chatName}</h1>
           <p className="text-[10px] text-muted-foreground">
             {remaining > 0
-              ? `IA do Vento Sul • ${remaining} restantes hoje`
+              ? `${isAurora ? "Espelho da Alma" : "IA do Vento Sul"} • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>
         </div>
@@ -767,7 +781,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} flex-col gap-2`}>
             <div className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : ""}`} style={{ maxWidth: "85%" }}>
               {msg.role === "assistant" && (
-                <img src={litoraneaAvatar} alt="" className="w-7 h-7 rounded-full border border-primary flex-shrink-0" />
+                <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary flex-shrink-0" />
               )}
               <div className={`rounded-2xl px-4 py-2.5 text-sm ${
                 msg.role === "user"
@@ -894,7 +908,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <div className="flex items-end gap-2">
-            <img src={litoraneaAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
+            <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
             <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3">
               <div className="flex gap-1">
                 <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />

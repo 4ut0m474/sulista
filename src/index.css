@@ -79,6 +79,42 @@
     --input: 150 15% 22%;
     --ring: 152 50% 45%;
   }
+
+  /* Aurora – Espelho da Alma skin */
+  .aurora {
+    --background: 222 47% 8%;
+    --foreground: 0 0% 100%;
+    --card: 222 40% 14%;
+    --card-foreground: 0 0% 100%;
+    --popover: 222 40% 14%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 38 85% 55%;
+    --primary-foreground: 222 47% 8%;
+    --ocean: 222 60% 30%;
+    --ocean-foreground: 0 0% 100%;
+    --secondary: 38 90% 65%;
+    --secondary-foreground: 222 47% 8%;
+    --muted: 222 30% 18%;
+    --muted-foreground: 38 30% 70%;
+    --accent: 38 70% 50%;
+    --accent-foreground: 222 47% 8%;
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 38 85% 55%;
+    --gold: 38 90% 60%;
+    --success: 38 85% 55%;
+    --success-foreground: 222 47% 8%;
+  }
+
+  .aurora.dark {
+    --background: 222 47% 6%;
+    --card: 222 40% 10%;
+    --muted: 222 30% 14%;
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+  }
 }
 
 @layer base {
@@ -129,6 +165,10 @@
 
   .bg-gradient-ocean {
     background: linear-gradient(135deg, hsl(var(--ocean)), hsl(211 70% 18%));
+  }
+
+  .bg-gradient-aurora {
+    background: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 40% 14%) 50%, hsl(38 60% 20%) 100%);
   }
 
   .shadow-card {

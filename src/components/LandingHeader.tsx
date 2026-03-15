@@ -1,13 +1,15 @@
-import { Sun, Moon, Type, Globe, ChevronDown } from "lucide-react";
+import { Sun, Moon, Globe, ChevronDown, Sparkle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage, languageLabels } from "@/contexts/LanguageContext";
+import { useAurora } from "@/contexts/AuroraContext";
 import { useState } from "react";
 
 const LandingHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const { fontSize, cycleFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
+  const { isAurora, toggleAurora } = useAurora();
   const [langOpen, setLangOpen] = useState(false);
 
   const fontSizeLabel = "A";
@@ -63,13 +65,27 @@ const LandingHeader = () => {
           )}
         </div>
 
-        {/* Font Size Toggle — must be A++ for admin secret */}
+        {/* Font Size Toggle */}
         <button
           onClick={cycleFontSize}
           className="w-10 h-10 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-card hover:bg-card transition-colors"
           aria-label="Aumentar fonte"
         >
           <span className={`${fontSizeScale} font-black text-primary transition-all`}>{fontSizeLabel}</span>
+        </button>
+
+        {/* Aurora / Espelho da Alma Toggle */}
+        <button
+          onClick={toggleAurora}
+          className={`w-10 h-10 rounded-full backdrop-blur-sm border flex items-center justify-center shadow-card transition-all ${
+            isAurora
+              ? "bg-secondary/90 border-secondary/60 shadow-gold"
+              : "bg-card/80 border-border/50 hover:bg-card"
+          }`}
+          aria-label="Espelho da Alma"
+          title={isAurora ? "Voltar ao Vento Sul" : "Espelho da Alma – Aurora"}
+        >
+          <Sparkle className={`w-5 h-5 transition-colors ${isAurora ? "text-primary-foreground" : "text-secondary"}`} />
         </button>
       </div>
     </header>

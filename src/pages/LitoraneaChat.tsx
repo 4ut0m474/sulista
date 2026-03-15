@@ -781,7 +781,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} flex-col gap-2`}>
             <div className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : ""}`} style={{ maxWidth: "85%" }}>
               {msg.role === "assistant" && (
-                <img src={litoraneaAvatar} alt="" className="w-7 h-7 rounded-full border border-primary flex-shrink-0" />
+                <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary flex-shrink-0" />
               )}
               <div className={`rounded-2xl px-4 py-2.5 text-sm ${
                 msg.role === "user"

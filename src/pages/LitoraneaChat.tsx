@@ -727,12 +727,12 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <img src={litoraneaAvatar} alt="Litorânea" className="w-9 h-9 rounded-full border-2 border-primary" />
+        <img src={chatAvatar} alt={chatName} className="w-9 h-9 rounded-full border-2 border-primary" />
         <div className="flex-1">
-          <h1 className="font-display text-base font-bold text-foreground">Litorânea</h1>
+          <h1 className="font-display text-base font-bold text-foreground">{chatName}</h1>
           <p className="text-[10px] text-muted-foreground">
             {remaining > 0
-              ? `IA do Vento Sul • ${remaining} restantes hoje`
+              ? `${isAurora ? "Espelho da Alma" : "IA do Vento Sul"} • ${remaining} restantes hoje`
               : "Limite diário atingido"}
           </p>
         </div>

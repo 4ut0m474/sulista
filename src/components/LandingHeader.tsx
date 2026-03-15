@@ -1,13 +1,15 @@
-import { Sun, Moon, Type, Globe, ChevronDown } from "lucide-react";
+import { Sun, Moon, Globe, ChevronDown, Sparkle } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useLanguage, languageLabels } from "@/contexts/LanguageContext";
+import { useAurora } from "@/contexts/AuroraContext";
 import { useState } from "react";
 
 const LandingHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const { fontSize, cycleFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
+  const { isAurora, toggleAurora } = useAurora();
   const [langOpen, setLangOpen] = useState(false);
 
   const fontSizeLabel = "A";

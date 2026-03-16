@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight, MapPin, Star, Palmtree, Building2, Lock, Trash2 } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import auroraAvatar from "@/assets/aurora-avatar.png";
+import automataAvatar from "@/assets/automata-avatar.png";
+import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import heroImage from "@/assets/hero-landscape.jpg";
 import { useLocalidades, getCachedSubLocations, type SubLocationGroup } from "@/hooks/useLocalidades";
 import { useLanguage } from "@/contexts/LanguageContext";

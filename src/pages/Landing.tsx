@@ -395,6 +395,15 @@ const Landing = () => {
         }}
       />
       <DeleteAccountModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />
+      <AgentIntroModal
+        agent={introAgent || "litoranea"}
+        open={!!introAgent}
+        onClose={() => setIntroAgent(null)}
+        onContinue={(agent) => {
+          setIntroAgent(null);
+          navigateToAgent(agent);
+        }}
+      />
 
     </div>
   );

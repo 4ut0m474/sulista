@@ -102,11 +102,7 @@ const Landing = () => {
           <div className="mt-5 flex items-end justify-center gap-4">
             {/* Automata — left */}
             <button
-              onClick={() => {
-                const nextState = selectedState || "PR";
-                const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
-                navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea?agent=automata`);
-              }}
+              onClick={() => handleAgentClick("automata")}
               className="flex flex-col items-center gap-1.5 group"
             >
               <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-muted-foreground/30 bg-muted overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">
@@ -117,11 +113,7 @@ const Landing = () => {
 
             {/* Litorânea — center (bigger) */}
             <button
-              onClick={() => {
-                const nextState = selectedState || "PR";
-                const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
-                navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`);
-              }}
+              onClick={() => handleAgentClick("litoranea")}
               className="flex flex-col items-center gap-1.5 group"
             >
               <div className={`w-20 h-20 rounded-full shadow-lg flex items-center justify-center border-4 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden ${
@@ -136,11 +128,7 @@ const Landing = () => {
 
             {/* Aurora — right */}
             <button
-              onClick={() => {
-                const nextState = selectedState || "PR";
-                const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
-                navigate(`/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea?agent=aurora`);
-              }}
+              onClick={() => handleAgentClick("aurora")}
               className="flex flex-col items-center gap-1.5 group"
             >
               <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-destructive/40 bg-destructive/10 overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">

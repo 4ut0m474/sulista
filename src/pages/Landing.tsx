@@ -48,6 +48,23 @@ const Landing = () => {
 
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
+  const handleAgentClick = (agent: AgentType) => {
+    if (!hasSeenIntro(agent)) {
+      setIntroAgent(agent);
+    } else {
+      navigateToAgent(agent);
+    }
+  };
+
+  const navigateToAgent = (agent: AgentType) => {
+    const nextState = selectedState || "PR";
+    const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
+    const base = `/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`;
+    if (agent === "automata") navigate(`${base}?agent=automata`);
+    else if (agent === "aurora") navigate(`${base}?agent=aurora`);
+    else navigate(base);
+  };
+
   const cityFavorites = favorites.filter(f => !f.subLocation);
   const subLocationFavorites = favorites.filter(f => !!f.subLocation);
 

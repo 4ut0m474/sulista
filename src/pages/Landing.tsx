@@ -33,6 +33,7 @@ const Landing = () => {
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [persistOpen, setPersistOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [introAgent, setIntroAgent] = useState<AgentType | null>(null);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
   const { pinVerified, confirmPin } = useAuth();

@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { useAurora } from "@/contexts/AuroraContext";
 import LandingHeader from "@/components/LandingHeader";
+import AgentIntroModal, { hasSeenIntro, type AgentType } from "@/components/AgentIntroModal";
 import { useFavorites } from "@/hooks/useFavorites";
 import PersistenceModal from "@/components/PersistenceModal";
 import SulCoinsBanner from "@/components/SulCoinsBanner";

@@ -59,10 +59,10 @@ const Landing = () => {
   const navigateToAgent = (agent: AgentType) => {
     const nextState = selectedState || "PR";
     const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
-    const base = `/city/${nextState}/${encodeURIComponent(nextCity)}/litoranea`;
-    if (agent === "automata") navigate(`${base}?agent=automata`);
-    else if (agent === "aurora") navigate(`${base}?agent=aurora`);
-    else navigate(base);
+    const base = `/city/${nextState}/${encodeURIComponent(nextCity)}`;
+    if (agent === "automata") navigate(`${base}/automata`);
+    else if (agent === "aurora") navigate(`${base}/aurora`);
+    else navigate(`${base}/litoranea`);
   };
 
   const cityFavorites = favorites.filter(f => !f.subLocation);

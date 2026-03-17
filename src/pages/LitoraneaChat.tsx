@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge, Sun, Moon } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import auroraAvatar from "@/assets/aurora-avatar.png";
@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { QRCodeSVG } from "qrcode.react";
 import { Slider } from "@/components/ui/slider";
 import { useAurora } from "@/contexts/AuroraContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useFontSize } from "@/contexts/FontSizeContext";
+import ChatBackground from "@/components/chat/ChatBackground";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
@@ -107,6 +110,8 @@ const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira"
 
 const LitoraneaChat = () => {
   const { isAurora } = useAurora();
+  const { theme, toggleTheme } = useTheme();
+  const { fontSize, cycleFontSize } = useFontSize();
   const chatAvatar = isAurora ? auroraAvatar : litoraneaAvatar;
   const chatName = isAurora ? "Aurora" : "Litorânea";
   const { state, city } = useParams<{ state: string; city: string }>();
@@ -721,9 +726,10 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
   const remaining = DAILY_LIMIT - getUsageCount();
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden relative">
+      <ChatBackground agent="litoranea" />
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
+      <header className="flex-shrink-0 relative z-10 flex items-center gap-3 px-4 py-3 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -736,6 +742,12 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
               : "Limite diário atingido"}
           </p>
         </div>
+        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted transition-colors">
+          {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
+        </button>
+        <button onClick={cycleFontSize} className="p-2 rounded-full hover:bg-muted transition-colors">
+          <span className="text-xs font-black text-foreground">A</span>
+        </button>
         <button
           onClick={() => {
             if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
@@ -752,12 +764,11 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         >
           <Gauge className="w-4 h-4" />
         </button>
-        <Sparkles className="w-5 h-5 text-primary" />
       </header>
 
       {/* Speed control slider */}
       {showSpeedControl && (
-        <div className="flex-shrink-0 px-4 py-2 bg-card border-b border-border flex items-center gap-3">
+        <div className="flex-shrink-0 relative z-10 px-4 py-2 bg-card/90 backdrop-blur-md border-b border-border flex items-center gap-3">
           <span className="text-[10px] text-muted-foreground whitespace-nowrap">🐢 0.8x</span>
           <Slider
             value={[ttsSpeed]}
@@ -776,7 +787,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
       )}
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} flex-col gap-2`}>
             <div className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : ""}`} style={{ maxWidth: "85%" }}>
@@ -937,7 +948,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
       </div>
 
       {/* Input bar */}
-      <div className="flex-shrink-0 p-4 bg-card border-t border-border pb-20">
+      <div className="flex-shrink-0 relative z-10 p-4 bg-card/90 backdrop-blur-md border-t border-border pb-20">
         <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="flex gap-2 max-w-md mx-auto">
           <button
             type="button"

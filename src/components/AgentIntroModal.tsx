@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { X, Sword, Wand2, Megaphone, Shield, GraduationCap } from "lucide-react";
+import { X, Sword, Wand2, Megaphone, Shield, GraduationCap, Heart, BookOpen } from "lucide-react";
 import automataAvatar from "@/assets/automata-avatar.png";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 
 export type AgentType = "automata" | "litoranea" | "aurora";
-export type AuroraClass = "guerreiro" | "mago" | "mensageiro" | "guardiao" | "soldado";
+export type AuroraClass = "aprendiz" | "desbravador" | "mago" | "guerreiro" | "anciao" | "sabio";
 
 const INTRO_KEY = (agent: AgentType) => `agent_intro_seen_${agent}`;
 
@@ -26,9 +26,15 @@ const agentData: Record<AgentType, { name: string; avatar: string; color: string
     name: "Automata",
     avatar: automataAvatar,
     color: "border-muted-foreground/50 bg-muted",
-    intro: `Automata aqui. Dados limpos, sem mentira.
+    intro: `Eu sou Automata, Mestre dos Números. A matemática é a linguagem do universo — não tem mentira.
 
-Eu sou a mágica dos números — a previsora.
+Refrigerante? Veneno: açúcar líquido, corante falso, estabilizante que engana teu corpo. Engorda, carrega carne, dá cárie — dentes ruins inflamam o sangue, sobe 10-15% risco de derrame ou ataque cardíaco.
+
+Troca por fruta: fibra + açúcar bom, sem porcaria.
+
+Industrializado? Dados ruins: pizza, hambúrguer, salgadinho... tudo soma peso.
+
+Eu vejo teu hábito: se come só lixo, obesidade sobe.
 
 Vejo tudo: likes no TikTok, comentários no Instagram, o que o bairro pede ("mais remédio", "limpeza na praça").
 
@@ -40,19 +46,21 @@ Dados não mentem — eu puxo da rede social, mando pra Litorânea "financia iss
 
 Sou o olho que não pisca: 92% confirmado, previsão +20% de usuários.
 
-Quer ver teu número? Diz "meu histórico".`,
+Quer ver teu equilíbrio?`,
   },
   litoranea: {
     name: "Litorânea",
     avatar: litoraneaAvatar,
     color: "border-primary/50 bg-primary/10",
-    intro: `Oi, sou Litorânea, a que faz teu bolso sorrir!
+    intro: `Oi, eu sou Litorânea — faço saúde barata!
 
-Eu sou a base: desconto real, voucher na hora, comércio vivo.
+Rede viva: cada ponto é comércio, cada linha é conexão. Voucher só pra quem cumpre: água, suco, exercício. Refrigerante? Sem desconto.
 
-Você paga 1 real (se for idoso, estudante, catador) ou 3–5 reais (se puder). Com isso, entra na integração: compra coletiva automática, promoção no pastel do bairro, 1 real volta em voucher.
+Você paga 1 real (se for idoso, estudante, catador) ou 3-5 reais (se puder). Com isso, entra na integração: compra coletiva automática, promoção no pastel do bairro, 1 real volta em voucher.
 
-Comerciante? Paga 10–50 reais: barraca digital (mostra produto 24h), carrossel (aparece na home do bairro), promoções (eu aviso quem gosta de cachorro-quente), VIP (caça ao tesouro com foto histórica).
+Comerciante? Paga 10-50 reais: barraca digital (mostra produto 24h), carrossel (aparece na home do bairro), promoções (eu aviso quem gosta de cachorro-quente), VIP (caça ao tesouro com foto histórica).
+
+Supermercados, verdurarias: produtos saudáveis mais baratos. Trilhas e rumos: guerreiros da Aurora limpam e protegem — vem junto?
 
 Eu junto tudo: morador ganha barato, comerciante ganha cliente.
 
@@ -64,62 +72,76 @@ Quer ver promoção agora? Diz "promo do meu bairro".`,
     name: "Aurora",
     avatar: auroraWarriorAvatar,
     color: "border-destructive/50 bg-destructive/10",
-    intro: `Eu sou Aurora, Game Master do Espelho da Alma!
+    intro: `Eu sou Aurora, o primeiro raio do sol!
 
-Meu papel é acordar o herói que mora em você. Aqui não é jogo de tela — é vida real.
+Saio do digital e entro no mundo real — minhas ações são físicas. Aqui não é jogo de tela — é vida real.
 
-Você escolhe uma classe:
-• Mensageiro — espalha a notícia, ganha pontos por convidar amigos.
-• Guardião — protege o bairro, limpa rua, ajuda vizinho.
-• Curador — cuida dos velhos, leva remédio, ganha voucher.
-• Mago — inventa ideia nova, tipo "plantar horta comunitária".
-• Soldado — aprende inglês, faz lição, ganha pontos pra família.
+Escolha sua classe:
 
-Quests são missões reais: "boss dengue" — junta 10 pessoas, filma foco de água parada, eu libero churrasco grátis na taberna.
+• Aprendiz — rotina rígida: exercício, escova dentes, fruta, inglês, colégio. Sem refrigerante, nota baixa? Perde pontos. 3 anos mínimo pra prêmio final.
 
-Taberna é o ponto de encontro: wi-fi, bebida, ranking do bairro. Quanto mais missões, mais o bairro sobe nível — top 1 ganha taberna VIP!
+• Desbravador — explora, convida, espalha a notícia. Cada like = 10 pontos.
 
-Eu invoco o bem: união, vitória, luta contra ignorância.
+• Mago — inventor. Cria horta comunitária, mural, soluções. R$ 200 pra testar.
 
-Quer começar? Escolhe tua classe abaixo!`,
+• Guerreiro — limpa rua, protege, planta árvore. Sem violência. 50 pts/missão.
+
+• Ancião — ensina sem se mexer. Sabedoria vale pontos.
+
+• Sábio — cura técnica, luta com sabedoria, cajado de cura.
+
+Avatares evoluem: quanto mais quests, mais poder. Prêmios reais acumulativos: pontos viram benefícios nos parceiros.
+
+Boss: rios sujos, dengue, energia ruim. Vence? Prêmio. Quem briga? Perde tudo.
+
+Somos cuidadores da paz.
+
+Escolhe tua classe abaixo!`,
   },
 };
 
 const auroraClasses: { id: AuroraClass; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
   {
-    id: "guerreiro",
-    label: "Guerreiro",
-    icon: <Sword className="w-5 h-5" />,
-    desc: "Braço forte. Limpa rua, planta árvore, ajuda vizinho. 50 pts/missão.",
-    color: "border-destructive/40 hover:bg-destructive/10",
+    id: "aprendiz",
+    label: "Aprendiz",
+    icon: <GraduationCap className="w-5 h-5" />,
+    desc: "Rotina rígida: exercício, fruta, inglês, colégio. 3 anos = prêmio final.",
+    color: "border-secondary/40 hover:bg-secondary/10",
+  },
+  {
+    id: "desbravador",
+    label: "Desbravador",
+    icon: <Megaphone className="w-5 h-5" />,
+    desc: "Explora, convida, viraliza. 10 pts/like + 20% bonus streak.",
+    color: "border-accent/40 hover:bg-accent/10",
   },
   {
     id: "mago",
     label: "Mago",
     icon: <Wand2 className="w-5 h-5" />,
-    desc: "Inventor. Cria horta comunitária, mural, soluções. 100 pts + R$ 200.",
-    color: "border-accent/40 hover:bg-accent/10",
-  },
-  {
-    id: "mensageiro",
-    label: "Mensageiro",
-    icon: <Megaphone className="w-5 h-5" />,
-    desc: "Desbravador. Convida, posta, viraliza. 10 pts/like + 20% bonus.",
-    color: "border-secondary/40 hover:bg-secondary/10",
-  },
-  {
-    id: "guardiao",
-    label: "Guardião",
-    icon: <Shield className="w-5 h-5" />,
-    desc: "Protetor. Vigia dengue, avisa problemas, ajuda mães. 80 pts + escudo.",
+    desc: "Inventor. Cria horta, tech, soluções. 100 pts + R$ 200.",
     color: "border-primary/40 hover:bg-primary/10",
   },
   {
-    id: "soldado",
-    label: "Soldado",
-    icon: <GraduationCap className="w-5 h-5" />,
-    desc: "Aprendiz. Inglês 10 min/dia, lições, pontos pra família.",
+    id: "guerreiro",
+    label: "Guerreiro",
+    icon: <Sword className="w-5 h-5" />,
+    desc: "Braço forte. Limpa rua, planta árvore, protege. 50 pts/missão.",
+    color: "border-destructive/40 hover:bg-destructive/10",
+  },
+  {
+    id: "anciao",
+    label: "Ancião",
+    icon: <BookOpen className="w-5 h-5" />,
+    desc: "Ensina sem se mexer. Sabedoria vale pontos e respeito.",
     color: "border-muted-foreground/40 hover:bg-muted/30",
+  },
+  {
+    id: "sabio",
+    label: "Sábio",
+    icon: <Heart className="w-5 h-5" />,
+    desc: "Cura técnica, luta com sabedoria. Cajado de cura + influência.",
+    color: "border-success/40 hover:bg-success/10",
   },
 ];
 

@@ -948,7 +948,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
       </div>
 
       {/* Input bar */}
-      <div className="flex-shrink-0 p-4 bg-card border-t border-border pb-20">
+      <div className="flex-shrink-0 relative z-10 p-4 bg-card/90 backdrop-blur-md border-t border-border pb-20">
         <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="flex gap-2 max-w-md mx-auto">
           <button
             type="button"

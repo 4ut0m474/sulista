@@ -726,9 +726,10 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
   const remaining = DAILY_LIMIT - getUsageCount();
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden relative">
+      <ChatBackground agent="litoranea" />
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center gap-3 px-4 py-3 bg-card border-b border-border">
+      <header className="flex-shrink-0 relative z-10 flex items-center gap-3 px-4 py-3 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -741,6 +742,12 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
               : "Limite diário atingido"}
           </p>
         </div>
+        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted transition-colors">
+          {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
+        </button>
+        <button onClick={cycleFontSize} className="p-2 rounded-full hover:bg-muted transition-colors">
+          <span className="text-xs font-black text-foreground">A</span>
+        </button>
         <button
           onClick={() => {
             if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
@@ -757,7 +764,6 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
         >
           <Gauge className="w-4 h-4" />
         </button>
-        <Sparkles className="w-5 h-5 text-primary" />
       </header>
 
       {/* Speed control slider */}

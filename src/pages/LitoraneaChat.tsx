@@ -110,6 +110,8 @@ const SULCOIN_KEYWORDS = ["sulcoin", "enviar", "receber", "convidar", "carteira"
 
 const LitoraneaChat = () => {
   const { isAurora } = useAurora();
+  const { theme, toggleTheme } = useTheme();
+  const { fontSize, cycleFontSize } = useFontSize();
   const chatAvatar = isAurora ? auroraAvatar : litoraneaAvatar;
   const chatName = isAurora ? "Aurora" : "Litorânea";
   const { state, city } = useParams<{ state: string; city: string }>();

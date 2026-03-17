@@ -768,7 +768,7 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
 
       {/* Speed control slider */}
       {showSpeedControl && (
-        <div className="flex-shrink-0 px-4 py-2 bg-card border-b border-border flex items-center gap-3">
+        <div className="flex-shrink-0 relative z-10 px-4 py-2 bg-card/90 backdrop-blur-md border-b border-border flex items-center gap-3">
           <span className="text-[10px] text-muted-foreground whitespace-nowrap">🐢 0.8x</span>
           <Slider
             value={[ttsSpeed]}

@@ -119,6 +119,126 @@ export type Database = {
         }
         Relationships: []
       }
+      aurora_diario: {
+        Row: {
+          created_at: string
+          data: string
+          descricao: string | null
+          id: string
+          pontos: number
+          prova_url: string | null
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          pontos?: number
+          prova_url?: string | null
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          descricao?: string | null
+          id?: string
+          pontos?: number
+          prova_url?: string | null
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      aurora_progress: {
+        Row: {
+          avatar_url: string | null
+          badges: string[] | null
+          classe: string
+          created_at: string
+          id: string
+          nivel: number
+          pontos: number
+          streaks_diarios: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badges?: string[] | null
+          classe?: string
+          created_at?: string
+          id?: string
+          nivel?: number
+          pontos?: number
+          streaks_diarios?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badges?: string[] | null
+          classe?: string
+          created_at?: string
+          id?: string
+          nivel?: number
+          pontos?: number
+          streaks_diarios?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      aurora_quests: {
+        Row: {
+          completed_at: string | null
+          confirmacoes: number
+          created_at: string
+          descricao: string | null
+          id: string
+          pontos_recompensa: number
+          prova_url: string | null
+          quest_nome: string
+          status: string
+          tipo: string
+          updated_at: string
+          user_id: string
+          voucher_valor: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          confirmacoes?: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          pontos_recompensa?: number
+          prova_url?: string | null
+          quest_nome: string
+          status?: string
+          tipo?: string
+          updated_at?: string
+          user_id: string
+          voucher_valor?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          confirmacoes?: number
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          pontos_recompensa?: number
+          prova_url?: string | null
+          quest_nome?: string
+          status?: string
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+          voucher_valor?: number | null
+        }
+        Relationships: []
+      }
       avaliacoes: {
         Row: {
           comentario: string | null

@@ -31,6 +31,7 @@ import AuroraChat from "./pages/AuroraChat";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
 import AtivarPersistencia from "./pages/AtivarPersistencia";
+import ConfirmarPin from "./pages/ConfirmarPin";
 
 import ScrollToTop from "./components/ScrollToTop";
 import PinGate from "./components/PinGate";

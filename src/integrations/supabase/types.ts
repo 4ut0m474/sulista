@@ -494,6 +494,35 @@ export type Database = {
         }
         Relationships: []
       }
+      pins: {
+        Row: {
+          expira: string
+          id: number
+          pin: string
+          uid: string
+        }
+        Insert: {
+          expira?: string
+          id?: number
+          pin: string
+          uid: string
+        }
+        Update: {
+          expira?: string
+          id?: number
+          pin?: string
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pins_uid_fkey"
+            columns: ["uid"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["uid"]
+          },
+        ]
+      }
       planos_cidade: {
         Row: {
           ativo: boolean
@@ -761,6 +790,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      usuarios: {
+        Row: {
+          aceitou_privacidade: boolean
+          aceitou_termos: boolean
+          confirmado_email: boolean
+          cpf_hash: string
+          data_criacao: string
+          nome: string
+          telefone: string | null
+          uid: string
+        }
+        Insert: {
+          aceitou_privacidade?: boolean
+          aceitou_termos?: boolean
+          confirmado_email?: boolean
+          cpf_hash: string
+          data_criacao?: string
+          nome: string
+          telefone?: string | null
+          uid?: string
+        }
+        Update: {
+          aceitou_privacidade?: boolean
+          aceitou_termos?: boolean
+          confirmado_email?: boolean
+          cpf_hash?: string
+          data_criacao?: string
+          nome?: string
+          telefone?: string | null
+          uid?: string
         }
         Relationships: []
       }

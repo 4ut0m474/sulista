@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import automataAvatar from "@/assets/automata-avatar.png";
 import ReactMarkdown from "react-markdown";

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Mic, Volume2, VolumeX, Wallet, QrCode, Send as SendIcon, UserPlus, Coins, Gauge, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import auroraAvatar from "@/assets/aurora-avatar.png";
@@ -728,265 +728,82 @@ ${!isPersistent ? "⚠️ **Ativa a persistência** pra acumular SulCoins e salv
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <ChatBackground agent="litoranea" />
-      {/* Header */}
+      {/* Minimal header */}
       <header className="flex-shrink-0 relative z-10 flex items-center gap-3 px-4 py-3 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <img src={chatAvatar} alt={chatName} className="w-9 h-9 rounded-full border-2 border-primary" />
-        <div className="flex-1">
-          <h1 className="font-display text-base font-bold text-foreground">{chatName}</h1>
-          <p className="text-[10px] text-muted-foreground">
-            {remaining > 0
-              ? `${isAurora ? "Espelho da Alma" : "IA do Vento Sul"} • ${remaining} restantes hoje`
-              : "Limite diário atingido"}
-          </p>
-        </div>
+        <div className="flex-1" />
         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted transition-colors">
           {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
         </button>
-        <button onClick={cycleFontSize} className="p-2 rounded-full hover:bg-muted transition-colors">
-          <span className="text-xs font-black text-foreground">A</span>
-        </button>
-        <button
-          onClick={() => {
-            if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
-            setVoiceEnabled(!voiceEnabled);
-          }}
-          className={`p-2 rounded-full transition-colors ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}
-        >
+        <button onClick={() => { if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); } setVoiceEnabled(!voiceEnabled); }}
+          className={`p-2 rounded-full ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}>
           {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
-        <button
-          onClick={() => setShowSpeedControl(!showSpeedControl)}
-          className={`p-2 rounded-full transition-colors ${showSpeedControl ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}
-          title={`Velocidade: ${ttsSpeed}x`}
-        >
-          <Gauge className="w-4 h-4" />
+        <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-2 rounded-full hover:bg-muted">
+          <Gauge className="w-4 h-4 text-muted-foreground" />
         </button>
       </header>
 
-      {/* Speed control slider */}
       {showSpeedControl && (
         <div className="flex-shrink-0 relative z-10 px-4 py-2 bg-card/90 backdrop-blur-md border-b border-border flex items-center gap-3">
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">🐢 0.8x</span>
-          <Slider
-            value={[ttsSpeed]}
-            min={0.8}
-            max={1.5}
-            step={0.1}
-            onValueChange={([v]) => {
-              setTtsSpeed(v);
-              localStorage.setItem(TTS_SPEED_KEY, String(v));
-            }}
-            className="flex-1"
-          />
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">1.5x ⚡</span>
-          <span className="text-xs font-bold text-primary min-w-[32px] text-center">{ttsSpeed}x</span>
+          <span className="text-[10px] text-muted-foreground">🐢 0.8x</span>
+          <Slider value={[ttsSpeed]} min={0.8} max={1.5} step={0.1} onValueChange={([v]) => { setTtsSpeed(v); localStorage.setItem(TTS_SPEED_KEY, String(v)); }} className="flex-1" />
+          <span className="text-[10px] text-muted-foreground">1.5x ⚡</span>
+          <span className="text-xs font-bold text-primary">{ttsSpeed}x</span>
         </div>
       )}
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} flex-col gap-2`}>
-            <div className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : ""}`} style={{ maxWidth: "85%" }}>
-              {msg.role === "assistant" && (
-                <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary flex-shrink-0" />
-              )}
-              <div className={`rounded-2xl px-4 py-2.5 text-sm ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-br-sm ml-auto"
-                  : "bg-card border border-border text-foreground rounded-bl-sm"
-              }`}>
-                {msg.role === "assistant" ? (
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                ) : msg.content}
-              </div>
-            </div>
-            {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
-              <div className="ml-9 flex flex-wrap gap-2">
-                {msg.options.map(opt => (
-                  <button key={opt} onClick={() => sendMessage(opt)}
-                    className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 hover:bg-primary/20 active:scale-95 transition-all">
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Voice-only center: avatar + audio visualization */}
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">
+        {/* Avatar with glow */}
+        <div className="relative">
+          <div className={`absolute inset-0 rounded-full blur-2xl transition-opacity duration-700 ${isSpeaking ? "opacity-60 bg-primary/40 scale-125" : "opacity-20 bg-primary/20"}`} style={{ width: 160, height: 160, top: -16, left: -16 }} />
+          <img src={chatAvatar} alt={chatName} className={`w-32 h-32 rounded-full border-4 transition-all duration-500 ${isSpeaking ? "border-primary shadow-2xl shadow-primary/40 scale-105" : isListening ? "border-green-500 shadow-xl shadow-green-500/30" : "border-border"}`} />
+        </div>
 
-        {/* Inline QR Code */}
-        {showInlineQR && walletUserId && (
-          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-primary" />
-              <span className="text-sm font-bold text-foreground">Teu QR Code</span>
-            </div>
-            <div className="flex justify-center bg-background rounded-xl p-4">
-              <QRCodeSVG value={walletUserId} size={200} bgColor="transparent" fgColor="currentColor" className="text-foreground" />
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center">Mostre isso pra quem quiser te enviar SulCoins. Ninguém vê teu ID real 🔒</p>
-            <button onClick={() => setShowInlineQR(false)} className="w-full py-2 rounded-xl bg-muted text-foreground text-xs font-bold">Fechar</button>
-          </div>
-        )}
+        <h2 className="text-xl font-bold text-foreground">{chatName}</h2>
 
-        {/* Inline Transfer */}
-        {showInlineTransfer && (
-          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <Coins className="w-5 h-5 text-primary" />
-              <span className="text-sm font-bold text-foreground">
-                {transferStep === "amount" ? "Quanto enviar?" : transferStep === "target" ? "Pra quem?" : "Confirmar envio"}
-              </span>
-            </div>
-            {transferStep === "amount" && (
-              <>
-                <input type="number" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}
-                  placeholder="Ex: 5" min="1"
-                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border text-center font-bold" />
-                <p className="text-[10px] text-muted-foreground text-center">Saldo: {walletSaldo ?? 0} SulCoins</p>
-                <button onClick={() => { if (parseInt(transferAmount) > 0) setTransferStep("target"); }}
-                  disabled={!transferAmount || parseInt(transferAmount) <= 0}
-                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Próximo →</button>
-              </>
-            )}
-            {transferStep === "target" && (
-              <>
-                <input value={transferTarget} onChange={e => setTransferTarget(e.target.value)}
-                  placeholder="Cole o UUID do destinatário"
-                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground text-sm border border-border font-mono text-xs" />
-                <p className="text-[10px] text-muted-foreground text-center">Ou escaneie o QR na tela da Carteira 📷</p>
-                <div className="flex gap-2">
-                  <button onClick={() => setTransferStep("amount")} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">← Voltar</button>
-                  <button onClick={() => { if (transferTarget.length >= 10) setTransferStep("confirm"); }}
-                    disabled={transferTarget.length < 10}
-                    className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50">Confirmar →</button>
-                </div>
-              </>
-            )}
-            {transferStep === "confirm" && (
-              <>
-                <p className="text-sm text-foreground text-center">Enviar <strong className="text-primary">{transferAmount} SulCoins</strong> pro ID <span className="font-mono text-xs">{transferTarget.substring(0, 8)}...</span>?</p>
-                <div className="flex gap-2">
-                  <button onClick={() => { setShowInlineTransfer(false); }} className="flex-1 py-2.5 rounded-xl bg-muted text-foreground text-sm font-bold border border-border">Não</button>
-                  <button onClick={executeTransfer} className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">Sim, enviar!</button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Inline Invite */}
-        {showInlineInvite && walletUserId && (
-          <div className="ml-9 bg-card border border-border rounded-2xl p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-primary" />
-              <span className="text-sm font-bold text-foreground">Convidar alguém</span>
-            </div>
-            <p className="text-xs text-foreground">Manda esse link pro teu amigo:</p>
-            <div className="bg-muted rounded-xl p-3 text-center">
-              <p className="text-xs font-mono text-primary break-all select-all">ventosul.app/invite?ref={walletUserId.substring(0, 8)}</p>
-            </div>
-            <div className="bg-muted/50 rounded-xl p-3 space-y-1">
-              <p className="text-[10px] text-foreground font-bold">Recompensas:</p>
-              <p className="text-[10px] text-muted-foreground">• Quem entra ganha <strong className="text-primary">+0,05 SulC</strong></p>
-              <p className="text-[10px] text-muted-foreground">• Tu ganha: Comerciante <strong className="text-primary">+0,25</strong>, Turista <strong className="text-primary">+0,30</strong>, Comum <strong className="text-primary">+0,15</strong></p>
-            </div>
-            <button onClick={() => {
-              navigator.clipboard?.writeText(`https://ventosul.app/invite?ref=${walletUserId.substring(0, 8)}`);
-              setMessages(prev => [...prev, { role: "assistant", content: "Link copiado! 📋 Manda pro teu amigo! 🎉" }]);
-              setShowInlineInvite(false);
-            }} className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold">📋 Copiar link</button>
-          </div>
-        )}
-
-
+        {/* Audio wave when speaking */}
         {isSpeaking && (
-          <div className="flex items-center gap-2 ml-9">
-            <div className="flex gap-0.5 items-center">
-              <span className="w-1 h-3 bg-primary rounded-full animate-pulse" />
-              <span className="w-1 h-4 bg-primary rounded-full animate-pulse" style={{ animationDelay: "100ms" }} />
-              <span className="w-1 h-2.5 bg-primary rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
-              <span className="w-1 h-3.5 bg-primary rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-            </div>
-            <span className="text-[10px] text-primary font-semibold">Falando...</span>
+          <div className="flex items-end gap-1 h-10">
+            {[3, 5, 4, 6, 3, 5, 4, 3, 5, 6, 4, 3].map((h, i) => (
+              <span key={i} className="w-1 bg-primary rounded-full animate-pulse" style={{ height: `${h * 5}px`, animationDelay: `${i * 80}ms`, animationDuration: "0.6s" }} />
+            ))}
           </div>
         )}
 
-        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex items-end gap-2">
-            <img src={chatAvatar} alt="" className="w-7 h-7 rounded-full border border-primary" />
-            <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-3">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
-            </div>
+        {/* Loading dots */}
+        {isLoading && !isSpeaking && (
+          <div className="flex gap-2">
+            {[0, 150, 300].map(d => <span key={d} className="w-3 h-3 rounded-full bg-primary animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
           </div>
         )}
 
-        {/* Listening indicator - big and prominent */}
+        {/* Listening state - big mic */}
         {isListening && (
-          <div className="flex flex-col items-center gap-3 py-4">
+          <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center animate-pulse">
-                <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">
-                  <Mic className="w-6 h-6 text-white" />
+              <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center animate-pulse">
+                <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">
+                  <Mic className="w-7 h-7 text-white" />
                 </div>
               </div>
-              <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-green-400 animate-ping opacity-30" />
+              <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-green-400 animate-ping opacity-30" />
             </div>
-            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo... fala sem pressa!</p>
-            <p className="text-[10px] text-muted-foreground">Espero até 5s de pausa • máx 30s</p>
+            <p className="text-xs font-bold text-green-600 dark:text-green-400">🎙️ Te ouvindo...</p>
           </div>
         )}
-      </div>
 
-      {/* Input bar */}
-      <div className="flex-shrink-0 relative z-10 p-4 bg-card/90 backdrop-blur-md border-t border-border pb-20">
-        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="flex gap-2 max-w-md mx-auto">
-          <button
-            type="button"
-            onClick={() => isListening ? stopListening() : startListeningWithTimeout()}
-            disabled={isLoading || isSpeaking}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${
-              isListening
-                ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/30"
-                : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border-2 border-green-500/30"
-            }`}
-            title={isListening ? "Parar" : "Falar por voz"}
-          >
-            <Mic className="w-5 h-5" />
+        {/* Idle state — tap to talk */}
+        {!isSpeaking && !isLoading && !isListening && (
+          <button onClick={() => startListeningWithTimeout()} className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center hover:bg-green-500/20 active:scale-95 transition-all">
+            <Mic className="w-8 h-8 text-green-600 dark:text-green-400" />
           </button>
-
-          <input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder={isListening ? "🎙️ Fale agora..." : "Digite ou use o microfone..."}
-            className="flex-1 px-4 py-2.5 rounded-full bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            disabled={isLoading || isListening}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim() || isListening}
-            className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 transition-colors hover:bg-primary/90"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
-        {!isListening && !isSpeaking && !isLoading && (
-          <p className="text-center text-[10px] text-muted-foreground mt-2 opacity-70">
-            Aperte o botão verde 🎙️ pra falar comigo!
-          </p>
         )}
       </div>
 
-      {/* Footer */}
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>
   );

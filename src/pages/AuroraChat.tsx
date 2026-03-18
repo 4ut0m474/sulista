@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Mic, Volume2, VolumeX, Gauge, Sun, Moon, Swords } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon, Swords } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import ReactMarkdown from "react-markdown";
@@ -235,16 +235,9 @@ const AuroraChat = () => {
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <img src={auroraWarriorAvatar} alt="Aurora" className="w-9 h-9 rounded-full border-2 border-destructive" />
-        <div className="flex-1">
-          <h1 className="font-display text-base font-bold text-foreground flex items-center gap-1">Aurora <Swords className="w-4 h-4 text-destructive" /></h1>
-          <p className="text-[10px] text-muted-foreground">Game Master • {playerClass || "Guerreiro"} • {remaining} restantes</p>
-        </div>
+        <div className="flex-1" />
         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted">
           {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
-        </button>
-        <button onClick={cycleFontSize} className="p-2 rounded-full hover:bg-muted">
-          <span className="text-xs font-black text-foreground">A</span>
         </button>
         <button onClick={() => { if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); } setVoiceEnabled(!voiceEnabled); }}
           className={`p-2 rounded-full ${voiceEnabled ? "text-destructive bg-destructive/10" : "text-muted-foreground"}`}>
@@ -264,70 +257,50 @@ const AuroraChat = () => {
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} flex-col gap-2`}>
-            <div className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : ""}`} style={{ maxWidth: "85%" }}>
-              {msg.role === "assistant" && <img src={auroraWarriorAvatar} alt="" className="w-7 h-7 rounded-full border border-destructive flex-shrink-0" />}
-              <div className={`rounded-2xl px-4 py-2.5 text-sm ${msg.role === "user" ? "bg-destructive text-destructive-foreground rounded-br-sm ml-auto" : "bg-card/90 backdrop-blur-sm border border-border text-foreground rounded-bl-sm"}`}>
-                {msg.role === "assistant" ? <div className="prose prose-sm max-w-none dark:prose-invert"><ReactMarkdown>{msg.content}</ReactMarkdown></div> : msg.content}
-              </div>
-            </div>
-            {msg.role === "assistant" && msg.options?.length && (
-              <div className="ml-9 flex flex-wrap gap-2">
-                {msg.options.map(opt => (
-                  <button key={opt} onClick={() => sendMessage(opt)} className="px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-xs font-bold border border-destructive/20 hover:bg-destructive/20 active:scale-95 transition-all">{opt}</button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Voice-only center */}
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">
+        <div className="relative">
+          <div className={`absolute inset-0 rounded-full blur-2xl transition-opacity duration-700 ${isSpeaking ? "opacity-60 bg-destructive/40 scale-125" : "opacity-20 bg-destructive/20"}`} style={{ width: 160, height: 160, top: -16, left: -16 }} />
+          <img src={auroraWarriorAvatar} alt="Aurora" className={`w-32 h-32 rounded-full border-4 transition-all duration-500 ${isSpeaking ? "border-destructive shadow-2xl shadow-destructive/40 scale-105" : isListening ? "border-red-500 shadow-xl shadow-red-500/30" : "border-border"}`} />
+        </div>
+
+        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">Aurora <Swords className="w-5 h-5 text-destructive" /></h2>
+
         {isSpeaking && (
-          <div className="flex items-center gap-2 ml-9">
-            <div className="flex gap-0.5 items-center">
-              {[3, 4, 2.5, 3.5].map((h, i) => <span key={i} className="w-1 bg-destructive rounded-full animate-pulse" style={{ height: `${h * 4}px`, animationDelay: `${i * 100}ms` }} />)}
-            </div>
-            <span className="text-[10px] text-destructive font-semibold">Invocando...</span>
+          <div className="flex items-end gap-1 h-10">
+            {[3, 5, 4, 6, 3, 5, 4, 3, 5, 6, 4, 3].map((h, i) => (
+              <span key={i} className="w-1 bg-destructive rounded-full animate-pulse" style={{ height: `${h * 5}px`, animationDelay: `${i * 80}ms`, animationDuration: "0.6s" }} />
+            ))}
           </div>
         )}
-        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex items-end gap-2">
-            <img src={auroraWarriorAvatar} alt="" className="w-7 h-7 rounded-full border border-destructive" />
-            <div className="bg-card/90 border border-border rounded-2xl rounded-bl-sm px-4 py-3">
-              <div className="flex gap-1">
-                {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-              </div>
-            </div>
+
+        {isLoading && !isSpeaking && (
+          <div className="flex gap-2">
+            {[0, 150, 300].map(d => <span key={d} className="w-3 h-3 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
           </div>
         )}
+
         {isListening && (
-          <div className="flex flex-col items-center gap-3 py-4">
+          <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
-                <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/40">
-                  <Mic className="w-6 h-6 text-white" />
+              <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
+                <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/40">
+                  <Mic className="w-7 h-7 text-white" />
                 </div>
               </div>
+              <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-red-400 animate-ping opacity-30" />
             </div>
             <p className="text-xs font-bold text-red-500">⚔️ Fale, guerreiro!</p>
           </div>
         )}
+
+        {!isSpeaking && !isLoading && !isListening && (
+          <button onClick={() => startListeningWithTimeout()} className="w-20 h-20 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-95 transition-all">
+            <Mic className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </button>
+        )}
       </div>
 
-      <div className="flex-shrink-0 relative z-10 p-4 bg-card/90 backdrop-blur-md border-t border-border pb-20">
-        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="flex gap-2 max-w-md mx-auto">
-          <button type="button" onClick={() => isListening ? stopListening() : startListeningWithTimeout()} disabled={isLoading || isSpeaking}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${isListening ? "bg-red-600 text-white animate-pulse" : "bg-red-600/10 text-red-600 hover:bg-red-600/20 border-2 border-red-600/30"}`}>
-            <Mic className="w-5 h-5" />
-          </button>
-          <input value={input} onChange={e => setInput(e.target.value)} placeholder={isListening ? "⚔️ Fale agora..." : "Digite sua missão..."} disabled={isLoading || isListening}
-            className="flex-1 px-4 py-2.5 rounded-full bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-destructive/50" />
-          <button type="submit" disabled={isLoading || !input.trim() || isListening}
-            className="w-10 h-10 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center disabled:opacity-50">
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>
   );

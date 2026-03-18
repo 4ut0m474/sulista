@@ -45,11 +45,24 @@ Você declara, sob as penas da lei, aceitar estes termos integralmente ao usar o
 
 const POLITICA_PRIVACIDADE = `Coletamos nome, RG/CPF (salvo como hash SHA-256, nunca cru), telefone opcional, localização (com consentimento expresso). Não vendemos, não compartilhamos dados pessoais. Você pode deletar conta a qualquer momento (LGPD – Lei 13.709/2018). Uso por menores só com responsável legal (ECA – Lei 8.069/1990).`;
 
+function formatCpf(value: string): string {
+  const nums = value.replace(/\D/g, "").slice(0, 11);
+  if (nums.length <= 3) return nums;
+  if (nums.length <= 6) return `${nums.slice(0, 3)}.${nums.slice(3)}`;
+  if (nums.length <= 9) return `${nums.slice(0, 3)}.${nums.slice(3, 6)}.${nums.slice(6)}`;
+  return `${nums.slice(0, 3)}.${nums.slice(3, 6)}.${nums.slice(6, 9)}-${nums.slice(9)}`;
+}
+
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(text.trim().toLowerCase());
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function generatePin(): string {
+  const digits = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10));
+  return digits.join("");
 }
 
 const AtivarPersistencia = () => {
@@ -63,49 +76,117 @@ const AtivarPersistencia = () => {
   const [aceitaPrivacidade, setAceitaPrivacidade] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = nome.trim().length > 0 && documento.trim().length >= 5 && aceitaTermos && aceitaPrivacidade && !loading;
+  const docNums = documento.replace(/\D/g, "");
+  const canSubmit = nome.trim().length > 0 && docNums.length >= 5 && aceitaTermos && aceitaPrivacidade && !loading;
 
   const handleAtivar = async () => {
     if (!canSubmit) return;
     setLoading(true);
     try {
+      // Ensure user is authenticated (anonymous)
+      let userId: string;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Sign up anonymously
         const { data: anonData, error: anonErr } = await supabase.auth.signInAnonymously();
         if (anonErr) throw anonErr;
         if (!anonData.user) throw new Error("Falha ao criar conta");
-        await doInsert(anonData.user.id);
+        userId = anonData.user.id;
       } else {
-        await doInsert(user.id);
+        userId = user.id;
       }
+
+      // Hash CPF/RG
+      const cpfHash = await sha256(docNums);
+
+      // Generate PIN
+      const pin = generatePin();
+
+      // Insert/update in usuarios table
+      const { data: existing } = await supabase
+        .from("usuarios" as any)
+        .select("uid")
+        .eq("uid", userId)
+        .maybeSingle();
+
+      if (existing) {
+        const { error: updateErr } = await supabase
+          .from("usuarios" as any)
+          .update({
+            nome: nome.trim(),
+            cpf_hash: cpfHash,
+            telefone: telefone.trim() || null,
+            aceitou_termos: true,
+            aceitou_privacidade: true,
+            confirmado_email: false,
+          } as any)
+          .eq("uid", userId);
+        if (updateErr) throw updateErr;
+      } else {
+        const { error: insertErr } = await supabase
+          .from("usuarios" as any)
+          .insert({
+            uid: userId,
+            nome: nome.trim(),
+            cpf_hash: cpfHash,
+            telefone: telefone.trim() || null,
+            aceitou_termos: true,
+            aceitou_privacidade: true,
+            confirmado_email: false,
+          } as any);
+        if (insertErr) throw insertErr;
+      }
+
+      // Also maintain existing user_persistencia table
+      const nomeHash = await sha256(nome);
+      const telHash = telefone.trim() ? await sha256(telefone) : null;
+      await supabase.from("user_persistencia" as any).upsert({
+        user_id: userId,
+        nome_hash: nomeHash,
+        documento_hash: cpfHash,
+        telefone_hash: telHash,
+        termos_aceitos: true,
+        privacidade_aceita: true,
+      } as any, { onConflict: "user_id" } as any);
+
+      // Save PIN via edge function
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+
+      const pinRes = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/send-pin-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ uid: userId, pin, email: user?.email || "sem-email" }),
+        }
+      );
+
+      if (!pinRes.ok) {
+        const errData = await pinRes.json().catch(() => ({}));
+        console.error("Erro ao enviar PIN:", errData);
+        throw new Error(errData.error || "Erro ao gerar PIN");
+      }
+
+      // Store uid in session for PIN confirmation page
+      sessionStorage.setItem("persistencia_uid", userId);
+      sessionStorage.setItem("persistencia_pin_debug", pin); // For testing - remove in production
+
+      syncPersistenceLocalState({ userId, status: "approved", verified: true });
+      confirmPin();
+
+      toast.success(`PIN gerado! Código: ${pin}`);
+      navigate("/confirmar-pin");
     } catch (err: any) {
+      console.error("Erro ao ativar persistência:", err);
       toast.error(err.message || "Erro ao ativar persistência");
     } finally {
       setLoading(false);
     }
-  };
-
-  const doInsert = async (userId: string) => {
-    const nomeHash = await sha256(nome);
-    const docHash = await sha256(documento);
-    const telHash = telefone.trim() ? await sha256(telefone) : null;
-
-    const { error } = await supabase.from("user_persistencia" as any).insert({
-      user_id: userId,
-      nome_hash: nomeHash,
-      documento_hash: docHash,
-      telefone_hash: telHash,
-      termos_aceitos: true,
-      privacidade_aceita: true,
-    } as any);
-
-    if (error) throw error;
-
-    syncPersistenceLocalState({ userId, status: "approved", verified: true });
-    confirmPin();
-    toast.success("Persistência ativada com sucesso!");
-    navigate("/");
   };
 
   return (
@@ -140,12 +221,18 @@ const AtivarPersistencia = () => {
         <section className="space-y-3">
           <h2 className="text-sm font-black text-foreground">Seus dados</h2>
           <div>
-            <label className="text-xs font-bold text-foreground">Nome *</label>
+            <label className="text-xs font-bold text-foreground">Nome completo *</label>
             <Input value={nome} onChange={e => setNome(e.target.value)} placeholder="Seu nome completo" maxLength={100} className="mt-1" />
           </div>
           <div>
             <label className="text-xs font-bold text-foreground">RG ou CPF *</label>
-            <Input value={documento} onChange={e => setDocumento(e.target.value)} placeholder="Apenas um dos dois" maxLength={20} className="mt-1" />
+            <Input
+              value={documento}
+              onChange={e => setDocumento(formatCpf(e.target.value))}
+              placeholder="000.000.000-00"
+              maxLength={14}
+              className="mt-1"
+            />
           </div>
           <div>
             <label className="text-xs font-bold text-foreground">Telefone <span className="text-muted-foreground font-normal">(opcional)</span></label>

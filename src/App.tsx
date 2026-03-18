@@ -31,6 +31,7 @@ import AuroraChat from "./pages/AuroraChat";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
 import AtivarPersistencia from "./pages/AtivarPersistencia";
+import ConfirmarPin from "./pages/ConfirmarPin";
 
 import ScrollToTop from "./components/ScrollToTop";
 import PinGate from "./components/PinGate";
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
                 <Route path="/ativar-persistencia" element={<AtivarPersistencia />} />
+                <Route path="/confirmar-pin" element={<ConfirmarPin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </PinGate>

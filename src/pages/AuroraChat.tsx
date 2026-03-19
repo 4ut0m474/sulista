@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import ChatBackground from "@/components/chat/ChatBackground";
+import AuroraClassSelector from "@/components/chat/AuroraClassSelector";
 import { getSelectedClass } from "@/components/AgentIntroModal";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };

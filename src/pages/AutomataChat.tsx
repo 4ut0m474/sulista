@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import ChatBackground from "@/components/chat/ChatBackground";
+import AutomataStatsPanel from "@/components/chat/AutomataStatsPanel";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
@@ -257,6 +258,11 @@ const AutomataChat = () => {
           <span className="text-xs font-bold text-primary">{ttsSpeed}x</span>
         </div>
       )}
+
+      {/* Stats panel */}
+      <div className="flex-shrink-0 relative z-10 bg-card/80 backdrop-blur-sm border-b border-border">
+        <AutomataStatsPanel />
+      </div>
 
       {/* Voice-only center */}
       <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">

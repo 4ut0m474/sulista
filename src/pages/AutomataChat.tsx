@@ -259,6 +259,11 @@ const AutomataChat = () => {
         </div>
       )}
 
+      {/* Stats panel */}
+      <div className="flex-shrink-0 relative z-10 bg-card/80 backdrop-blur-sm border-b border-border">
+        <AutomataStatsPanel />
+      </div>
+
       {/* Voice-only center */}
       <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">
         <div className="relative">

@@ -49,11 +49,7 @@ const Landing = () => {
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   const handleAgentClick = (agent: AgentType) => {
-    if (!hasSeenIntro(agent)) {
-      setIntroAgent(agent);
-    } else {
-      navigateToAgent(agent);
-    }
+    navigateToAgent(agent);
   };
 
   const navigateToAgent = (agent: AgentType) => {

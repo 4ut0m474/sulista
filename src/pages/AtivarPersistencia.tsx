@@ -80,112 +80,128 @@ const AtivarPersistencia = () => {
   const canSubmit = nome.trim().length > 0 && docNums.length >= 5 && aceitaTermos && aceitaPrivacidade && !loading;
 
   const handleAtivar = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      alert("Preencha nome, documento e aceite os termos");
+      return;
+    }
     setLoading(true);
+
+    let userId: string | null = null;
+    let pin = "";
+
     try {
       // Ensure user is authenticated (anonymous)
-      let userId: string;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         const { data: anonData, error: anonErr } = await supabase.auth.signInAnonymously();
-        if (anonErr) throw anonErr;
-        if (!anonData.user) throw new Error("Falha ao criar conta");
-        userId = anonData.user.id;
+        if (anonErr) {
+          console.error("Erro auth anônimo:", anonErr);
+          // Don't block — continue to redirect
+        }
+        userId = anonData?.user?.id ?? null;
       } else {
         userId = user.id;
       }
 
-      // Hash CPF/RG
-      const cpfHash = await sha256(docNums);
+      if (userId) {
+        // Hash CPF/RG
+        const cpfHash = await sha256(docNums);
 
-      // Generate PIN
-      const pin = generatePin();
-
-      // Insert/update in usuarios table
-      const { data: existing } = await supabase
-        .from("usuarios" as any)
-        .select("uid")
-        .eq("uid", userId)
-        .maybeSingle();
-
-      if (existing) {
-        const { error: updateErr } = await supabase
+        // Insert/update in usuarios table — don't block on error
+        const { data: existing } = await supabase
           .from("usuarios" as any)
-          .update({
-            nome: nome.trim(),
-            cpf_hash: cpfHash,
-            telefone: telefone.trim() || null,
-            aceitou_termos: true,
-            aceitou_privacidade: true,
-            confirmado_email: false,
-          } as any)
-          .eq("uid", userId);
-        if (updateErr) throw updateErr;
-      } else {
-        const { error: insertErr } = await supabase
-          .from("usuarios" as any)
-          .insert({
-            uid: userId,
-            nome: nome.trim(),
-            cpf_hash: cpfHash,
-            telefone: telefone.trim() || null,
-            aceitou_termos: true,
-            aceitou_privacidade: true,
-            confirmado_email: false,
-          } as any);
-        if (insertErr) throw insertErr;
-      }
+          .select("uid")
+          .eq("uid", userId)
+          .maybeSingle();
 
-      // Also maintain existing user_persistencia table
-      const nomeHash = await sha256(nome);
-      const telHash = telefone.trim() ? await sha256(telefone) : null;
-      await supabase.from("user_persistencia" as any).upsert({
-        user_id: userId,
-        nome_hash: nomeHash,
-        documento_hash: cpfHash,
-        telefone_hash: telHash,
-        termos_aceitos: true,
-        privacidade_aceita: true,
-      } as any, { onConflict: "user_id" } as any);
-
-      // Save PIN via edge function
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const { data: session } = await supabase.auth.getSession();
-      const token = session?.session?.access_token;
-
-      const pinRes = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/send-pin-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({ uid: userId, pin, email: user?.email || "sem-email" }),
+        if (existing) {
+          const { error: updateErr } = await supabase
+            .from("usuarios" as any)
+            .update({
+              nome: nome.trim(),
+              cpf_hash: cpfHash,
+              telefone: telefone.trim() || null,
+              aceitou_termos: true,
+              aceitou_privacidade: true,
+              confirmado_email: false,
+            } as any)
+            .eq("uid", userId);
+          if (updateErr) console.error("Erro update usuarios:", updateErr);
+        } else {
+          const { error: insertErr } = await supabase
+            .from("usuarios" as any)
+            .insert({
+              uid: userId,
+              nome: nome.trim(),
+              cpf_hash: cpfHash,
+              telefone: telefone.trim() || null,
+              aceitou_termos: true,
+              aceitou_privacidade: true,
+              confirmado_email: false,
+            } as any);
+          if (insertErr) console.error("Erro insert usuarios:", insertErr);
         }
-      );
 
-      if (!pinRes.ok) {
-        const errData = await pinRes.json().catch(() => ({}));
-        console.error("Erro ao enviar PIN:", errData);
-        throw new Error(errData.error || "Erro ao gerar PIN");
+        // Also maintain existing user_persistencia table
+        const nomeHash = await sha256(nome);
+        const telHash = telefone.trim() ? await sha256(telefone) : null;
+        const { error: persErr } = await supabase.from("user_persistencia" as any).upsert({
+          user_id: userId,
+          nome_hash: nomeHash,
+          documento_hash: cpfHash,
+          telefone_hash: telHash,
+          termos_aceitos: true,
+          privacidade_aceita: true,
+        } as any, { onConflict: "user_id" } as any);
+        if (persErr) console.error("Erro user_persistencia:", persErr);
+
+        // Generate PIN
+        pin = generatePin();
+
+        // Save PIN via edge function — don't block on error
+        try {
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+          const { data: session } = await supabase.auth.getSession();
+          const token = session?.session?.access_token;
+
+          const pinRes = await fetch(
+            `https://${projectId}.supabase.co/functions/v1/send-pin-email`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              },
+              body: JSON.stringify({ uid: userId, pin, email: "sem-email" }),
+            }
+          );
+          if (!pinRes.ok) {
+            const errData = await pinRes.json().catch(() => ({}));
+            console.error("Erro ao enviar PIN:", errData);
+          }
+        } catch (pinErr) {
+          console.error("Erro edge function PIN:", pinErr);
+        }
+
+        // Store uid in session for PIN confirmation page
+        sessionStorage.setItem("persistencia_uid", userId);
+        sessionStorage.setItem("persistencia_pin_debug", pin);
+
+        syncPersistenceLocalState({ userId, status: "approved", verified: true });
+        confirmPin();
+
+        toast.success(`PIN gerado! Código: ${pin}`);
+      } else {
+        console.error("Não foi possível obter userId, redirecionando mesmo assim");
       }
-
-      // Store uid in session for PIN confirmation page
-      sessionStorage.setItem("persistencia_uid", userId);
-      sessionStorage.setItem("persistencia_pin_debug", pin); // For testing - remove in production
-
-      syncPersistenceLocalState({ userId, status: "approved", verified: true });
-      confirmPin();
-
-      toast.success(`PIN gerado! Código: ${pin}`);
-      navigate("/confirmar-pin");
     } catch (err: any) {
       console.error("Erro ao ativar persistência:", err);
-      toast.error(err.message || "Erro ao ativar persistência");
+      // Don't block — always redirect
     } finally {
       setLoading(false);
+      // ALWAYS redirect to PIN page, even on errors
+      navigate("/confirmar-pin");
     }
   };
 

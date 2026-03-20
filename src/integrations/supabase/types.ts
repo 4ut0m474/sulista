@@ -95,6 +95,27 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_personas: {
+        Row: {
+          agent_name: string
+          id: string
+          protocol_json: Json
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          id?: string
+          protocol_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          id?: string
+          protocol_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       anonymous_profiles: {
         Row: {
           created_at: string

@@ -65,7 +65,6 @@ function generatePin(): string {
 
 const AtivarPersistencia = () => {
   const navigate = useNavigate();
-  const { confirmPin } = useAuth();
 
   const [nome, setNome] = useState("");
   const [documento, setDocumento] = useState("");

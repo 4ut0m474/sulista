@@ -58,11 +58,6 @@ async function sha256(text: string): Promise<string> {
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-function generatePin(): string {
-  const digits = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10));
-  return digits.join("");
-}
-
 const AtivarPersistencia = () => {
   const navigate = useNavigate();
 

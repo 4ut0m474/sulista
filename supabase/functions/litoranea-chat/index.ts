@@ -146,7 +146,40 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, adminMode, auroraMode, userProfile, nearbyData } = await req.json();
+    const { messages, adminMode, auroraMode, automataMode, userProfile, nearbyData } = await req.json();
+
+    // Determine agent name for protocol loading
+    const agentName = adminMode ? null : automataMode ? "automata" : auroraMode ? "aurora" : "litoranea";
+
+    // Load protocol from database
+    let protocolEnforcement = "";
+    if (agentName) {
+      try {
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+        const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+          const dbRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/agent_personas?agent_name=eq.${agentName}&select=protocol_json`,
+            { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+          );
+          if (dbRes.ok) {
+            const rows = await dbRes.json();
+            if (rows.length > 0) {
+              const p = rows[0].protocol_json;
+              protocolEnforcement = `\n\n=== PROTOCOLO DE PERSONA (OBRIGATÓRIO) ===
+Frase inicial: "${p.start_phrase}"
+Tom: ${p.tone}
+REGRAS ABSOLUTAS (violar = resposta INVÁLIDA):
+${p.rules.map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
+ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se violou alguma, REESCREVA forçando o tema correto.
+=== FIM DO PROTOCOLO ===`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Protocol load error:", e);
+      }
+    }
 
     // Build personalized system prompt with user profile
     let personalizedPrompt = adminMode
@@ -154,6 +187,10 @@ serve(async (req) => {
       : auroraMode
         ? AURORA_SYSTEM_PROMPT
         : SYSTEM_PROMPT;
+    
+    // Append protocol enforcement
+    personalizedPrompt += protocolEnforcement;
+
     if (userProfile && !adminMode) {
       personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a conversa. Se campos estão vazios, pergunte naturalmente.`;
     }

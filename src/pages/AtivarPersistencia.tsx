@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { syncPersistenceLocalState } from "@/lib/persistence";
-import { useAuth } from "@/contexts/AuthContext";
 
 const TERMOS_DE_USO = `Cláusula 1 – Aceitação dos Termos
 Ao acessar, cadastrar-se ou utilizar o aplicativo Vento Sul (doravante "Aplicativo"), você declara que leu, compreendeu e aceita integralmente estes Termos de Uso, bem como a Política de Privacidade. Se não concordar, pare imediatamente.

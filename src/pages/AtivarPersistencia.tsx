@@ -86,28 +86,22 @@ const AtivarPersistencia = () => {
     }
     setLoading(true);
 
-    let userId: string | null = null;
-    let pin = "";
-
     try {
       // Ensure user is authenticated (anonymous)
       const { data: { user } } = await supabase.auth.getUser();
+      let userId: string | null = null;
       if (!user) {
         const { data: anonData, error: anonErr } = await supabase.auth.signInAnonymously();
-        if (anonErr) {
-          console.error("Erro auth anônimo:", anonErr);
-          // Don't block — continue to redirect
-        }
+        if (anonErr) console.error("Erro auth anônimo:", anonErr);
         userId = anonData?.user?.id ?? null;
       } else {
         userId = user.id;
       }
 
       if (userId) {
-        // Hash CPF/RG
         const cpfHash = await sha256(docNums);
 
-        // Insert/update in usuarios table — don't block on error
+        // Insert/update usuarios
         const { data: existing } = await supabase
           .from("usuarios" as any)
           .select("uid")
@@ -115,7 +109,7 @@ const AtivarPersistencia = () => {
           .maybeSingle();
 
         if (existing) {
-          const { error: updateErr } = await supabase
+          await supabase
             .from("usuarios" as any)
             .update({
               nome: nome.trim(),
@@ -126,9 +120,8 @@ const AtivarPersistencia = () => {
               confirmado_email: false,
             } as any)
             .eq("uid", userId);
-          if (updateErr) console.error("Erro update usuarios:", updateErr);
         } else {
-          const { error: insertErr } = await supabase
+          await supabase
             .from("usuarios" as any)
             .insert({
               uid: userId,
@@ -139,69 +132,18 @@ const AtivarPersistencia = () => {
               aceitou_privacidade: true,
               confirmado_email: false,
             } as any);
-          if (insertErr) console.error("Erro insert usuarios:", insertErr);
         }
 
-        // Also maintain existing user_persistencia table
-        const nomeHash = await sha256(nome);
-        const telHash = telefone.trim() ? await sha256(telefone) : null;
-        const { error: persErr } = await supabase.from("user_persistencia" as any).upsert({
-          user_id: userId,
-          nome_hash: nomeHash,
-          documento_hash: cpfHash,
-          telefone_hash: telHash,
-          termos_aceitos: true,
-          privacidade_aceita: true,
-        } as any, { onConflict: "user_id" } as any);
-        if (persErr) console.error("Erro user_persistencia:", persErr);
-
-        // Generate PIN
-        pin = generatePin();
-
-        // Save PIN via edge function — don't block on error
-        try {
-          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-          const { data: session } = await supabase.auth.getSession();
-          const token = session?.session?.access_token;
-
-          const pinRes = await fetch(
-            `https://${projectId}.supabase.co/functions/v1/send-pin-email`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              },
-              body: JSON.stringify({ uid: userId, pin, email: "sem-email" }),
-            }
-          );
-          if (!pinRes.ok) {
-            const errData = await pinRes.json().catch(() => ({}));
-            console.error("Erro ao enviar PIN:", errData);
-          }
-        } catch (pinErr) {
-          console.error("Erro edge function PIN:", pinErr);
-        }
-
-        // Store uid in session for PIN confirmation page
+        // Store uid for PIN confirmation
         sessionStorage.setItem("persistencia_uid", userId);
-        sessionStorage.setItem("persistencia_pin_debug", pin);
-
-        syncPersistenceLocalState({ userId, status: "approved", verified: true });
-        confirmPin();
-
-        toast.success(`PIN gerado! Código: ${pin}`);
-      } else {
-        console.error("Não foi possível obter userId, redirecionando mesmo assim");
       }
+
+      toast.success("Dados salvos! Agora crie seu PIN.");
     } catch (err: any) {
       console.error("Erro ao ativar persistência:", err);
-      // Don't block — always redirect
     } finally {
       setLoading(false);
-      // ALWAYS redirect to PIN page, even on errors
-      navigate("/confirmar-pin");
+      navigate("/criar-pin");
     }
   };
 

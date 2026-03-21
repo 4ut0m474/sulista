@@ -1,20 +1,37 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { Home, MapPin, Briefcase, Coins } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
+import automataAvatar from "@/assets/automata-avatar.png";
+import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 
 interface FooterNavProps {
   stateAbbr: string;
   cityName: string;
 }
 
+const agentConfig: Record<string, { avatar: string; label: string; path: string }> = {
+  litoranea: { avatar: litoraneaAvatar, label: "Litorânea", path: "litoranea" },
+  aurora: { avatar: auroraWarriorAvatar, label: "Aurora", path: "aurora" },
+  automata: { avatar: automataAvatar, label: "Automata", path: "automata" },
+};
+
 const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
   const location = useLocation();
   const base = `/city/${stateAbbr}/${encodeURIComponent(cityName)}`;
 
+  // Detect active agent from current path
+  const activeAgent = location.pathname.includes("/aurora")
+    ? "aurora"
+    : location.pathname.includes("/automata")
+    ? "automata"
+    : "litoranea";
+
+  const agent = agentConfig[activeAgent];
+
   const items = [
     { label: "Início", icon: Home, path: base },
     { label: "Ofertas perto", icon: MapPin, path: `${base}/nearby` },
-    { label: "Litorânea", icon: null, path: `${base}/litoranea`, isCenter: true },
+    { label: agent.label, icon: null, path: `${base}/${agent.path}`, isCenter: true },
     { label: "Comerciante", icon: Briefcase, path: `${base}/merchant` },
     { label: "Carteira", icon: Coins, path: `${base}/wallet` },
   ];
@@ -32,9 +49,9 @@ const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
                 className="flex flex-col items-center gap-0.5 -mt-5"
               >
                 <div className={`w-14 h-14 rounded-full border-4 border-card bg-primary/10 flex items-center justify-center shadow-lg transition-transform hover:scale-110 ${isActive ? "ring-2 ring-primary" : ""}`}>
-                  <img src={litoraneaAvatar} alt="Litorânea" className="w-11 h-11 rounded-full" />
+                  <img src={agent.avatar} alt={agent.label} className="w-11 h-11 rounded-full" />
                 </div>
-                <span className="text-[9px] font-bold text-primary">Litorânea</span>
+                <span className="text-[9px] font-bold text-primary">{agent.label}</span>
               </RouterNavLink>
             );
           }

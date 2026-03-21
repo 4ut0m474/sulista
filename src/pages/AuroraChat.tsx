@@ -54,6 +54,7 @@ const AuroraChat = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
+  const [mapMode, setMapMode] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);

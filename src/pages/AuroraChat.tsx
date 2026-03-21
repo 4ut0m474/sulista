@@ -273,7 +273,7 @@ const AuroraChat = () => {
                 ? "bg-destructive/80 text-destructive-foreground rounded-br-sm"
                 : "bg-card/80 text-card-foreground border border-border rounded-bl-sm"
             }`}>
-              <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0">{m.content}</ReactMarkdown>
+              <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0"><ReactMarkdown>{m.content}</ReactMarkdown></div>
               {m.role === "assistant" && (
                 <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/30">
                   <button onClick={() => speakText(m.content, false)} className="text-muted-foreground hover:text-destructive transition-colors">

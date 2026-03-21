@@ -23,15 +23,59 @@ const SteampunkBackground = () => (
   </div>
 );
 
+const southCities = [
+  { name: "Curitiba", x: 62, y: 22, pop: true },
+  { name: "Londrina", x: 48, y: 12, pop: true },
+  { name: "Maringá", x: 42, y: 15, pop: false },
+  { name: "Foz", x: 22, y: 20, pop: false },
+  { name: "Cascavel", x: 30, y: 22, pop: true },
+  { name: "Ponta Grossa", x: 58, y: 28, pop: false },
+  { name: "Florianópolis", x: 72, y: 48, pop: true },
+  { name: "Joinville", x: 68, y: 40, pop: true },
+  { name: "Blumenau", x: 64, y: 44, pop: false },
+  { name: "Chapecó", x: 38, y: 42, pop: false },
+  { name: "Criciúma", x: 62, y: 55, pop: true },
+  { name: "Porto Alegre", x: 58, y: 72, pop: true },
+  { name: "Caxias", x: 52, y: 64, pop: true },
+  { name: "Pelotas", x: 50, y: 85, pop: false },
+  { name: "Santa Maria", x: 38, y: 74, pop: false },
+  { name: "Passo Fundo", x: 44, y: 58, pop: true },
+  { name: "Uruguaiana", x: 18, y: 78, pop: false },
+];
+
 const RPGMapBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,6%)] via-[hsl(222,35%,10%)] to-[hsl(38,40%,8%)]" />
-    <div className="absolute top-8 right-8 w-20 h-20 rounded-full bg-[hsl(38,80%,50%)] opacity-5 blur-2xl" />
-    <div className="absolute top-1/3 left-4 w-2 h-2 rounded-full bg-[hsl(38,90%,60%)] opacity-30 animate-pulse" />
-    <div className="absolute top-1/2 right-8 w-1.5 h-1.5 rounded-full bg-[hsl(152,50%,50%)] opacity-25 animate-pulse" style={{ animationDelay: "1s" }} />
-    <div className="absolute bottom-1/3 left-1/3 w-2 h-2 rounded-full bg-[hsl(38,90%,60%)] opacity-20 animate-pulse" style={{ animationDelay: "2s" }} />
-    <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[hsl(222,30%,8%)] to-transparent opacity-80" />
-    <div className="absolute top-1/2 inset-x-0 h-16 bg-[hsl(222,20%,15%)] opacity-10 blur-xl" />
+    {/* Dark map base */}
+    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,8%)] via-[hsl(160,25%,10%)] to-[hsl(222,30%,6%)]" />
+    {/* State boundaries (simplified SVG paths for PR, SC, RS) */}
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+      {/* PR outline */}
+      <path d="M20,10 L75,10 L75,32 L20,32 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
+      <text x="50" y="8" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">PR</text>
+      {/* SC outline */}
+      <path d="M30,34 L78,34 L78,56 L30,56 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
+      <text x="55" y="36" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">SC</text>
+      {/* RS outline */}
+      <path d="M15,58 L70,58 L70,95 L15,95 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
+      <text x="42" y="60" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">RS</text>
+      {/* City pins */}
+      {southCities.map((c) => (
+        <g key={c.name}>
+          <circle cx={c.x} cy={c.y} r={c.pop ? 1.2 : 0.8} fill={c.pop ? "hsl(142,70%,50%)" : "hsl(0,70%,55%)"} opacity={c.pop ? 0.8 : 0.5}>
+            <animate attributeName="opacity" values={c.pop ? "0.8;0.5;0.8" : "0.5;0.3;0.5"} dur={`${3 + Math.random() * 2}s`} repeatCount="indefinite" />
+          </circle>
+          <text x={c.x} y={c.y - 2} fill="hsl(0,0%,80%)" fontSize="2" textAnchor="middle" opacity="0.6">{c.name}</text>
+        </g>
+      ))}
+      {/* Connection lines between big cities */}
+      <line x1="62" y1="22" x2="68" y2="40" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
+      <line x1="68" y1="40" x2="72" y2="48" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
+      <line x1="72" y1="48" x2="58" y2="72" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
+      <line x1="48" y1="12" x2="62" y2="22" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.15" />
+      <line x1="58" y1="72" x2="52" y2="64" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.15" />
+    </svg>
+    {/* Atmospheric overlay */}
+    <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[hsl(222,30%,4%)] to-transparent opacity-80" />
   </div>
 );
 

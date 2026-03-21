@@ -24,58 +24,99 @@ const SteampunkBackground = () => (
 );
 
 const southCities = [
-  { name: "Curitiba", x: 62, y: 22, pop: true },
-  { name: "Londrina", x: 48, y: 12, pop: true },
-  { name: "Maringá", x: 42, y: 15, pop: false },
-  { name: "Foz", x: 22, y: 20, pop: false },
-  { name: "Cascavel", x: 30, y: 22, pop: true },
-  { name: "Ponta Grossa", x: 58, y: 28, pop: false },
-  { name: "Florianópolis", x: 72, y: 48, pop: true },
-  { name: "Joinville", x: 68, y: 40, pop: true },
-  { name: "Blumenau", x: 64, y: 44, pop: false },
-  { name: "Chapecó", x: 38, y: 42, pop: false },
-  { name: "Criciúma", x: 62, y: 55, pop: true },
-  { name: "Porto Alegre", x: 58, y: 72, pop: true },
-  { name: "Caxias", x: 52, y: 64, pop: true },
-  { name: "Pelotas", x: 50, y: 85, pop: false },
-  { name: "Santa Maria", x: 38, y: 74, pop: false },
-  { name: "Passo Fundo", x: 44, y: 58, pop: true },
-  { name: "Uruguaiana", x: 18, y: 78, pop: false },
+  // PR - grandes
+  { name: "Curitiba", x: 62, y: 18, pop: 1962, big: true },
+  { name: "Londrina", x: 44, y: 10, pop: 580, big: true },
+  { name: "Maringá", x: 38, y: 13, pop: 430, big: true },
+  { name: "Ponta Grossa", x: 58, y: 24, pop: 358, big: true },
+  { name: "Cascavel", x: 26, y: 20, pop: 332, big: true },
+  { name: "Foz do Iguaçu", x: 18, y: 22, pop: 258, big: false },
+  { name: "São José dos Pinhais", x: 64, y: 20, pop: 323, big: true },
+  { name: "Colombo", x: 63, y: 17, pop: 246, big: false },
+  { name: "Guarapuava", x: 42, y: 25, pop: 183, big: false },
+  { name: "Paranaguá", x: 72, y: 22, pop: 157, big: false },
+  { name: "Toledo", x: 24, y: 18, pop: 142, big: false },
+  { name: "Apucarana", x: 46, y: 12, pop: 136, big: false },
+  { name: "Pato Branco", x: 30, y: 28, pop: 83, big: false },
+  // SC - grandes
+  { name: "Joinville", x: 68, y: 36, pop: 604, big: true },
+  { name: "Florianópolis", x: 72, y: 45, pop: 516, big: true },
+  { name: "Blumenau", x: 64, y: 40, pop: 365, big: true },
+  { name: "Chapecó", x: 34, y: 40, pop: 230, big: false },
+  { name: "Itajaí", x: 70, y: 39, pop: 227, big: false },
+  { name: "Criciúma", x: 62, y: 52, pop: 217, big: false },
+  { name: "Jaraguá do Sul", x: 66, y: 37, pop: 181, big: false },
+  { name: "Lages", x: 52, y: 44, pop: 158, big: false },
+  { name: "Balneário Camboriú", x: 69, y: 41, pop: 149, big: false },
+  // RS - grandes
+  { name: "Porto Alegre", x: 56, y: 68, pop: 1488, big: true },
+  { name: "Caxias do Sul", x: 50, y: 62, pop: 517, big: true },
+  { name: "Canoas", x: 55, y: 67, pop: 349, big: true },
+  { name: "Pelotas", x: 48, y: 82, pop: 343, big: true },
+  { name: "Santa Maria", x: 36, y: 72, pop: 285, big: false },
+  { name: "Gravataí", x: 57, y: 66, pop: 283, big: false },
+  { name: "Novo Hamburgo", x: 54, y: 64, pop: 249, big: false },
+  { name: "Passo Fundo", x: 42, y: 56, pop: 206, big: false },
+  { name: "Rio Grande", x: 50, y: 86, pop: 211, big: false },
+  { name: "Uruguaiana", x: 16, y: 76, pop: 130, big: false },
+  { name: "Bagé", x: 32, y: 82, pop: 122, big: false },
+  { name: "Erechim", x: 42, y: 52, pop: 107, big: false },
+  { name: "Santa Cruz do Sul", x: 44, y: 68, pop: 133, big: false },
+  { name: "Alegrete", x: 22, y: 78, pop: 78, big: false },
 ];
 
 const RPGMapBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Dark map base */}
-    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,8%)] via-[hsl(160,25%,10%)] to-[hsl(222,30%,6%)]" />
-    {/* State boundaries (simplified SVG paths for PR, SC, RS) */}
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-      {/* PR outline */}
-      <path d="M20,10 L75,10 L75,32 L20,32 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
-      <text x="50" y="8" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">PR</text>
-      {/* SC outline */}
-      <path d="M30,34 L78,34 L78,56 L30,56 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
-      <text x="55" y="36" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">SC</text>
-      {/* RS outline */}
-      <path d="M15,58 L70,58 L70,95 L15,95 Z" fill="none" stroke="hsl(152,30%,25%)" strokeWidth="0.3" opacity="0.4" />
-      <text x="42" y="60" fill="hsl(152,40%,40%)" fontSize="3" textAnchor="middle" opacity="0.5">RS</text>
-      {/* City pins */}
-      {southCities.map((c) => (
-        <g key={c.name}>
-          <circle cx={c.x} cy={c.y} r={c.pop ? 1.2 : 0.8} fill={c.pop ? "hsl(142,70%,50%)" : "hsl(0,70%,55%)"} opacity={c.pop ? 0.8 : 0.5}>
-            <animate attributeName="opacity" values={c.pop ? "0.8;0.5;0.8" : "0.5;0.3;0.5"} dur={`${3 + Math.random() * 2}s`} repeatCount="indefinite" />
-          </circle>
-          <text x={c.x} y={c.y - 2} fill="hsl(0,0%,80%)" fontSize="2" textAnchor="middle" opacity="0.6">{c.name}</text>
-        </g>
+    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,6%)] via-[hsl(160,20%,8%)] to-[hsl(222,30%,5%)]" />
+    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+      {/* Grid lines */}
+      {Array.from({ length: 20 }, (_, i) => (
+        <line key={`h${i}`} x1="0" y1={i * 5} x2="100" y2={i * 5} stroke="hsl(152,20%,15%)" strokeWidth="0.1" opacity="0.3" />
       ))}
-      {/* Connection lines between big cities */}
-      <line x1="62" y1="22" x2="68" y2="40" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
-      <line x1="68" y1="40" x2="72" y2="48" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
-      <line x1="72" y1="48" x2="58" y2="72" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.2" />
-      <line x1="48" y1="12" x2="62" y2="22" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.15" />
-      <line x1="58" y1="72" x2="52" y2="64" stroke="hsl(38,60%,40%)" strokeWidth="0.2" opacity="0.15" />
+      {Array.from({ length: 20 }, (_, i) => (
+        <line key={`v${i}`} x1={i * 5} y1="0" x2={i * 5} y2="100" stroke="hsl(152,20%,15%)" strokeWidth="0.1" opacity="0.3" />
+      ))}
+      {/* PR region */}
+      <path d="M15,6 L75,6 L75,30 L15,30 Z" fill="hsl(152,25%,10%)" fillOpacity="0.3" stroke="hsl(142,40%,30%)" strokeWidth="0.4" opacity="0.6" />
+      <text x="45" y="5" fill="hsl(142,50%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">PARANÁ</text>
+      {/* SC region */}
+      <path d="M28,32 L78,32 L78,54 L28,54 Z" fill="hsl(200,25%,10%)" fillOpacity="0.3" stroke="hsl(200,40%,30%)" strokeWidth="0.4" opacity="0.6" />
+      <text x="53" y="34" fill="hsl(200,50%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">SANTA CATARINA</text>
+      {/* RS region */}
+      <path d="M12,56 L68,56 L68,92 L12,92 Z" fill="hsl(270,20%,10%)" fillOpacity="0.3" stroke="hsl(270,30%,30%)" strokeWidth="0.4" opacity="0.6" />
+      <text x="40" y="58" fill="hsl(270,40%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">RIO GRANDE DO SUL</text>
+      {/* Connection routes */}
+      {[
+        [62, 18, 68, 36], [68, 36, 72, 45], [72, 45, 62, 52], [62, 52, 56, 68],
+        [44, 10, 62, 18], [56, 68, 50, 62], [50, 62, 42, 56], [38, 13, 44, 10],
+        [26, 20, 38, 13], [56, 68, 48, 82], [36, 72, 56, 68], [64, 40, 72, 45],
+      ].map(([x1, y1, x2, y2], i) => (
+        <line key={`route${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="hsl(38,50%,35%)" strokeWidth="0.15" opacity="0.25" strokeDasharray="1,1" />
+      ))}
+      {/* City pins */}
+      {southCities.map((c) => {
+        const r = c.pop > 500 ? 1.6 : c.pop > 200 ? 1.1 : 0.7;
+        const isHigh = c.pop > 200;
+        return (
+          <g key={c.name}>
+            {/* Glow for big cities */}
+            {c.big && <circle cx={c.x} cy={c.y} r={r * 3} fill={isHigh ? "hsl(142,70%,50%)" : "hsl(0,70%,50%)"} opacity="0.08" />}
+            <circle cx={c.x} cy={c.y} r={r} fill={isHigh ? "hsl(142,70%,55%)" : "hsl(0,65%,50%)"} opacity={isHigh ? 0.9 : 0.6}>
+              <animate attributeName="opacity" values={isHigh ? "0.9;0.6;0.9" : "0.6;0.35;0.6"} dur={`${3 + Math.random() * 2}s`} repeatCount="indefinite" />
+            </circle>
+            {/* Inner dot for capitals */}
+            {c.pop > 500 && <circle cx={c.x} cy={c.y} r={r * 0.4} fill="white" opacity="0.7" />}
+            <text x={c.x} y={c.y - r - 1} fill="hsl(0,0%,85%)" fontSize={c.big ? "1.8" : "1.4"} textAnchor="middle" opacity={c.big ? 0.8 : 0.5} fontWeight={c.big ? "bold" : "normal"}>{c.name}</text>
+          </g>
+        );
+      })}
+      {/* Legend */}
+      <circle cx="82" cy="90" r="1.2" fill="hsl(142,70%,55%)" opacity="0.9" />
+      <text x="85" y="91" fill="hsl(0,0%,70%)" fontSize="1.6" opacity="0.6">Alta pop.</text>
+      <circle cx="82" cy="94" r="0.7" fill="hsl(0,65%,50%)" opacity="0.6" />
+      <text x="85" y="95" fill="hsl(0,0%,70%)" fontSize="1.6" opacity="0.6">Baixa pop.</text>
     </svg>
-    {/* Atmospheric overlay */}
-    <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[hsl(222,30%,4%)] to-transparent opacity-80" />
+    <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[hsl(222,30%,4%)] to-transparent opacity-60" />
   </div>
 );
 

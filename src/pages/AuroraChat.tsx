@@ -268,34 +268,42 @@ const AuroraChat = () => {
         <AuroraClassSelector />
       </div>
 
-      {/* Messages area over map */}
-      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-3 space-y-3 pb-28">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-lg backdrop-blur-md ${
-              m.role === "user"
-                ? "bg-destructive/80 text-destructive-foreground rounded-br-sm"
-                : "bg-card/80 text-card-foreground border border-border rounded-bl-sm"
-            }`}>
-              <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0"><ReactMarkdown>{m.content}</ReactMarkdown></div>
-              {m.role === "assistant" && (
-                <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/30">
-                  <button onClick={() => speakText(m.content, false)} className="text-muted-foreground hover:text-destructive transition-colors">
-                    <Volume2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
+      {/* Messages area over map - hidden in map mode */}
+      {!mapMode ? (
+        <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-3 space-y-3 pb-28">
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-lg backdrop-blur-md ${
+                m.role === "user"
+                  ? "bg-destructive/80 text-destructive-foreground rounded-br-sm"
+                  : "bg-card/80 text-card-foreground border border-border rounded-bl-sm"
+              }`}>
+                <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+                {m.role === "assistant" && (
+                  <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/30">
+                    <button onClick={() => speakText(m.content, false)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        {isLoading && !messages.some(m => m.role === "assistant" && m.content === "") && (
-          <div className="flex justify-start">
-            <div className="bg-card/80 backdrop-blur-md rounded-2xl px-4 py-3 flex gap-1.5">
-              {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+          ))}
+          {isLoading && !messages.some(m => m.role === "assistant" && m.content === "") && (
+            <div className="flex justify-start">
+              <div className="bg-card/80 backdrop-blur-md rounded-2xl px-4 py-3 flex gap-1.5">
+                {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 relative z-10 flex items-center justify-center">
+          <button onClick={() => setMapMode(false)} className="absolute bottom-32 bg-card/90 backdrop-blur-md text-foreground px-6 py-3 rounded-full shadow-lg border border-border font-bold text-sm hover:bg-card transition-colors">
+            ⚔️ Voltar ao chat
+          </button>
+        </div>
+      )}
 
       {/* Listening indicator */}
       {isListening && (

@@ -232,6 +232,8 @@ const AuroraChat = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <ChatBackground agent="aurora" />
+
+      {/* Header */}
       <header className="flex-shrink-0 relative z-10 flex items-center gap-3 px-4 py-3 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -263,51 +265,75 @@ const AuroraChat = () => {
         <AuroraClassSelector />
       </div>
 
-      {/* Voice-only center */}
-      <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">
-        <div className="relative">
-          <div className={`absolute inset-0 rounded-full blur-2xl transition-opacity duration-700 ${isSpeaking ? "opacity-60 bg-destructive/40 scale-125" : "opacity-20 bg-destructive/20"}`} style={{ width: 160, height: 160, top: -16, left: -16 }} />
-          <img src={auroraWarriorAvatar} alt="Aurora" className={`w-32 h-32 rounded-full border-4 transition-all duration-500 ${isSpeaking ? "border-destructive shadow-2xl shadow-destructive/40 scale-105" : isListening ? "border-red-500 shadow-xl shadow-red-500/30" : "border-border"}`} />
-        </div>
-
-        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">Aurora <Swords className="w-5 h-5 text-destructive" /></h2>
-
-        {isSpeaking && (
-          <div className="flex items-end gap-1 h-10">
-            {[3, 5, 4, 6, 3, 5, 4, 3, 5, 6, 4, 3].map((h, i) => (
-              <span key={i} className="w-1 bg-destructive rounded-full animate-pulse" style={{ height: `${h * 5}px`, animationDelay: `${i * 80}ms`, animationDuration: "0.6s" }} />
-            ))}
-          </div>
-        )}
-
-        {isLoading && !isSpeaking && (
-          <div className="flex gap-2">
-            {[0, 150, 300].map(d => <span key={d} className="w-3 h-3 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-          </div>
-        )}
-
-        {isListening && (
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
-                <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/40">
-                  <Mic className="w-7 h-7 text-white" />
+      {/* Messages area over map */}
+      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-4 py-3 space-y-3 pb-28">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-lg backdrop-blur-md ${
+              m.role === "user"
+                ? "bg-destructive/80 text-destructive-foreground rounded-br-sm"
+                : "bg-card/80 text-card-foreground border border-border rounded-bl-sm"
+            }`}>
+              <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0">{m.content}</ReactMarkdown>
+              {m.role === "assistant" && (
+                <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/30">
+                  <button onClick={() => speakText(m.content, false)} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              </div>
-              <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-red-400 animate-ping opacity-30" />
+              )}
             </div>
-            <p className="text-xs font-bold text-red-500">⚔️ Fale, guerreiro!</p>
           </div>
-        )}
-
-        {!isSpeaking && !isLoading && !isListening && (
-          <button onClick={() => startListeningWithTimeout()} className="w-20 h-20 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center hover:bg-red-500/20 active:scale-95 transition-all">
-            <Mic className="w-8 h-8 text-red-600 dark:text-red-400" />
-          </button>
+        ))}
+        {isLoading && !messages.some(m => m.role === "assistant" && m.content === "") && (
+          <div className="flex justify-start">
+            <div className="bg-card/80 backdrop-blur-md rounded-2xl px-4 py-3 flex gap-1.5">
+              {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-destructive animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+            </div>
+          </div>
         )}
       </div>
 
-      <FooterNav stateAbbr={state || ""} cityName={city || ""} />
+      {/* Listening indicator */}
+      {isListening && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 bg-card/90 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 shadow-lg border border-destructive/30">
+          <div className="w-3 h-3 rounded-full bg-destructive animate-pulse" />
+          <span className="text-xs font-bold text-destructive">⚔️ Ouvindo...</span>
+        </div>
+      )}
+
+      {/* Footer with Aurora icon center */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border">
+        <div className="max-w-md mx-auto flex items-center justify-around py-2 relative">
+          <RouterNavLink to={`/city/${state}/${city}`} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground hover:text-foreground">
+            <Home className="w-5 h-5" /><span className="text-[10px] font-bold">Início</span>
+          </RouterNavLink>
+          <RouterNavLink to={`/city/${state}/${city}/nearby`} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground hover:text-foreground">
+            <MapPin className="w-5 h-5" /><span className="text-[10px] font-bold">Ofertas</span>
+          </RouterNavLink>
+
+          {/* Aurora center icon - 80px, 10px above bottom */}
+          <button
+            onClick={() => { if (isListening) { stopListening(); } else { startListeningWithTimeout(); } }}
+            className="absolute left-1/2 -translate-x-1/2 -top-8 z-10"
+          >
+            <div className={`w-20 h-20 rounded-full border-4 border-card shadow-xl transition-all ${
+              isListening ? "ring-4 ring-destructive/50 scale-105" : isSpeaking ? "ring-4 ring-destructive/30 animate-pulse" : "hover:scale-105"
+            }`}>
+              <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full rounded-full object-cover" />
+            </div>
+          </button>
+
+          <div className="w-16" /> {/* spacer for center icon */}
+
+          <RouterNavLink to={`/city/${state}/${city}/merchant`} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground hover:text-foreground">
+            <Briefcase className="w-5 h-5" /><span className="text-[10px] font-bold">Comerciante</span>
+          </RouterNavLink>
+          <RouterNavLink to={`/city/${state}/${city}/wallet`} className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground hover:text-foreground">
+            <Coins className="w-5 h-5" /><span className="text-[10px] font-bold">Carteira</span>
+          </RouterNavLink>
+        </div>
+      </nav>
     </div>
   );
 };

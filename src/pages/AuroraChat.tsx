@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon, Swords } from "lucide-react";
-import FooterNav from "@/components/FooterNav";
+import { useParams, useNavigate, NavLink as RouterNavLink } from "react-router-dom";
+import { ArrowLeft, Volume2, VolumeX, Gauge, Sun, Moon, Home, MapPin, Briefcase, Coins } from "lucide-react";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";

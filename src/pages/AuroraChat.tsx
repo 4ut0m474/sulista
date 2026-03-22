@@ -249,9 +249,15 @@ const AuroraChat = () => {
         <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-2 rounded-full hover:bg-muted">
           <Gauge className="w-4 h-4 text-muted-foreground" />
         </button>
-        <button onClick={() => setMapMode(!mapMode)} className={`p-2 rounded-full transition-colors ${mapMode ? "bg-destructive/20 text-destructive" : "hover:bg-muted text-muted-foreground"}`} title={mapMode ? "Mostrar chat" : "Ver mapa"}>
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {mapMode ? (
+          <button onClick={() => setMapMode(false)} className="p-2 rounded-full bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors" title="Voltar ao chat">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        ) : (
+          <button onClick={() => setMapMode(true)} className="p-2 rounded-full hover:bg-muted text-muted-foreground" title="Ver mapa">
+            <MapPin className="w-4 h-4" />
+          </button>
+        )}
       </header>
 
       {showSpeedControl && (
@@ -298,11 +304,7 @@ const AuroraChat = () => {
           )}
         </div>
       ) : (
-        <div className="flex-1 relative z-10 flex items-center justify-center">
-          <button onClick={() => setMapMode(false)} className="absolute bottom-32 bg-card/90 backdrop-blur-md text-foreground px-6 py-3 rounded-full shadow-lg border border-border font-bold text-sm hover:bg-card transition-colors">
-            ⚔️ Voltar ao chat
-          </button>
-        </div>
+        <div className="flex-1 relative z-10" />
       )}
 
       {/* Listening indicator */}

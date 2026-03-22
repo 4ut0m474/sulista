@@ -28,6 +28,7 @@ import SubLocationDetail from "./pages/SubLocationDetail";
 import LitoraneaChat from "./pages/LitoraneaChat";
 import AutomataChat from "./pages/AutomataChat";
 import AuroraChat from "./pages/AuroraChat";
+import AuroraGame from "./pages/AuroraGame";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
 import AtivarPersistencia from "./pages/AtivarPersistencia";

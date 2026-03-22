@@ -1,14 +1,21 @@
-import { Sun, Moon, Sparkle } from "lucide-react";
+import { Sun, Moon, Swords } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
-import { useAurora } from "@/contexts/AuroraContext";
+import { useNavigate, useParams } from "react-router-dom";
 
 const LandingHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const { fontSize, cycleFontSize } = useFontSize();
-  const { isAurora, toggleAurora } = useAurora();
+  const navigate = useNavigate();
+  const { state, city } = useParams<{ state: string; city: string }>();
 
   const fontSizeScale = fontSize === "normal" ? "text-xs" : fontSize === "large" ? "text-sm" : "text-base";
+
+  const handleGame = () => {
+    const s = state || "PR";
+    const c = city || "Curitiba";
+    navigate(`/city/${s}/${c}/aurora/game`);
+  };
 
   return (
     <header className="absolute top-0 left-0 right-0 z-20 px-4 py-3">
@@ -26,18 +33,14 @@ const LandingHeader = () => {
           )}
         </button>
 
-        {/* Aurora / Espelho da Alma Toggle — center, bigger */}
+        {/* Game / Mapa RPG button — center */}
         <button
-          onClick={toggleAurora}
-          className={`w-14 h-14 rounded-full backdrop-blur-sm border-2 flex items-center justify-center shadow-lg transition-all ${
-            isAurora
-              ? "bg-secondary/90 border-secondary/60 shadow-gold scale-110"
-              : "bg-card/80 border-border/50 hover:bg-card hover:scale-105"
-          }`}
-          aria-label="Espelho da Alma"
-          title={isAurora ? "Voltar ao Vento Sul" : "Espelho da Alma – Aurora"}
+          onClick={handleGame}
+          className="w-14 h-14 rounded-full backdrop-blur-sm border-2 bg-secondary/90 border-secondary/60 shadow-lg flex items-center justify-center hover:scale-105 transition-all"
+          aria-label="Abrir Mapa do Jogo"
+          title="Mapa RPG — Aurora"
         >
-          <Sparkle className={`w-7 h-7 transition-colors ${isAurora ? "text-primary-foreground" : "text-secondary"}`} />
+          <Swords className="w-7 h-7 text-primary-foreground" />
         </button>
 
         {/* Font Size Toggle — right */}

@@ -249,9 +249,15 @@ const AuroraChat = () => {
         <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-2 rounded-full hover:bg-muted">
           <Gauge className="w-4 h-4 text-muted-foreground" />
         </button>
-        <button onClick={() => setMapMode(!mapMode)} className={`p-2 rounded-full transition-colors ${mapMode ? "bg-destructive/20 text-destructive" : "hover:bg-muted text-muted-foreground"}`} title={mapMode ? "Mostrar chat" : "Ver mapa"}>
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {mapMode ? (
+          <button onClick={() => setMapMode(false)} className="p-2 rounded-full bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors" title="Voltar ao chat">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        ) : (
+          <button onClick={() => setMapMode(true)} className="p-2 rounded-full hover:bg-muted text-muted-foreground" title="Ver mapa">
+            <MapPin className="w-4 h-4" />
+          </button>
+        )}
       </header>
 
       {showSpeedControl && (

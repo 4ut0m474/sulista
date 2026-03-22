@@ -67,56 +67,113 @@ const southCities = [
 
 const RPGMapBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,6%)] via-[hsl(160,20%,8%)] to-[hsl(222,30%,5%)]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,47%,8%)] via-[hsl(200,30%,10%)] to-[hsl(222,30%,6%)]" />
     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-      {/* Grid lines */}
-      {Array.from({ length: 20 }, (_, i) => (
-        <line key={`h${i}`} x1="0" y1={i * 5} x2="100" y2={i * 5} stroke="hsl(152,20%,15%)" strokeWidth="0.1" opacity="0.3" />
+      <defs>
+        <linearGradient id="prGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="hsl(142,45%,25%)" />
+          <stop offset="100%" stopColor="hsl(160,40%,18%)" />
+        </linearGradient>
+        <linearGradient id="scGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="hsl(200,50%,22%)" />
+          <stop offset="100%" stopColor="hsl(210,45%,16%)" />
+        </linearGradient>
+        <linearGradient id="rsGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="hsl(270,35%,22%)" />
+          <stop offset="100%" stopColor="hsl(280,30%,15%)" />
+        </linearGradient>
+        <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(210,60%,18%)" />
+          <stop offset="100%" stopColor="hsl(220,50%,12%)" />
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="0.8" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      {/* Ocean */}
+      <rect x="70" y="0" width="30" height="100" fill="url(#oceanGrad)" opacity="0.5" />
+
+      {/* PR */}
+      <path d="M18,8 L30,6 L45,7 L55,6 L65,8 L72,12 L75,18 L74,24 L70,28 L60,30 L50,29 L40,30 L30,28 L22,25 L18,20 L16,14 Z"
+        fill="url(#prGrad)" fillOpacity="0.6" stroke="hsl(142,50%,40%)" strokeWidth="0.5" />
+      <path d="M20,15 Q35,18 50,16 Q60,15 68,20" fill="none" stroke="hsl(200,60%,40%)" strokeWidth="0.2" opacity="0.4" />
+      <text x="45" y="5" fill="hsl(142,60%,55%)" fontSize="2.8" textAnchor="middle" fontWeight="bold" opacity="0.8" filter="url(#glow)">PARANÁ</text>
+
+      {/* SC */}
+      <path d="M30,32 L42,31 L55,32 L65,33 L74,36 L76,42 L74,48 L68,52 L58,53 L48,52 L38,50 L32,46 L30,40 Z"
+        fill="url(#scGrad)" fillOpacity="0.6" stroke="hsl(200,50%,40%)" strokeWidth="0.5" />
+      <text x="53" y="31" fill="hsl(200,60%,60%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.8" filter="url(#glow)">SANTA CATARINA</text>
+
+      {/* RS */}
+      <path d="M14,56 L28,55 L42,56 L55,57 L65,60 L66,68 L62,76 L55,82 L48,86 L40,88 L30,86 L22,82 L16,76 L14,68 Z"
+        fill="url(#rsGrad)" fillOpacity="0.6" stroke="hsl(270,40%,40%)" strokeWidth="0.5" />
+      <ellipse cx="49" cy="84" rx="3" ry="4" fill="hsl(210,50%,25%)" fillOpacity="0.4" stroke="hsl(200,50%,35%)" strokeWidth="0.2" />
+      <text x="40" y="55" fill="hsl(270,50%,60%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.8" filter="url(#glow)">RIO GRANDE DO SUL</text>
+
+      {/* Forests */}
+      {[[25,12],[35,14],[50,20],[60,16],[45,38],[55,44],[35,65],[45,70],[25,72]].map(([cx,cy], i) => (
+        <circle key={`forest${i}`} cx={cx} cy={cy} r={2.5} fill="hsl(140,40%,15%)" opacity="0.25" />
       ))}
-      {Array.from({ length: 20 }, (_, i) => (
-        <line key={`v${i}`} x1={i * 5} y1="0" x2={i * 5} y2="100" stroke="hsl(152,20%,15%)" strokeWidth="0.1" opacity="0.3" />
+
+      {/* Mountains */}
+      {[[58,24],[60,26],[56,22],[52,44],[54,46],[50,62],[48,64]].map(([cx,cy], i) => (
+        <polygon key={`mtn${i}`} points={`${cx},${cy-1.5} ${cx-1.2},${cy+0.8} ${cx+1.2},${cy+0.8}`} fill="hsl(30,20%,25%)" opacity="0.3" />
       ))}
-      {/* PR region */}
-      <path d="M15,6 L75,6 L75,30 L15,30 Z" fill="hsl(152,25%,10%)" fillOpacity="0.3" stroke="hsl(142,40%,30%)" strokeWidth="0.4" opacity="0.6" />
-      <text x="45" y="5" fill="hsl(142,50%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">PARANÁ</text>
-      {/* SC region */}
-      <path d="M28,32 L78,32 L78,54 L28,54 Z" fill="hsl(200,25%,10%)" fillOpacity="0.3" stroke="hsl(200,40%,30%)" strokeWidth="0.4" opacity="0.6" />
-      <text x="53" y="34" fill="hsl(200,50%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">SANTA CATARINA</text>
-      {/* RS region */}
-      <path d="M12,56 L68,56 L68,92 L12,92 Z" fill="hsl(270,20%,10%)" fillOpacity="0.3" stroke="hsl(270,30%,30%)" strokeWidth="0.4" opacity="0.6" />
-      <text x="40" y="58" fill="hsl(270,40%,50%)" fontSize="2.5" textAnchor="middle" fontWeight="bold" opacity="0.7">RIO GRANDE DO SUL</text>
-      {/* Connection routes */}
+
+      {/* Grid */}
+      {Array.from({ length: 10 }, (_, i) => (
+        <line key={`h${i}`} x1="0" y1={i * 10} x2="100" y2={i * 10} stroke="hsl(152,20%,20%)" strokeWidth="0.08" opacity="0.15" />
+      ))}
+      {Array.from({ length: 10 }, (_, i) => (
+        <line key={`v${i}`} x1={i * 10} y1="0" x2={i * 10} y2="100" stroke="hsl(152,20%,20%)" strokeWidth="0.08" opacity="0.15" />
+      ))}
+
+      {/* Routes */}
       {[
         [62, 18, 68, 36], [68, 36, 72, 45], [72, 45, 62, 52], [62, 52, 56, 68],
         [44, 10, 62, 18], [56, 68, 50, 62], [50, 62, 42, 56], [38, 13, 44, 10],
         [26, 20, 38, 13], [56, 68, 48, 82], [36, 72, 56, 68], [64, 40, 72, 45],
       ].map(([x1, y1, x2, y2], i) => (
-        <line key={`route${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="hsl(38,50%,35%)" strokeWidth="0.15" opacity="0.25" strokeDasharray="1,1" />
+        <line key={`route${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="hsl(38,50%,40%)" strokeWidth="0.2" opacity="0.3" strokeDasharray="1,0.8" />
       ))}
+
       {/* City pins */}
       {southCities.map((c) => {
         const r = c.pop > 500 ? 1.6 : c.pop > 200 ? 1.1 : 0.7;
         const isHigh = c.pop > 200;
         return (
           <g key={c.name}>
-            {/* Glow for big cities */}
-            {c.big && <circle cx={c.x} cy={c.y} r={r * 3} fill={isHigh ? "hsl(142,70%,50%)" : "hsl(0,70%,50%)"} opacity="0.08" />}
-            <circle cx={c.x} cy={c.y} r={r} fill={isHigh ? "hsl(142,70%,55%)" : "hsl(0,65%,50%)"} opacity={isHigh ? 0.9 : 0.6}>
-              <animate attributeName="opacity" values={isHigh ? "0.9;0.6;0.9" : "0.6;0.35;0.6"} dur={`${3 + Math.random() * 2}s`} repeatCount="indefinite" />
+            {c.big && <circle cx={c.x} cy={c.y} r={r * 3} fill={isHigh ? "hsl(142,70%,50%)" : "hsl(0,70%,50%)"} opacity="0.1" />}
+            <circle cx={c.x} cy={c.y} r={r} fill={isHigh ? "hsl(142,70%,55%)" : "hsl(0,65%,50%)"} opacity={isHigh ? 0.9 : 0.65}>
+              <animate attributeName="opacity" values={isHigh ? "0.9;0.6;0.9" : "0.65;0.35;0.65"} dur={`${3 + Math.random() * 2}s`} repeatCount="indefinite" />
             </circle>
-            {/* Inner dot for capitals */}
             {c.pop > 500 && <circle cx={c.x} cy={c.y} r={r * 0.4} fill="white" opacity="0.7" />}
-            <text x={c.x} y={c.y - r - 1} fill="hsl(0,0%,85%)" fontSize={c.big ? "1.8" : "1.4"} textAnchor="middle" opacity={c.big ? 0.8 : 0.5} fontWeight={c.big ? "bold" : "normal"}>{c.name}</text>
+            <text x={c.x} y={c.y - r - 1} fill="hsl(0,0%,90%)" fontSize={c.big ? "1.8" : "1.3"} textAnchor="middle" opacity={c.big ? 0.85 : 0.5} fontWeight={c.big ? "bold" : "normal"}>{c.name}</text>
           </g>
         );
       })}
+
+      {/* Compass */}
+      <g transform="translate(88,12)" opacity="0.4">
+        <circle cx="0" cy="0" r="4" fill="none" stroke="hsl(38,50%,50%)" strokeWidth="0.3" />
+        <line x1="0" y1="-4" x2="0" y2="4" stroke="hsl(38,50%,50%)" strokeWidth="0.2" />
+        <line x1="-4" y1="0" x2="4" y2="0" stroke="hsl(38,50%,50%)" strokeWidth="0.2" />
+        <text x="0" y="-5" fill="hsl(38,60%,60%)" fontSize="1.8" textAnchor="middle" fontWeight="bold">N</text>
+        <text x="0" y="6.5" fill="hsl(38,60%,50%)" fontSize="1.4" textAnchor="middle">S</text>
+      </g>
+
       {/* Legend */}
-      <circle cx="82" cy="90" r="1.2" fill="hsl(142,70%,55%)" opacity="0.9" />
-      <text x="85" y="91" fill="hsl(0,0%,70%)" fontSize="1.6" opacity="0.6">Alta pop.</text>
-      <circle cx="82" cy="94" r="0.7" fill="hsl(0,65%,50%)" opacity="0.6" />
-      <text x="85" y="95" fill="hsl(0,0%,70%)" fontSize="1.6" opacity="0.6">Baixa pop.</text>
+      <g transform="translate(78,88)" opacity="0.6">
+        <rect x="0" y="0" width="20" height="11" rx="1" fill="hsl(222,30%,8%)" fillOpacity="0.7" stroke="hsl(38,30%,30%)" strokeWidth="0.2" />
+        <circle cx="3" cy="3" r="1.2" fill="hsl(142,70%,55%)" />
+        <text x="6" y="4" fill="hsl(0,0%,80%)" fontSize="1.5">Alta pop.</text>
+        <circle cx="3" cy="7" r="0.7" fill="hsl(0,65%,50%)" />
+        <text x="6" y="8" fill="hsl(0,0%,80%)" fontSize="1.5">Baixa pop.</text>
+      </g>
     </svg>
-    <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[hsl(222,30%,4%)] to-transparent opacity-60" />
+    <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[hsl(222,30%,4%)] to-transparent opacity-50" />
   </div>
 );
 

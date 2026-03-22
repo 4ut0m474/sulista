@@ -304,11 +304,7 @@ const AuroraChat = () => {
           )}
         </div>
       ) : (
-        <div className="flex-1 relative z-10 flex items-center justify-center">
-          <button onClick={() => setMapMode(false)} className="absolute bottom-32 bg-card/90 backdrop-blur-md text-foreground px-6 py-3 rounded-full shadow-lg border border-border font-bold text-sm hover:bg-card transition-colors">
-            ⚔️ Voltar ao chat
-          </button>
-        </div>
+        <div className="flex-1 relative z-10" />
       )}
 
       {/* Listening indicator */}

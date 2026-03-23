@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, X, ChevronUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { getSelectedClass, setSelectedClass, type AuroraClass } from "@/components/AgentIntroModal";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
@@ -13,6 +13,14 @@ import classSabio from "@/assets/class-sabio.png";
 import classAnciao from "@/assets/class-anciao.png";
 import classDesbravador from "@/assets/class-desbravador.png";
 import classAnao from "@/assets/class-anao.png";
+
+import faceGuerreiro from "@/assets/face-guerreiro.png";
+import faceMago from "@/assets/face-mago.png";
+import faceAprendiz from "@/assets/face-aprendiz.png";
+import faceSabio from "@/assets/face-sabio.png";
+import faceAnciao from "@/assets/face-anciao.png";
+import faceDesbravador from "@/assets/face-desbravador.png";
+import faceAnao from "@/assets/face-anao.png";
 
 type GuildPin = { name: string; x: number; y: number; population: number; state: string };
 
@@ -44,54 +52,56 @@ interface ClassInfo {
   label: string;
   emoji: string;
   image: string;
+  face: string;
   desc: string;
   buffs: string;
   quest: string;
   glowColor: string;
+  ringColor: string;
 }
 
 const classes: ClassInfo[] = [
   {
-    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro,
+    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro, face: faceGuerreiro,
     desc: "Protetor da guilda. Força bruta, honra e defesa. Serviços físicos pesados, recompensa imediata.",
     buffs: "+15% XP em missões de proteção", quest: "Defender 3 pontos do bairro",
-    glowColor: "shadow-red-500/60",
+    glowColor: "shadow-red-500/60", ringColor: "ring-red-500",
   },
   {
-    id: "mago", label: "Mago", emoji: "🔮", image: classMago,
+    id: "mago", label: "Mago", emoji: "🔮", image: classMago, face: faceMago,
     desc: "Mestre das artes arcanas. Robe azul fluido com capuz misterioso, energia controlada.",
     buffs: "+20% Mana em rituais", quest: "Encantar 5 objetos do bairro",
-    glowColor: "shadow-blue-500/60",
+    glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
-    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz,
-    desc: "Curioso e dedicado. Começo da jornada, cheio de potencial e vontade de aprender.",
+    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, face: faceAprendiz,
+    desc: "Curiosa e dedicada. Começo da jornada, cheia de potencial e vontade de aprender.",
     buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
-    glowColor: "shadow-yellow-400/60",
+    glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {
-    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio,
-    desc: "Conhecimento eterno. Guardião da sabedoria ancestral, guia dos perdidos.",
+    id: "sabio", label: "Sábia", emoji: "📖", image: classSabio, face: faceSabio,
+    desc: "Conhecimento eterno. Guardiã da sabedoria ancestral, guia dos perdidos.",
     buffs: "+25% em aprendizado", quest: "Ensinar 2 crianças",
-    glowColor: "shadow-green-500/60",
+    glowColor: "shadow-green-500/60", ringColor: "ring-green-500",
   },
   {
-    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao,
-    desc: "Guardião do passado. Líder espiritual, une as guildas com sabedoria milenar.",
+    id: "anciao", label: "Anciã", emoji: "👑", image: classAnciao, face: faceAnciao,
+    desc: "Guardiã do passado. Líder espiritual, une as guildas com sabedoria milenar.",
     buffs: "+30% Karma", quest: "Unir 4 guildas",
-    glowColor: "shadow-purple-500/60",
+    glowColor: "shadow-purple-500/60", ringColor: "ring-purple-500",
   },
   {
-    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador,
+    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador, face: faceDesbravador,
     desc: "Explorador destemido. Descobre novos caminhos e inspira outros a seguir.",
     buffs: "+15% Inspiração", quest: "Mapear 3 pontos novos",
-    glowColor: "shadow-orange-500/60",
+    glowColor: "shadow-orange-500/60", ringColor: "ring-orange-500",
   },
   {
-    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao,
+    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao, face: faceAnao,
     desc: "Guardião da terra. Forja ferramentas do lixo, transforma resíduos em recursos.",
     buffs: "+25% Reciclagem", quest: "Coletar 5kg de lixo útil",
-    glowColor: "shadow-amber-700/60",
+    glowColor: "shadow-amber-700/60", ringColor: "ring-amber-700",
   },
 ];
 
@@ -99,10 +109,11 @@ const AuroraGame = () => {
   const navigate = useNavigate();
   const [selectedClassState, setClassState] = useState<ClassId | null>(getSelectedClass());
   const [showClassPopup, setShowClassPopup] = useState<ClassId | null>(null);
-  const [xp, setXp] = useState(35);
-  const [mana, setMana] = useState(60);
-  const [karma, setKarma] = useState(45);
+  const [xp] = useState(35);
+  const [mana] = useState(60);
+  const [karma] = useState(45);
   const [auroraMsg, setAuroraMsg] = useState("");
+  const [showChat, setShowChat] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -146,20 +157,41 @@ const AuroraGame = () => {
   const popupClass = showClassPopup ? classes.find(c => c.id === showClassPopup) : null;
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-screen w-screen overflow-hidden relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
       <img src={rpgMapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/15" />
 
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-30 flex items-center gap-2 px-3 py-2">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full bg-card/80 backdrop-blur-sm">
-          <ArrowLeft className="w-5 h-5 text-foreground" />
+      {/* Header with back, class face icons, voice, and hide chat */}
+      <header className="absolute top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
+        <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm flex-shrink-0">
+          <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
-        <span className="text-sm font-bold text-white drop-shadow-lg">⚔️ Mapa de Guildas</span>
-        <div className="flex-1" />
+
+        {/* Class face icons row */}
+        <div className="flex-1 flex items-center justify-center gap-1.5 overflow-x-auto scrollbar-hide">
+          {classes.map((c) => (
+            <button key={c.id}
+              onClick={() => setShowClassPopup(showClassPopup === c.id ? null : c.id)}
+              className={`w-9 h-9 rounded-full overflow-hidden border-2 shadow-lg transition-all flex-shrink-0 ${
+                selectedClassState === c.id
+                  ? `${c.ringColor} ring-2 scale-110 border-white`
+                  : "border-white/40 hover:scale-105"
+              }`}
+              title={c.label}>
+              <img src={c.face} alt={c.label} className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+
         <button onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setVoiceEnabled(!voiceEnabled); }}
-          className={`p-2 rounded-full backdrop-blur-sm ${voiceEnabled ? "bg-destructive/80 text-white" : "bg-card/80 text-muted-foreground"}`}>
-          {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          className={`p-1.5 rounded-full backdrop-blur-sm flex-shrink-0 ${voiceEnabled ? "bg-destructive/80 text-white" : "bg-card/80 text-muted-foreground"}`}>
+          {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+        </button>
+
+        {/* X button to hide/show chat */}
+        <button onClick={() => setShowChat(!showChat)}
+          className="p-1.5 rounded-full bg-white/80 backdrop-blur-sm flex-shrink-0">
+          {showChat ? <X className="w-3.5 h-3.5 text-black" /> : <ChevronUp className="w-3.5 h-3.5 text-black" />}
         </button>
       </header>
 
@@ -169,54 +201,33 @@ const AuroraGame = () => {
           onClick={() => {
             const msg = `${pin.name} (${pin.state}) — ${pin.population > 300 ? "Guilda forte!" : "Precisa de heróis!"} ${pin.population}+ guerreiros.`;
             setAuroraMsg(msg);
+            setShowChat(true);
             if (voiceEnabled) speakText(msg);
           }}>
           <div className={`${getPinSize(pin.population)} ${getPinColor(pin.population)} rounded-full shadow-lg animate-pulse`} />
-          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] whitespace-nowrap opacity-80">
             {pin.name}
           </span>
         </button>
       ))}
 
-      {/* Class icons carousel */}
-      <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-30 flex gap-2 overflow-x-auto max-w-[95vw] px-2">
-        {classes.map((c) => (
-          <button key={c.id}
-            onClick={() => setShowClassPopup(showClassPopup === c.id ? null : c.id)}
-            className={`w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md border-2 shadow-xl transition-all flex-shrink-0 ${
-              selectedClassState === c.id
-                ? "bg-secondary/90 border-secondary text-primary-foreground scale-110"
-                : "bg-card/80 border-border/60 text-foreground hover:scale-105"
-            }`}
-            title={c.label}>
-            <span className="text-lg">{c.emoji}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Full-body class popup */}
       {popupClass && (
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
-          
-          {/* Avatar full body - 70% da tela */}
           <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
             <img src={popupClass.image} alt={popupClass.label}
-              className={`h-full w-auto object-contain drop-shadow-2xl ${popupClass.glowColor}`}
+              className={`h-full w-auto object-contain drop-shadow-2xl`}
               style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />
           </div>
-
-          {/* Card descrição RPG */}
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xl">{popupClass.emoji}</span>
+              <img src={popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
               <h3 className="font-bold text-foreground text-base">{popupClass.label}</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-2">{popupClass.desc}</p>
             <div className="text-xs text-accent font-semibold mb-1">🛡️ Buff: {popupClass.buffs}</div>
             <div className="text-xs text-destructive font-semibold mb-2">⚔️ Quest: {popupClass.quest}</div>
-
-            {/* Botão Escolher - pequeno, canto inferior direito */}
             <div className="flex justify-end">
               <button onClick={() => handleSelectClass(popupClass.id)}
                 className="px-4 py-1.5 rounded-md bg-white text-black border border-black text-xs font-bold hover:bg-gray-100 transition-colors">
@@ -227,8 +238,8 @@ const AuroraGame = () => {
         </div>
       )}
 
-      {/* Aurora floating message */}
-      {auroraMsg && !showClassPopup && (
+      {/* Aurora floating message - hideable */}
+      {auroraMsg && showChat && !showClassPopup && (
         <div className="absolute top-16 left-3 right-3 z-30 flex gap-2 items-start">
           <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
             <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
@@ -239,23 +250,29 @@ const AuroraGame = () => {
         </div>
       )}
 
-      {/* XP / Mana / Karma bars */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 bg-card/80 backdrop-blur-xl border-t border-border px-4 py-2">
-        <div className="max-w-md mx-auto space-y-1.5">
+      {/* XP / Mana / Karma bars - 85% transparent */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
+        <div className="max-w-md mx-auto space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-secondary w-12">⚡ XP</span>
-            <Progress value={xp} className="flex-1 h-2 bg-muted" />
-            <span className="text-[10px] font-bold text-muted-foreground w-8">{xp}%</span>
+            <span className="text-[10px] font-bold text-yellow-300 w-12 drop-shadow">⚡ XP</span>
+            <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <div className="h-full rounded-full bg-yellow-400/70 transition-all" style={{ width: `${xp}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-white/70 w-8">{xp}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-primary w-12">💧 Mana</span>
-            <Progress value={mana} className="flex-1 h-2 bg-muted" />
-            <span className="text-[10px] font-bold text-muted-foreground w-8">{mana}%</span>
+            <span className="text-[10px] font-bold text-blue-300 w-12 drop-shadow">💧 Mana</span>
+            <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <div className="h-full rounded-full bg-blue-400/70 transition-all" style={{ width: `${mana}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-white/70 w-8">{mana}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-accent w-12">✨ Karma</span>
-            <Progress value={karma} className="flex-1 h-2 bg-muted" />
-            <span className="text-[10px] font-bold text-muted-foreground w-8">{karma}%</span>
+            <span className="text-[10px] font-bold text-purple-300 w-12 drop-shadow">✨ Karma</span>
+            <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}>
+              <div className="h-full rounded-full bg-purple-400/70 transition-all" style={{ width: `${karma}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-white/70 w-8">{karma}%</span>
           </div>
         </div>
       </div>

@@ -46,6 +46,7 @@ const guildPins: GuildPin[] = [
 ];
 
 type ClassId = AuroraClass | "anao";
+type Gender = "M" | "F";
 
 interface ClassInfo {
   id: ClassId;
@@ -69,25 +70,25 @@ const classes: ClassInfo[] = [
   },
   {
     id: "mago", label: "Mago", emoji: "🔮", image: classMago, face: faceMago,
-    desc: "Mestre das artes arcanas. Robe azul fluido com capuz misterioso, energia controlada.",
+    desc: "Mestre das artes arcanas. Energia controlada, conhecimento profundo.",
     buffs: "+20% Mana em rituais", quest: "Encantar 5 objetos do bairro",
     glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
     id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, face: faceAprendiz,
-    desc: "Curiosa e dedicada. Começo da jornada, cheia de potencial e vontade de aprender.",
+    desc: "Começo da jornada, cheio de potencial e vontade de aprender.",
     buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
     glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {
-    id: "sabio", label: "Sábia", emoji: "📖", image: classSabio, face: faceSabio,
-    desc: "Conhecimento eterno. Guardiã da sabedoria ancestral, guia dos perdidos.",
+    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, face: faceSabio,
+    desc: "Conhecimento eterno. Guardião da sabedoria ancestral, guia dos perdidos.",
     buffs: "+25% em aprendizado", quest: "Ensinar 2 crianças",
     glowColor: "shadow-green-500/60", ringColor: "ring-green-500",
   },
   {
-    id: "anciao", label: "Anciã", emoji: "👑", image: classAnciao, face: faceAnciao,
-    desc: "Guardiã do passado. Líder espiritual, une as guildas com sabedoria milenar.",
+    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, face: faceAnciao,
+    desc: "Guardião do passado. Líder espiritual, une as guildas com sabedoria milenar.",
     buffs: "+30% Karma", quest: "Unir 4 guildas",
     glowColor: "shadow-purple-500/60", ringColor: "ring-purple-500",
   },
@@ -108,7 +109,9 @@ const classes: ClassInfo[] = [
 const AuroraGame = () => {
   const navigate = useNavigate();
   const [selectedClassState, setClassState] = useState<ClassId | null>(getSelectedClass());
+  const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [showClassPopup, setShowClassPopup] = useState<ClassId | null>(null);
+  const [showGenderPicker, setShowGenderPicker] = useState<ClassId | null>(null);
   const [xp] = useState(35);
   const [mana] = useState(60);
   const [karma] = useState(45);
@@ -142,12 +145,15 @@ const AuroraGame = () => {
     } catch { setIsSpeaking(false); }
   };
 
-  const handleSelectClass = (cls: ClassId) => {
+  const handleSelectClass = (cls: ClassId, gender: Gender) => {
     setClassState(cls);
+    setSelectedGender(gender);
     if (cls !== "anao") setSelectedClass(cls as AuroraClass);
     setShowClassPopup(null);
+    setShowGenderPicker(null);
     const c = classes.find(c => c.id === cls);
-    const msg = `${c?.label} escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
+    const gLabel = gender === "M" ? "Masculino" : "Feminino";
+    const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
     setAuroraMsg(msg);
     if (voiceEnabled) speakText(msg);
   };
@@ -156,6 +162,7 @@ const AuroraGame = () => {
   const getPinSize = (pop: number) => pop >= 500 ? "w-4 h-4" : pop >= 250 ? "w-3 h-3" : "w-2.5 h-2.5";
 
   const popupClass = showClassPopup ? classes.find(c => c.id === showClassPopup) : null;
+  const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
     <div className="h-screen w-screen overflow-hidden relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
@@ -189,7 +196,7 @@ const AuroraGame = () => {
               <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-xl rounded-xl border border-border shadow-2xl p-2 flex flex-col gap-1 z-50 max-h-[50vh] overflow-y-auto w-44">
                 {classes.map((c) => (
                   <button key={c.id}
-                    onClick={() => { setClassDropdownOpen(false); setShowClassPopup(c.id); }}
+                    onClick={() => { setClassDropdownOpen(false); setShowGenderPicker(c.id); }}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedClassState === c.id ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"}`}>
                     <img src={c.face} alt="" className="w-7 h-7 rounded-full border border-border flex-shrink-0" />
                     <span>{c.label}</span>
@@ -233,26 +240,56 @@ const AuroraGame = () => {
         </button>
       ))}
 
-      {/* Full-body class popup */}
+      {/* Gender picker overlay */}
+      {genderPickerClass && !showClassPopup && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowGenderPicker(null); }}>
+          <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-4 shadow-2xl">
+            <h3 className="font-bold text-foreground text-base text-center mb-1">{genderPickerClass.label}</h3>
+            <p className="text-xs text-muted-foreground text-center mb-4">Escolha a versão:</p>
+            <div className="flex gap-4 justify-center">
+              {/* Male */}
+              <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                  <User className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <span className="text-xs font-semibold text-foreground">Masculino</span>
+              </button>
+              {/* Female */}
+              <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                  <User className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <span className="text-xs font-semibold text-foreground">Feminino</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-body class popup (after gender chosen) */}
       {popupClass && (
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
           <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
             <img src={popupClass.image} alt={popupClass.label}
-              className={`h-full w-auto object-contain drop-shadow-2xl`}
+              className="h-full w-auto object-contain drop-shadow-2xl"
               style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">
             <div className="flex items-center gap-2 mb-1">
               <img src={popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
               <h3 className="font-bold text-foreground text-base">{popupClass.label}</h3>
+              <span className="text-[10px] text-muted-foreground ml-auto">{selectedGender === "M" ? "♂ Masculino" : "♀ Feminino"}</span>
             </div>
             <p className="text-xs text-muted-foreground mb-2">{popupClass.desc}</p>
             <div className="text-xs text-accent font-semibold mb-1">🛡️ Buff: {popupClass.buffs}</div>
             <div className="text-xs text-destructive font-semibold mb-2">⚔️ Quest: {popupClass.quest}</div>
             <div className="flex justify-end">
-              <button onClick={() => handleSelectClass(popupClass.id)}
-                className="px-4 py-1.5 rounded-md bg-white text-black border border-black text-xs font-bold hover:bg-gray-100 transition-colors">
+              <button onClick={() => handleSelectClass(popupClass.id, selectedGender || "M")}
+                className="px-4 py-1.5 rounded-md bg-card text-foreground border border-border text-xs font-bold hover:bg-accent transition-colors">
                 Escolher
               </button>
             </div>
@@ -261,7 +298,7 @@ const AuroraGame = () => {
       )}
 
       {/* Aurora floating message - hideable */}
-      {auroraMsg && showChat && !showClassPopup && (
+      {auroraMsg && showChat && !showClassPopup && !showGenderPicker && (
         <div className="absolute top-16 left-3 right-3 z-30 flex gap-2 items-start">
           <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
             <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />

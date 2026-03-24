@@ -204,9 +204,11 @@ const AuroraGame = () => {
           <div className="relative">
             <button onClick={() => setClassDropdownOpen(!classDropdownOpen)}
               className="w-10 h-10 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
-              {selectedClassState ? (
-                <img src={classes.find(c => c.id === selectedClassState)?.face} alt="" className="w-full h-full rounded-full object-cover" />
-              ) : (
+              {selectedClassState ? (() => {
+                const cls = classes.find(c => c.id === selectedClassState);
+                const faceImg = selectedGender === "F" ? cls?.faceF : cls?.face;
+                return <img src={faceImg} alt="" className="w-full h-full rounded-full object-cover" />;
+              })() : (
                 <User className="w-5 h-5 text-white/80" />
               )}
             </button>

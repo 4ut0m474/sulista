@@ -14,6 +14,14 @@ import classAnciao from "@/assets/class-anciao.png";
 import classDesbravador from "@/assets/class-desbravador.png";
 import classAnao from "@/assets/class-anao.png";
 
+import classGuerreiroF from "@/assets/class-guerreiro-f.png";
+import classMagoF from "@/assets/class-mago-f.png";
+import classAprendizF from "@/assets/class-aprendiz-f.png";
+import classSabioF from "@/assets/class-sabio-f.png";
+import classAnciaoF from "@/assets/class-anciao-f.png";
+import classDesbravadorF from "@/assets/class-desbravador-f.png";
+import classAnaoF from "@/assets/class-anao-f.png";
+
 import faceGuerreiro from "@/assets/face-guerreiro.png";
 import faceMago from "@/assets/face-mago.png";
 import faceAprendiz from "@/assets/face-aprendiz.png";
@@ -21,6 +29,14 @@ import faceSabio from "@/assets/face-sabio.png";
 import faceAnciao from "@/assets/face-anciao.png";
 import faceDesbravador from "@/assets/face-desbravador.png";
 import faceAnao from "@/assets/face-anao.png";
+
+import faceGuerreiroF from "@/assets/face-guerreiro-f.png";
+import faceMagoF from "@/assets/face-mago-f.png";
+import faceAprendizF from "@/assets/face-aprendiz-f.png";
+import faceSabioF from "@/assets/face-sabio-f.png";
+import faceAnciaoF from "@/assets/face-anciao-f.png";
+import faceDesbravadorF from "@/assets/face-desbravador-f.png";
+import faceAnaoF from "@/assets/face-anao-f.png";
 
 type GuildPin = { name: string; x: number; y: number; population: number; state: string };
 
@@ -53,7 +69,9 @@ interface ClassInfo {
   label: string;
   emoji: string;
   image: string;
+  imageF: string;
   face: string;
+  faceF: string;
   desc: string;
   buffs: string;
   quest: string;
@@ -63,43 +81,43 @@ interface ClassInfo {
 
 const classes: ClassInfo[] = [
   {
-    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro, face: faceGuerreiro,
+    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro, imageF: classGuerreiroF, face: faceGuerreiro, faceF: faceGuerreiroF,
     desc: "Protetor da guilda. Força bruta, honra e defesa. Serviços físicos pesados, recompensa imediata.",
     buffs: "+15% XP em missões de proteção", quest: "Defender 3 pontos do bairro",
     glowColor: "shadow-red-500/60", ringColor: "ring-red-500",
   },
   {
-    id: "mago", label: "Mago", emoji: "🔮", image: classMago, face: faceMago,
+    id: "mago", label: "Mago", emoji: "🔮", image: classMago, imageF: classMagoF, face: faceMago, faceF: faceMagoF,
     desc: "Mestre das artes arcanas. Energia controlada, conhecimento profundo.",
     buffs: "+20% Mana em rituais", quest: "Encantar 5 objetos do bairro",
     glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
-    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, face: faceAprendiz,
+    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, imageF: classAprendizF, face: faceAprendiz, faceF: faceAprendizF,
     desc: "Começo da jornada, cheio de potencial e vontade de aprender.",
     buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
     glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {
-    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, face: faceSabio,
+    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, imageF: classSabioF, face: faceSabio, faceF: faceSabioF,
     desc: "Conhecimento eterno. Guardião da sabedoria ancestral, guia dos perdidos.",
     buffs: "+25% em aprendizado", quest: "Ensinar 2 crianças",
     glowColor: "shadow-green-500/60", ringColor: "ring-green-500",
   },
   {
-    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, face: faceAnciao,
+    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, imageF: classAnciaoF, face: faceAnciao, faceF: faceAnciaoF,
     desc: "Guardião do passado. Líder espiritual, une as guildas com sabedoria milenar.",
     buffs: "+30% Karma", quest: "Unir 4 guildas",
     glowColor: "shadow-purple-500/60", ringColor: "ring-purple-500",
   },
   {
-    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador, face: faceDesbravador,
+    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador, imageF: classDesbravadorF, face: faceDesbravador, faceF: faceDesbravadorF,
     desc: "Explorador destemido. Descobre novos caminhos e inspira outros a seguir.",
     buffs: "+15% Inspiração", quest: "Mapear 3 pontos novos",
     glowColor: "shadow-orange-500/60", ringColor: "ring-orange-500",
   },
   {
-    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao, face: faceAnao,
+    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao, imageF: classAnaoF, face: faceAnao, faceF: faceAnaoF,
     desc: "Guardião da terra. Forja ferramentas do lixo, transforma resíduos em recursos.",
     buffs: "+25% Reciclagem", quest: "Coletar 5kg de lixo útil",
     glowColor: "shadow-amber-700/60", ringColor: "ring-amber-700",
@@ -186,9 +204,11 @@ const AuroraGame = () => {
           <div className="relative">
             <button onClick={() => setClassDropdownOpen(!classDropdownOpen)}
               className="w-10 h-10 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
-              {selectedClassState ? (
-                <img src={classes.find(c => c.id === selectedClassState)?.face} alt="" className="w-full h-full rounded-full object-cover" />
-              ) : (
+              {selectedClassState ? (() => {
+                const cls = classes.find(c => c.id === selectedClassState);
+                const faceImg = selectedGender === "F" ? cls?.faceF : cls?.face;
+                return <img src={faceImg} alt="" className="w-full h-full rounded-full object-cover" />;
+              })() : (
                 <User className="w-5 h-5 text-white/80" />
               )}
             </button>
@@ -252,7 +272,7 @@ const AuroraGame = () => {
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <User className="w-10 h-10 text-muted-foreground" />
+                  <img src={genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Masculino</span>
               </button>
@@ -260,7 +280,7 @@ const AuroraGame = () => {
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <User className="w-10 h-10 text-muted-foreground" />
+                  <img src={genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>
@@ -274,13 +294,13 @@ const AuroraGame = () => {
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
           <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
-            <img src={popupClass.image} alt={popupClass.label}
+            <img src={selectedGender === "F" ? popupClass.imageF : popupClass.image} alt={popupClass.label}
               className="h-full w-auto object-contain drop-shadow-2xl"
               style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">
             <div className="flex items-center gap-2 mb-1">
-              <img src={popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
+              <img src={selectedGender === "F" ? popupClass.faceF : popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
               <h3 className="font-bold text-foreground text-base">{popupClass.label}</h3>
               <span className="text-[10px] text-muted-foreground ml-auto">{selectedGender === "M" ? "♂ Masculino" : "♀ Feminino"}</span>
             </div>

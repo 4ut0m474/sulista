@@ -109,7 +109,9 @@ const classes: ClassInfo[] = [
 const AuroraGame = () => {
   const navigate = useNavigate();
   const [selectedClassState, setClassState] = useState<ClassId | null>(getSelectedClass());
+  const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [showClassPopup, setShowClassPopup] = useState<ClassId | null>(null);
+  const [showGenderPicker, setShowGenderPicker] = useState<ClassId | null>(null);
   const [xp] = useState(35);
   const [mana] = useState(60);
   const [karma] = useState(45);

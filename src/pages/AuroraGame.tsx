@@ -14,6 +14,14 @@ import classAnciao from "@/assets/class-anciao.png";
 import classDesbravador from "@/assets/class-desbravador.png";
 import classAnao from "@/assets/class-anao.png";
 
+import classGuerreiroF from "@/assets/class-guerreiro-f.png";
+import classMagoF from "@/assets/class-mago-f.png";
+import classAprendizF from "@/assets/class-aprendiz-f.png";
+import classSabioF from "@/assets/class-sabio-f.png";
+import classAnciaoF from "@/assets/class-anciao-f.png";
+import classDesbravadorF from "@/assets/class-desbravador-f.png";
+import classAnaoF from "@/assets/class-anao-f.png";
+
 import faceGuerreiro from "@/assets/face-guerreiro.png";
 import faceMago from "@/assets/face-mago.png";
 import faceAprendiz from "@/assets/face-aprendiz.png";
@@ -21,6 +29,14 @@ import faceSabio from "@/assets/face-sabio.png";
 import faceAnciao from "@/assets/face-anciao.png";
 import faceDesbravador from "@/assets/face-desbravador.png";
 import faceAnao from "@/assets/face-anao.png";
+
+import faceGuerreiroF from "@/assets/face-guerreiro-f.png";
+import faceMagoF from "@/assets/face-mago-f.png";
+import faceAprendizF from "@/assets/face-aprendiz-f.png";
+import faceSabioF from "@/assets/face-sabio-f.png";
+import faceAnciaoF from "@/assets/face-anciao-f.png";
+import faceDesbravadorF from "@/assets/face-desbravador-f.png";
+import faceAnaoF from "@/assets/face-anao-f.png";
 
 type GuildPin = { name: string; x: number; y: number; population: number; state: string };
 

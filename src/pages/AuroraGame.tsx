@@ -196,7 +196,7 @@ const AuroraGame = () => {
               <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-xl rounded-xl border border-border shadow-2xl p-2 flex flex-col gap-1 z-50 max-h-[50vh] overflow-y-auto w-44">
                 {classes.map((c) => (
                   <button key={c.id}
-                    onClick={() => { setClassDropdownOpen(false); setShowClassPopup(c.id); }}
+                    onClick={() => { setClassDropdownOpen(false); setShowGenderPicker(c.id); }}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedClassState === c.id ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"}`}>
                     <img src={c.face} alt="" className="w-7 h-7 rounded-full border border-border flex-shrink-0" />
                     <span>{c.label}</span>

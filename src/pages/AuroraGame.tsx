@@ -46,6 +46,7 @@ const guildPins: GuildPin[] = [
 ];
 
 type ClassId = AuroraClass | "anao";
+type Gender = "M" | "F";
 
 interface ClassInfo {
   id: ClassId;
@@ -69,25 +70,25 @@ const classes: ClassInfo[] = [
   },
   {
     id: "mago", label: "Mago", emoji: "🔮", image: classMago, face: faceMago,
-    desc: "Mestre das artes arcanas. Robe azul fluido com capuz misterioso, energia controlada.",
+    desc: "Mestre das artes arcanas. Energia controlada, conhecimento profundo.",
     buffs: "+20% Mana em rituais", quest: "Encantar 5 objetos do bairro",
     glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
     id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, face: faceAprendiz,
-    desc: "Curiosa e dedicada. Começo da jornada, cheia de potencial e vontade de aprender.",
+    desc: "Começo da jornada, cheio de potencial e vontade de aprender.",
     buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
     glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {
-    id: "sabio", label: "Sábia", emoji: "📖", image: classSabio, face: faceSabio,
-    desc: "Conhecimento eterno. Guardiã da sabedoria ancestral, guia dos perdidos.",
+    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, face: faceSabio,
+    desc: "Conhecimento eterno. Guardião da sabedoria ancestral, guia dos perdidos.",
     buffs: "+25% em aprendizado", quest: "Ensinar 2 crianças",
     glowColor: "shadow-green-500/60", ringColor: "ring-green-500",
   },
   {
-    id: "anciao", label: "Anciã", emoji: "👑", image: classAnciao, face: faceAnciao,
-    desc: "Guardiã do passado. Líder espiritual, une as guildas com sabedoria milenar.",
+    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, face: faceAnciao,
+    desc: "Guardião do passado. Líder espiritual, une as guildas com sabedoria milenar.",
     buffs: "+30% Karma", quest: "Unir 4 guildas",
     glowColor: "shadow-purple-500/60", ringColor: "ring-purple-500",
   },

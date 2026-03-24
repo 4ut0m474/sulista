@@ -81,43 +81,43 @@ interface ClassInfo {
 
 const classes: ClassInfo[] = [
   {
-    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro, face: faceGuerreiro,
+    id: "guerreiro", label: "Guerreiro", emoji: "🛡️", image: classGuerreiro, imageF: classGuerreiroF, face: faceGuerreiro, faceF: faceGuerreiroF,
     desc: "Protetor da guilda. Força bruta, honra e defesa. Serviços físicos pesados, recompensa imediata.",
     buffs: "+15% XP em missões de proteção", quest: "Defender 3 pontos do bairro",
     glowColor: "shadow-red-500/60", ringColor: "ring-red-500",
   },
   {
-    id: "mago", label: "Mago", emoji: "🔮", image: classMago, face: faceMago,
+    id: "mago", label: "Mago", emoji: "🔮", image: classMago, imageF: classMagoF, face: faceMago, faceF: faceMagoF,
     desc: "Mestre das artes arcanas. Energia controlada, conhecimento profundo.",
     buffs: "+20% Mana em rituais", quest: "Encantar 5 objetos do bairro",
     glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
-    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, face: faceAprendiz,
+    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, imageF: classAprendizF, face: faceAprendiz, faceF: faceAprendizF,
     desc: "Começo da jornada, cheio de potencial e vontade de aprender.",
     buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
     glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {
-    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, face: faceSabio,
+    id: "sabio", label: "Sábio", emoji: "📖", image: classSabio, imageF: classSabioF, face: faceSabio, faceF: faceSabioF,
     desc: "Conhecimento eterno. Guardião da sabedoria ancestral, guia dos perdidos.",
     buffs: "+25% em aprendizado", quest: "Ensinar 2 crianças",
     glowColor: "shadow-green-500/60", ringColor: "ring-green-500",
   },
   {
-    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, face: faceAnciao,
+    id: "anciao", label: "Ancião", emoji: "👑", image: classAnciao, imageF: classAnciaoF, face: faceAnciao, faceF: faceAnciaoF,
     desc: "Guardião do passado. Líder espiritual, une as guildas com sabedoria milenar.",
     buffs: "+30% Karma", quest: "Unir 4 guildas",
     glowColor: "shadow-purple-500/60", ringColor: "ring-purple-500",
   },
   {
-    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador, face: faceDesbravador,
+    id: "desbravador", label: "Desbravador", emoji: "🗺️", image: classDesbravador, imageF: classDesbravadorF, face: faceDesbravador, faceF: faceDesbravadorF,
     desc: "Explorador destemido. Descobre novos caminhos e inspira outros a seguir.",
     buffs: "+15% Inspiração", quest: "Mapear 3 pontos novos",
     glowColor: "shadow-orange-500/60", ringColor: "ring-orange-500",
   },
   {
-    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao, face: faceAnao,
+    id: "anao" as ClassId, label: "Anão Forjador", emoji: "⛏️", image: classAnao, imageF: classAnaoF, face: faceAnao, faceF: faceAnaoF,
     desc: "Guardião da terra. Forja ferramentas do lixo, transforma resíduos em recursos.",
     buffs: "+25% Reciclagem", quest: "Coletar 5kg de lixo útil",
     glowColor: "shadow-amber-700/60", ringColor: "ring-amber-700",

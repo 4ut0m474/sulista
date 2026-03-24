@@ -145,12 +145,15 @@ const AuroraGame = () => {
     } catch { setIsSpeaking(false); }
   };
 
-  const handleSelectClass = (cls: ClassId) => {
+  const handleSelectClass = (cls: ClassId, gender: Gender) => {
     setClassState(cls);
+    setSelectedGender(gender);
     if (cls !== "anao") setSelectedClass(cls as AuroraClass);
     setShowClassPopup(null);
+    setShowGenderPicker(null);
     const c = classes.find(c => c.id === cls);
-    const msg = `${c?.label} escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
+    const gLabel = gender === "M" ? "Masculino" : "Feminino";
+    const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
     setAuroraMsg(msg);
     if (voiceEnabled) speakText(msg);
   };
@@ -159,6 +162,7 @@ const AuroraGame = () => {
   const getPinSize = (pop: number) => pop >= 500 ? "w-4 h-4" : pop >= 250 ? "w-3 h-3" : "w-2.5 h-2.5";
 
   const popupClass = showClassPopup ? classes.find(c => c.id === showClassPopup) : null;
+  const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
     <div className="h-screen w-screen overflow-hidden relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>

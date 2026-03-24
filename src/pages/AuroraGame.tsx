@@ -116,6 +116,7 @@ const AuroraGame = () => {
   const [showChat, setShowChat] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [classDropdownOpen, setClassDropdownOpen] = useState(false);
 
   const classLabel = selectedClassState ? classes.find(c => c.id === selectedClassState)?.label || "Guerreiro" : "Guerreiro";
 

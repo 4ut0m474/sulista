@@ -270,7 +270,7 @@ const AuroraGame = () => {
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <User className="w-10 h-10 text-muted-foreground" />
+                  <img src={genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Masculino</span>
               </button>
@@ -278,7 +278,7 @@ const AuroraGame = () => {
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <User className="w-10 h-10 text-muted-foreground" />
+                  <img src={genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>

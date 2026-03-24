@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2, VolumeX, X, ChevronUp } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, X, ChevronUp, User, Castle, Zap, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { getSelectedClass, setSelectedClass, type AuroraClass } from "@/components/AgentIntroModal";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
@@ -116,6 +116,7 @@ const AuroraGame = () => {
   const [showChat, setShowChat] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [classDropdownOpen, setClassDropdownOpen] = useState(false);
 
   const classLabel = selectedClassState ? classes.find(c => c.id === selectedClassState)?.label || "Guerreiro" : "Guerreiro";
 
@@ -167,20 +168,41 @@ const AuroraGame = () => {
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
 
-        {/* Class face icons row */}
-        <div className="flex-1 flex items-center justify-center gap-1.5 overflow-x-auto scrollbar-hide">
-          {classes.map((c) => (
-            <button key={c.id}
-              onClick={() => setShowClassPopup(showClassPopup === c.id ? null : c.id)}
-              className={`w-9 h-9 rounded-full overflow-hidden border-2 shadow-lg transition-all flex-shrink-0 ${
-                selectedClassState === c.id
-                  ? `${c.ringColor} ring-2 scale-110 border-white`
-                  : "border-white/40 hover:scale-105"
-              }`}
-              title={c.label}>
-              <img src={c.face} alt={c.label} className="w-full h-full object-cover" />
+        {/* Passado / Avatar Central / Futuro */}
+        <div className="flex-1 flex items-center justify-center gap-3">
+          {/* Passado */}
+          <button className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm" title="Passado">
+            <Castle className="w-4 h-4 text-amber-700" />
+          </button>
+
+          {/* Central class selector */}
+          <div className="relative">
+            <button onClick={() => setClassDropdownOpen(!classDropdownOpen)}
+              className="w-10 h-10 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
+              {selectedClassState ? (
+                <img src={classes.find(c => c.id === selectedClassState)?.face} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-white/80" />
+              )}
             </button>
-          ))}
+            {classDropdownOpen && (
+              <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-xl rounded-xl border border-border shadow-2xl p-2 flex flex-col gap-1 z-50 max-h-[50vh] overflow-y-auto w-44">
+                {classes.map((c) => (
+                  <button key={c.id}
+                    onClick={() => { setClassDropdownOpen(false); setShowClassPopup(c.id); }}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedClassState === c.id ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"}`}>
+                    <img src={c.face} alt="" className="w-7 h-7 rounded-full border border-border flex-shrink-0" />
+                    <span>{c.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Futuro */}
+          <button className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm" title="Futuro">
+            <Zap className="w-4 h-4 text-cyan-400" />
+          </button>
         </div>
 
         <button onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setVoiceEnabled(!voiceEnabled); }}

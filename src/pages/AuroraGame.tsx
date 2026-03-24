@@ -69,7 +69,9 @@ interface ClassInfo {
   label: string;
   emoji: string;
   image: string;
+  imageF: string;
   face: string;
+  faceF: string;
   desc: string;
   buffs: string;
   quest: string;

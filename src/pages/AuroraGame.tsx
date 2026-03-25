@@ -338,7 +338,7 @@ const AuroraGame = () => {
       )}
 
       {/* XP / Mana / Karma bars - 85% transparent */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
+      <div className="fixed bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
         <div className="max-w-md mx-auto space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-yellow-300 w-12 drop-shadow">⚡ XP</span>

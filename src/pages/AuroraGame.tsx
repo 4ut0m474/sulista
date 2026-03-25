@@ -7,6 +7,7 @@ import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import rpgMapPresent from "@/assets/rpg-map-present.jpg";
 import rpgMapPast from "@/assets/rpg-map-past.jpg";
 import rpgMapFuture from "@/assets/rpg-map-future.jpg";
+import { eraAvatars, eraClassNames, type EraId } from "@/data/auroraAvatars";
 
 import classGuerreiro from "@/assets/class-guerreiro.png";
 import classMago from "@/assets/class-mago.png";

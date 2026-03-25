@@ -194,7 +194,7 @@ const AuroraGame = () => {
       <div className="absolute inset-0 bg-black/15" />
 
       {/* Header with back, class face icons, voice, and hide chat */}
-      <header className="absolute top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm flex-shrink-0">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>

@@ -327,7 +327,7 @@ const AuroraGame = () => {
 
       {/* Aurora floating message - hideable */}
       {auroraMsg && showChat && !showClassPopup && !showGenderPicker && (
-        <div className="absolute top-16 left-3 right-3 z-30 flex gap-2 items-start">
+        <div className="fixed top-16 left-3 right-3 z-30 flex gap-2 items-start">
           <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
             <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
           </div>

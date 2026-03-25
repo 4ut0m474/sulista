@@ -4,7 +4,9 @@ import { ArrowLeft, Volume2, VolumeX, X, ChevronUp, User, Castle, Zap, ChevronDo
 import { Progress } from "@/components/ui/progress";
 import { getSelectedClass, setSelectedClass, type AuroraClass } from "@/components/AgentIntroModal";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
-import rpgMapBg from "@/assets/rpg-map-sul.jpg";
+import rpgMapPresent from "@/assets/rpg-map-present.jpg";
+import rpgMapPast from "@/assets/rpg-map-past.jpg";
+import rpgMapFuture from "@/assets/rpg-map-future.jpg";
 
 import classGuerreiro from "@/assets/class-guerreiro.png";
 import classMago from "@/assets/class-mago.png";
@@ -138,6 +140,9 @@ const AuroraGame = () => {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
+  const [mapEra, setMapEra] = useState<"present" | "past" | "future">("present");
+
+  const mapBg = mapEra === "past" ? rpgMapPast : mapEra === "future" ? rpgMapFuture : rpgMapPresent;
 
   const classLabel = selectedClassState ? classes.find(c => c.id === selectedClassState)?.label || "Guerreiro" : "Guerreiro";
 
@@ -183,12 +188,13 @@ const AuroraGame = () => {
   const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-      <img src={rpgMapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
+    <div className="h-screen w-screen overflow-auto relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
+      <div className="relative w-full" style={{ minHeight: "180vh" }}>
+        <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 
       {/* Header with back, class face icons, voice, and hide chat */}
-      <header className="absolute top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm flex-shrink-0">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
@@ -196,8 +202,9 @@ const AuroraGame = () => {
         {/* Passado / Avatar Central / Futuro */}
         <div className="flex-1 flex items-center justify-center gap-3">
           {/* Passado */}
-          <button className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm" title="Passado">
-            <Castle className="w-4 h-4 text-amber-700" />
+          <button onClick={() => { setMapEra("past"); setAuroraMsg("Mapa do passado — castelos e vilas antigas!"); }}
+            className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "past" ? "bg-amber-600 text-white" : "bg-card/80"}`} title="Passado">
+            <Castle className="w-4 h-4" />
           </button>
 
           {/* Central class selector */}
@@ -227,8 +234,9 @@ const AuroraGame = () => {
           </div>
 
           {/* Futuro */}
-          <button className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm" title="Futuro">
-            <Zap className="w-4 h-4 text-cyan-400" />
+          <button onClick={() => { setMapEra("future"); setAuroraMsg("Mapa do futuro — cidades flutuantes e neon!"); }}
+            className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "future" ? "bg-cyan-500 text-white" : "bg-card/80"}`} title="Futuro">
+            <Zap className="w-4 h-4" />
           </button>
         </div>
 
@@ -319,7 +327,7 @@ const AuroraGame = () => {
 
       {/* Aurora floating message - hideable */}
       {auroraMsg && showChat && !showClassPopup && !showGenderPicker && (
-        <div className="absolute top-16 left-3 right-3 z-30 flex gap-2 items-start">
+        <div className="fixed top-16 left-3 right-3 z-30 flex gap-2 items-start">
           <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
             <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
           </div>
@@ -330,7 +338,7 @@ const AuroraGame = () => {
       )}
 
       {/* XP / Mana / Karma bars - 85% transparent */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
+      <div className="fixed bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
         <div className="max-w-md mx-auto space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-yellow-300 w-12 drop-shadow">⚡ XP</span>
@@ -354,6 +362,7 @@ const AuroraGame = () => {
             <span className="text-[10px] font-bold text-white/70 w-8">{karma}%</span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

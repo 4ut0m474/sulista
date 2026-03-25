@@ -4,7 +4,9 @@ import { ArrowLeft, Volume2, VolumeX, X, ChevronUp, User, Castle, Zap, ChevronDo
 import { Progress } from "@/components/ui/progress";
 import { getSelectedClass, setSelectedClass, type AuroraClass } from "@/components/AgentIntroModal";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
-import rpgMapBg from "@/assets/rpg-map-sul.jpg";
+import rpgMapPresent from "@/assets/rpg-map-present.jpg";
+import rpgMapPast from "@/assets/rpg-map-past.jpg";
+import rpgMapFuture from "@/assets/rpg-map-future.jpg";
 
 import classGuerreiro from "@/assets/class-guerreiro.png";
 import classMago from "@/assets/class-mago.png";

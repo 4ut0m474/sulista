@@ -205,6 +205,7 @@ const AuroraGame = () => {
           <button onClick={() => { setMapEra("past"); setAuroraMsg("Mapa do passado — castelos e vilas antigas!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "past" ? "bg-amber-600 text-white" : "bg-card/80"}`} title="Passado">
             <Castle className="w-4 h-4" />
+          </button>
 
           {/* Central class selector */}
           <div className="relative">
@@ -236,6 +237,7 @@ const AuroraGame = () => {
           <button onClick={() => { setMapEra("future"); setAuroraMsg("Mapa do futuro — cidades flutuantes e neon!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "future" ? "bg-cyan-500 text-white" : "bg-card/80"}`} title="Futuro">
             <Zap className="w-4 h-4" />
+          </button>
         </div>
 
         <button onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setVoiceEnabled(!voiceEnabled); }}

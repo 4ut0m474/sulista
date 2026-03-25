@@ -303,14 +303,16 @@ const AuroraGame = () => {
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
           <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
-            <img src={selectedGender === "F" ? popupClass.imageF : popupClass.image} alt={popupClass.label}
-              className="h-full w-auto object-contain drop-shadow-2xl"
-              style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />
+            {(() => {
+              const eraAvatar = eraAvatars[mapEra]?.[popupClass.id as keyof typeof eraAvatars["present"]];
+              const avatarSrc = eraAvatar ? (selectedGender === "F" ? eraAvatar.f : eraAvatar.m) : (selectedGender === "F" ? popupClass.imageF : popupClass.image);
+              return <img src={avatarSrc} alt={popupClass.label} className="h-full w-auto object-contain drop-shadow-2xl" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />;
+            })()}
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">
             <div className="flex items-center gap-2 mb-1">
               <img src={selectedGender === "F" ? popupClass.faceF : popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
-              <h3 className="font-bold text-foreground text-base">{popupClass.label}</h3>
+              <h3 className="font-bold text-foreground text-base">{eraClassNames[mapEra]?.[popupClass.id as keyof typeof eraClassNames["present"]] || popupClass.label}</h3>
               <span className="text-[10px] text-muted-foreground ml-auto">{selectedGender === "M" ? "♂ Masculino" : "♀ Feminino"}</span>
             </div>
             <p className="text-xs text-muted-foreground mb-2">{popupClass.desc}</p>

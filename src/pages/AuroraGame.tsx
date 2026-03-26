@@ -161,7 +161,34 @@ const AuroraGame = () => {
     }
   }, []); // eslint-disable-line
 
-  const speakText = (text: string) => {
+  const stopListening = useCallback(() => {
+    if (micTimerRef.current) { clearTimeout(micTimerRef.current); micTimerRef.current = null; }
+    if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }
+    setIsListening(false);
+  }, []);
+
+  const startListening = useCallback((timeoutMs = 15000) => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    window.speechSynthesis.cancel(); setIsSpeaking(false);
+    stopListening();
+    const recognition = new SR();
+    recognition.lang = "pt-BR"; recognition.interimResults = false; recognition.continuous = false;
+    recognition.onresult = (e: any) => {
+      const text = e.results[0]?.[0]?.transcript?.trim();
+      if (text) {
+        setAuroraMsg(`Você disse: "${text}" — processando quest...`);
+      }
+    };
+    recognition.onerror = () => { setIsListening(false); };
+    recognition.onend = () => { setIsListening(false); if (micTimerRef.current) { clearTimeout(micTimerRef.current); micTimerRef.current = null; } };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+    micTimerRef.current = setTimeout(() => { recognition.stop(); }, timeoutMs);
+  }, [stopListening]);
+
+  const speakText = useCallback((text: string, autoMicAfter = false) => {
     if (!voiceEnabled) return;
     try {
       const synth = window.speechSynthesis;
@@ -171,11 +198,22 @@ const AuroraGame = () => {
       const v = synth.getVoices().find(v => v.lang.startsWith("pt-BR"));
       if (v) u.voice = v;
       u.onstart = () => setIsSpeaking(true);
-      u.onend = () => setIsSpeaking(false);
-      u.onerror = () => setIsSpeaking(false);
+      u.onend = () => { setIsSpeaking(false); if (autoMicAfter) setTimeout(() => startListening(15000), 400); };
+      u.onerror = () => { setIsSpeaking(false); };
       synth.speak(u);
     } catch { setIsSpeaking(false); }
-  };
+  }, [voiceEnabled, startListening]);
+
+  const handleMicButton = useCallback(() => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else if (isListening) {
+      stopListening();
+    } else {
+      startListening(15000);
+    }
+  }, [isSpeaking, isListening, stopListening, startListening]);
 
   const handleSelectClass = (cls: ClassId, gender: Gender) => {
     setClassState(cls);

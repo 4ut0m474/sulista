@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon, MessageSquareOff, MessageSquare } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import automataAvatar from "@/assets/automata-avatar.png";
 import ReactMarkdown from "react-markdown";
@@ -10,6 +10,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import ChatBackground from "@/components/chat/ChatBackground";
 import AutomataStatsPanel from "@/components/chat/AutomataStatsPanel";
+import AutomataChartsPanel from "@/components/chat/AutomataChartsPanel";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
@@ -60,6 +61,7 @@ const AutomataChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [showChat, setShowChat] = useState(true);
   const [ttsSpeed, setTtsSpeed] = useState(() => {
     const saved = parseFloat(localStorage.getItem(TTS_SPEED_KEY) || "1.0");
     return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
@@ -98,7 +100,7 @@ const AutomataChat = () => {
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.lang = "pt-BR";
       utterance.rate = ttsSpeed;
-      utterance.pitch = 0.9; // Lower pitch for Automata's serious tone
+      utterance.pitch = 0.9;
       const voices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const ptVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
       if (ptVoices[0]) utterance.voice = ptVoices[0];
@@ -147,6 +149,17 @@ const AutomataChat = () => {
     setIsListening(false);
   }, [clearAllMicTimers]);
 
+  const handleMicButton = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else if (isListening) {
+      stopListening();
+    } else {
+      startListeningWithTimeout();
+    }
+  };
+
   // Auto greet
   useEffect(() => {
     if (hasGreeted) return;
@@ -177,10 +190,7 @@ const AutomataChat = () => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          adminMode: false,
-          auroraMode: false,
-          automataMode: true,
-          userProfile: {},
+          adminMode: false, auroraMode: false, automataMode: true, userProfile: {},
         }),
       });
       if (!resp.ok || !resp.body) throw new Error("Erro na conexão");
@@ -228,25 +238,58 @@ const AutomataChat = () => {
 
   useEffect(() => { sendMessageRef.current = sendMessage; });
 
-  const remaining = DAILY_LIMIT - getUsageCount();
-
   return (
     <div className="h-screen flex flex-col overflow-hidden relative">
       <ChatBackground agent="automata" />
-      <header className="flex-shrink-0 relative z-10 flex items-center gap-3 px-4 py-3 bg-card/90 backdrop-blur-md border-b border-border">
+
+      {/* Header */}
+      <header className="flex-shrink-0 relative z-20 flex items-center gap-2 px-3 py-2 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <div className="flex-1" />
+
+        <div className="flex-1 flex items-center justify-center">
+          <div className="relative">
+            <img
+              src={automataAvatar}
+              alt="Automata"
+              className={`w-10 h-10 rounded-full border-2 transition-all ${isSpeaking ? "border-secondary shadow-lg shadow-secondary/40 scale-110" : "border-border"}`}
+            />
+            {isSpeaking && (
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-secondary animate-pulse" />
+            )}
+          </div>
+        </div>
+
+        <button onClick={() => setShowChat(!showChat)} className="p-2 rounded-full hover:bg-muted transition-colors" title={showChat ? "Esconder chat" : "Mostrar chat"}>
+          {showChat ? <MessageSquareOff className="w-4 h-4 text-muted-foreground" /> : <MessageSquare className="w-4 h-4 text-muted-foreground" />}
+        </button>
+
         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted transition-colors">
           {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
         </button>
+
         <button onClick={() => { if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); } setVoiceEnabled(!voiceEnabled); }}
           className={`p-2 rounded-full ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}>
           {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
         </button>
+
         <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-2 rounded-full hover:bg-muted">
           <Gauge className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+        {/* Mic button */}
+        <button
+          onClick={handleMicButton}
+          className={`p-2 rounded-full transition-all ${
+            isListening
+              ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/40"
+              : isSpeaking
+              ? "bg-destructive text-white"
+              : "bg-destructive/80 text-white hover:bg-destructive"
+          }`}
+        >
+          <Mic className="w-5 h-5" />
         </button>
       </header>
 
@@ -259,53 +302,85 @@ const AutomataChat = () => {
         </div>
       )}
 
-      {/* Stats panel */}
-      <div className="flex-shrink-0 relative z-10 bg-card/80 backdrop-blur-sm border-b border-border">
-        <AutomataStatsPanel />
-      </div>
-
-      {/* Voice-only center */}
-      <div className="flex-1 relative z-10 flex flex-col items-center justify-center gap-6">
-        <div className="relative">
-          <div className={`absolute inset-0 rounded-full blur-2xl transition-opacity duration-700 ${isSpeaking ? "opacity-60 bg-amber-500/40 scale-125" : "opacity-20 bg-amber-500/20"}`} style={{ width: 160, height: 160, top: -16, left: -16 }} />
-          <img src={automataAvatar} alt="Automata" className={`w-32 h-32 rounded-full border-4 transition-all duration-500 ${isSpeaking ? "border-amber-500 shadow-2xl shadow-amber-500/40 scale-105" : isListening ? "border-amber-600 shadow-xl shadow-amber-500/30" : "border-border"}`} />
+      {/* Main content: charts + chat overlay */}
+      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto">
+        {/* Charts always visible */}
+        <div className="p-3">
+          <AutomataChartsPanel />
         </div>
 
-        <h2 className="text-xl font-bold text-foreground">Automata</h2>
-
-        {isSpeaking && (
-          <div className="flex items-end gap-1 h-10">
-            {[3, 5, 4, 6, 3, 5, 4, 3, 5, 6, 4, 3].map((h, i) => (
-              <span key={i} className="w-1 bg-amber-500 rounded-full animate-pulse" style={{ height: `${h * 5}px`, animationDelay: `${i * 80}ms`, animationDuration: "0.6s" }} />
-            ))}
-          </div>
-        )}
-
-        {isLoading && !isSpeaking && (
-          <div className="flex gap-2">
-            {[0, 150, 300].map(d => <span key={d} className="w-3 h-3 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-          </div>
-        )}
-
-        {isListening && (
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-amber-500/20 flex items-center justify-center animate-pulse">
-                <div className="w-14 h-14 rounded-full bg-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/40">
-                  <Mic className="w-7 h-7 text-white" />
+        {/* Chat messages overlay */}
+        {showChat && (
+          <div className="px-3 pb-24 space-y-3">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 backdrop-blur-md shadow-md ${
+                  msg.role === "user"
+                    ? "bg-secondary/90 text-secondary-foreground rounded-br-sm"
+                    : "bg-card/90 text-card-foreground rounded-bl-sm border border-border/50"
+                }`}>
+                  <div className="text-sm leading-relaxed">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                  {/* Clickable options */}
+                  {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {msg.options.map((opt, j) => (
+                        <button
+                          key={j}
+                          onClick={() => sendMessage(opt)}
+                          className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95 transition-all"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-amber-400 animate-ping opacity-30" />
-            </div>
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-400">⚙️ Captando dados de voz...</p>
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-card/90 backdrop-blur-md rounded-2xl rounded-bl-sm px-4 py-3 border border-border/50">
+                  <div className="flex gap-1.5">
+                    {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-secondary animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isListening && (
+              <div className="flex justify-center">
+                <div className="bg-green-500/10 backdrop-blur-md rounded-full px-5 py-2 border border-green-500/30 flex items-center gap-2">
+                  <Mic className="w-4 h-4 text-green-500 animate-pulse" />
+                  <span className="text-xs font-medium text-green-600 dark:text-green-400">Escutando...</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
+      </div>
 
-        {!isSpeaking && !isLoading && !isListening && (
-          <button onClick={() => startListeningWithTimeout()} className="w-20 h-20 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center hover:bg-amber-500/20 active:scale-95 transition-all">
-            <Mic className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+      {/* Input bar */}
+      <div className="flex-shrink-0 relative z-20 px-3 py-2 bg-card/90 backdrop-blur-md border-t border-border">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && input.trim()) sendMessage(input); }}
+            placeholder="Digite ou fale..."
+            className="flex-1 bg-muted/50 border border-border rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <button
+            onClick={() => input.trim() && sendMessage(input)}
+            disabled={!input.trim() || isLoading}
+            className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 hover:bg-primary/90 active:scale-95 transition-all"
+          >
+            Enviar
           </button>
-        )}
+        </div>
       </div>
 
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />

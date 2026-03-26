@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2, VolumeX, X, ChevronUp, User, Castle, Zap, ChevronDown } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, X, ChevronUp, User, Castle, Zap, ChevronDown, Mic, Home, MicOff } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { getSelectedClass, setSelectedClass, type AuroraClass } from "@/components/AgentIntroModal";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";

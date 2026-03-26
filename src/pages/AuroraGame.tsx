@@ -153,7 +153,12 @@ const AuroraGame = () => {
   useEffect(() => {
     const msg = `E aí, ${classLabel}? Olha o mapa — guildas piscando em verde onde tem gente. Escolhe tua quest!`;
     setAuroraMsg(msg);
-    if (voiceEnabled) speakText(msg);
+    if (voiceEnabled) {
+      speakText(msg, true);
+    } else {
+      // Auto mic after 600ms if voice disabled
+      setTimeout(() => startListening(15000), 600);
+    }
   }, []); // eslint-disable-line
 
   const speakText = (text: string) => {

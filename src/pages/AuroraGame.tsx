@@ -140,8 +140,11 @@ const AuroraGame = () => {
   const [showChat, setShowChat] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
   const [mapEra, setMapEra] = useState<"present" | "past" | "future">("present");
+  const recognitionRef = useRef<any>(null);
+  const micTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const mapBg = mapEra === "past" ? rpgMapPast : mapEra === "future" ? rpgMapFuture : rpgMapPresent;
 

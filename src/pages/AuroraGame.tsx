@@ -241,33 +241,45 @@ const AuroraGame = () => {
       <div className="absolute inset-0 bg-black/15" />
 
       {/* Header with back, class face icons, voice, and hide chat */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center gap-1 px-2 py-2 bg-black/20 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 right-0 z-30 flex items-center gap-1.5 px-2 py-2 bg-black/20 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm flex-shrink-0">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
 
-        {/* Passado / Avatar Central / Futuro */}
-        <div className="flex-1 flex items-center justify-center gap-3">
+        {/* Era buttons + class selector + mic — centered */}
+        <div className="flex-1 flex items-center justify-center gap-2">
           {/* Passado */}
           <button onClick={() => { setMapEra("past"); setAuroraMsg("Mapa do passado — castelos e vilas antigas!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "past" ? "bg-amber-600 text-white" : "bg-card/80"}`} title="Passado">
             <Castle className="w-4 h-4" />
           </button>
 
+          {/* Presente */}
+          <button onClick={() => { setMapEra("present"); setAuroraMsg("Mapa do presente — explore sua cidade!"); }}
+            className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "present" ? "bg-green-600 text-white" : "bg-card/80"}`} title="Presente">
+            <Home className="w-4 h-4" />
+          </button>
+
+          {/* Futuro */}
+          <button onClick={() => { setMapEra("future"); setAuroraMsg("Mapa do futuro — cidades flutuantes e neon!"); }}
+            className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "future" ? "bg-cyan-500 text-white" : "bg-card/80"}`} title="Futuro">
+            <Zap className="w-4 h-4" />
+          </button>
+
           {/* Central class selector */}
           <div className="relative">
             <button onClick={() => setClassDropdownOpen(!classDropdownOpen)}
-              className="w-10 h-10 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
+              className="w-9 h-9 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
               {selectedClassState ? (() => {
                 const cls = classes.find(c => c.id === selectedClassState);
                 const faceImg = selectedGender === "F" ? cls?.faceF : cls?.face;
                 return <img src={faceImg} alt="" className="w-full h-full rounded-full object-cover" />;
               })() : (
-                <User className="w-5 h-5 text-white/80" />
+                <User className="w-4 h-4 text-white/80" />
               )}
             </button>
             {classDropdownOpen && (
-              <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-xl rounded-xl border border-border shadow-2xl p-2 flex flex-col gap-1 z-50 max-h-[50vh] overflow-y-auto w-44">
+              <div className="absolute top-11 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-xl rounded-xl border border-border shadow-2xl p-2 flex flex-col gap-1 z-50 max-h-[50vh] overflow-y-auto w-44">
                 {classes.map((c) => (
                   <button key={c.id}
                     onClick={() => { setClassDropdownOpen(false); setShowGenderPicker(c.id); }}
@@ -280,17 +292,15 @@ const AuroraGame = () => {
             )}
           </div>
 
-          {/* Futuro */}
-          <button onClick={() => { setMapEra("future"); setAuroraMsg("Mapa do futuro — cidades flutuantes e neon!"); }}
-            className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "future" ? "bg-cyan-500 text-white" : "bg-card/80"}`} title="Futuro">
-            <Zap className="w-4 h-4" />
+          {/* Mic button */}
+          <button onClick={handleMicButton}
+            className={`p-2 rounded-full backdrop-blur-sm flex-shrink-0 transition-colors ${
+              isListening ? "bg-green-500 text-white animate-pulse" : isSpeaking ? "bg-destructive/80 text-white animate-pulse" : "bg-destructive/80 text-white"
+            }`}
+            title={isSpeaking ? "Parar Aurora" : isListening ? "Escutando..." : "Ativar microfone"}>
+            {isListening ? <Mic className="w-4 h-4" /> : isSpeaking ? <VolumeX className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
           </button>
         </div>
-
-        <button onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setVoiceEnabled(!voiceEnabled); }}
-          className={`p-1.5 rounded-full backdrop-blur-sm flex-shrink-0 ${voiceEnabled ? "bg-destructive/80 text-white" : "bg-card/80 text-muted-foreground"}`}>
-          {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-        </button>
 
         {/* X button to hide/show chat */}
         <button onClick={() => setShowChat(!showChat)}

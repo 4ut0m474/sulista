@@ -236,7 +236,7 @@ const AuroraGame = () => {
 
   return (
     <div className="h-screen w-screen overflow-auto relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-      <div className="relative w-full" style={{ minHeight: "180vh" }}>
+      <div className="relative" style={{ minHeight: "180vh", minWidth: "1200px", width: "max-content" }}>
         <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 

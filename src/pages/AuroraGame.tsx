@@ -272,7 +272,8 @@ const AuroraGame = () => {
               className="w-9 h-9 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
               {selectedClassState ? (() => {
                 const cls = classes.find(c => c.id === selectedClassState);
-                const faceImg = selectedGender === "F" ? cls?.faceF : cls?.face;
+                const eraAvatar = eraAvatars[mapEra]?.[selectedClassState as keyof typeof eraAvatars["present"]];
+                const faceImg = eraAvatar ? (selectedGender === "F" ? eraAvatar.f : eraAvatar.m) : (selectedGender === "F" ? cls?.faceF : cls?.face);
                 return <img src={faceImg} alt="" className="w-full h-full rounded-full object-cover" />;
               })() : (
                 <User className="w-4 h-4 text-white/80" />

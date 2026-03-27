@@ -235,8 +235,8 @@ const AuroraGame = () => {
   const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
-    <div className="h-screen w-screen overflow-auto relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-      <div className="relative" style={{ minHeight: "180vh", minWidth: "1200px", width: "max-content" }}>
+    <div className="h-screen w-full overflow-auto relative touch-manipulation" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
+      <div className="relative w-full" style={{ minHeight: "180vh", minWidth: "1100px" }}>
         <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 

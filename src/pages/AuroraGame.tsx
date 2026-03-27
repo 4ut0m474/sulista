@@ -272,7 +272,8 @@ const AuroraGame = () => {
               className="w-9 h-9 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
               {selectedClassState ? (() => {
                 const cls = classes.find(c => c.id === selectedClassState);
-                const faceImg = selectedGender === "F" ? cls?.faceF : cls?.face;
+                const eraAvatar = eraAvatars[mapEra]?.[selectedClassState as keyof typeof eraAvatars["present"]];
+                const faceImg = eraAvatar ? (selectedGender === "F" ? eraAvatar.f : eraAvatar.m) : (selectedGender === "F" ? cls?.faceF : cls?.face);
                 return <img src={faceImg} alt="" className="w-full h-full rounded-full object-cover" />;
               })() : (
                 <User className="w-4 h-4 text-white/80" />
@@ -284,7 +285,7 @@ const AuroraGame = () => {
                   <button key={c.id}
                     onClick={() => { setClassDropdownOpen(false); setShowGenderPicker(c.id); }}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${selectedClassState === c.id ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"}`}>
-                    <img src={c.face} alt="" className="w-7 h-7 rounded-full border border-border flex-shrink-0" />
+                    <img src={eraAvatars[mapEra]?.[c.id as keyof typeof eraAvatars["present"]]?.m || c.face} alt="" className="w-7 h-7 rounded-full border border-border flex-shrink-0" />
                     <span>{c.label}</span>
                   </button>
                 ))}
@@ -337,15 +338,15 @@ const AuroraGame = () => {
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <img src={genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-xs font-semibold text-foreground">Masculino</span>
-              </button>
-              {/* Female */}
-              <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <img src={genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
+                 </div>
+                 <span className="text-xs font-semibold text-foreground">Masculino</span>
+               </button>
+               {/* Female */}
+               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
+                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                   <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>
@@ -367,7 +368,7 @@ const AuroraGame = () => {
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">
             <div className="flex items-center gap-2 mb-1">
-              <img src={selectedGender === "F" ? popupClass.faceF : popupClass.face} alt="" className="w-8 h-8 rounded-full border border-border" />
+              <img src={eraAvatars[mapEra]?.[popupClass.id as keyof typeof eraAvatars["present"]]?.[selectedGender === "F" ? "f" : "m"] || (selectedGender === "F" ? popupClass.faceF : popupClass.face)} alt="" className="w-8 h-8 rounded-full border border-border" />
               <h3 className="font-bold text-foreground text-base">{eraClassNames[mapEra]?.[popupClass.id as keyof typeof eraClassNames["present"]] || popupClass.label}</h3>
               <span className="text-[10px] text-muted-foreground ml-auto">{selectedGender === "M" ? "♂ Masculino" : "♀ Feminino"}</span>
             </div>

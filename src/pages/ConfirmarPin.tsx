@@ -50,6 +50,16 @@ const ConfirmarPin = () => {
           .update({ confirmado_email: true } as any)
           .eq("uid", uid);
 
+        // Create wallet with 1000 SulCoins
+        await supabase
+          .from("sulcoins" as any)
+          .upsert({ user_id: uid, saldo: 1000 } as any, { onConflict: "user_id" });
+
+        // Log the bonus
+        await supabase
+          .from("sulcoins_log" as any)
+          .insert({ user_id: uid, tipo: "signup_bonus", valor: 1000, descricao: "Bônus de boas-vindas: 1000 SulCoins" } as any);
+
         syncPersistenceLocalState({ userId: uid, status: "approved", verified: true });
         confirmPin();
       }
@@ -58,7 +68,7 @@ const ConfirmarPin = () => {
       localStorage.removeItem("pin");
       sessionStorage.removeItem("persistencia_uid");
 
-      toast.success("Persistência ativada com sucesso!");
+      toast.success("Persistência ativada! Você ganhou 1000 SulCoins 🎉");
       navigate("/");
     } catch (err: any) {
       console.error("Erro ao confirmar PIN:", err);

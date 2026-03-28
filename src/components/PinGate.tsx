@@ -1,8 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
 import PinLoginModal from "@/components/PinLoginModal";
-import { clearPersistenceLocalState } from "@/lib/persistence";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 /**
  * Renders a full-screen PIN gate when a persistent user opens the app
@@ -27,9 +24,7 @@ const PinGate = ({ children }: { children: React.ReactNode }) => {
           confirmPin();
         }}
         onCancel={() => {
-          clearPersistenceLocalState();
-          supabase.auth.signOut().catch(() => {});
-          toast("Modo anônimo ativado. Nenhum dado salvo.", { icon: "🔴" });
+          // No anonymous mode — user must enter PIN
         }}
       />
     );

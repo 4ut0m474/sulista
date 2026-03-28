@@ -83,18 +83,9 @@ const PinLoginModal = ({ open, onSuccess, onCancel }: PinLoginModalProps) => {
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             Verificar PIN
           </button>
-          <button
-            onClick={() => {
-              // Clear all persistence data — go fully anonymous
-              clearPersistenceLocalState();
-              supabase.auth.signOut().catch(() => {});
-              toast("Modo anônimo ativado. Nenhum dado salvo.", { icon: "🔴" });
-              onCancel();
-            }}
-            className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-          >
-            Cancelar e ficar anônimo
-          </button>
+          <p className="w-full text-center text-xs text-muted-foreground py-1">
+            Digite seu PIN para continuar
+          </p>
         </div>
       </div>
     </div>

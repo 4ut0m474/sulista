@@ -37,6 +37,7 @@ import CriarPin from "./pages/CriarPin";
 
 import ScrollToTop from "./components/ScrollToTop";
 import PinGate from "./components/PinGate";
+import PersistenceGuard from "./components/PersistenceGuard";
 
 const queryClient = new QueryClient();
 

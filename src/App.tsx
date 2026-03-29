@@ -36,8 +36,6 @@ import ConfirmarPin from "./pages/ConfirmarPin";
 import CriarPin from "./pages/CriarPin";
 
 import ScrollToTop from "./components/ScrollToTop";
-import PinGate from "./components/PinGate";
-import PersistenceGuard from "./components/PersistenceGuard";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +51,6 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
-              <PinGate>
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/city/:state/:city" element={<CityHome />} />
@@ -71,10 +68,10 @@ const App = () => (
                 
                 <Route path="/city/:state/:city/locations" element={<SubLocationsList />} />
                 <Route path="/city/:state/:city/local/:subLocation" element={<SubLocationDetail />} />
-                <Route path="/city/:state/:city/litoranea" element={<PersistenceGuard><LitoraneaChat /></PersistenceGuard>} />
-                <Route path="/city/:state/:city/automata" element={<PersistenceGuard><AutomataChat /></PersistenceGuard>} />
-                <Route path="/city/:state/:city/aurora" element={<PersistenceGuard><AuroraChat /></PersistenceGuard>} />
-                <Route path="/city/:state/:city/aurora/game" element={<PersistenceGuard><AuroraGame /></PersistenceGuard>} />
+                <Route path="/city/:state/:city/litoranea" element={<LitoraneaChat />} />
+                <Route path="/city/:state/:city/automata" element={<AutomataChat />} />
+                <Route path="/city/:state/:city/aurora" element={<AuroraChat />} />
+                <Route path="/city/:state/:city/aurora/game" element={<AuroraGame />} />
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
                 <Route path="/ativar-persistencia" element={<AtivarPersistencia />} />
@@ -82,7 +79,6 @@ const App = () => (
                 <Route path="/confirmar-pin" element={<ConfirmarPin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              </PinGate>
             </BrowserRouter>
           </TooltipProvider>
         </LanguageProvider>

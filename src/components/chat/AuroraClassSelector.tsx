@@ -3,7 +3,7 @@ import { type AuroraClass, getSelectedClass, setSelectedClass } from "@/componen
 import { useState } from "react";
 
 const classes: { id: AuroraClass; label: string; icon: React.ReactNode }[] = [
-  { id: "aprendiz", label: "Aprendiz", icon: <GraduationCap className="w-4 h-4" /> },
+  { id: "alquimista", label: "Alquimista", icon: <GraduationCap className="w-4 h-4" /> },
   { id: "guerreiro", label: "Guerreiro", icon: <Sword className="w-4 h-4" /> },
   { id: "mago", label: "Mago", icon: <Wand2 className="w-4 h-4" /> },
   { id: "sabio", label: "Sábio", icon: <Heart className="w-4 h-4" /> },

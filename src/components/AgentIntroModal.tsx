@@ -5,7 +5,7 @@ import litoraneaAvatar from "@/assets/litoranea-avatar.png";
 import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 
 export type AgentType = "automata" | "litoranea" | "aurora";
-export type AuroraClass = "aprendiz" | "desbravador" | "mago" | "guerreiro" | "anciao" | "sabio";
+export type AuroraClass = "alquimista" | "desbravador" | "mago" | "guerreiro" | "anciao" | "sabio";
 
 const INTRO_KEY = (agent: AgentType) => `agent_intro_seen_${agent}`;
 
@@ -78,7 +78,7 @@ Saio do digital e entro no mundo real — minhas ações são físicas. Aqui nã
 
 Escolha sua classe:
 
-• Aprendiz — rotina rígida: exercício, escova dentes, fruta, inglês, colégio. Sem refrigerante, nota baixa? Perde pontos. 3 anos mínimo pra prêmio final.
+• Alquimista — trabalha com plantas medicinais, poções, chás e cura natural. Transforma ingredientes da terra em saúde real.
 
 • Desbravador — explora, convida, espalha a notícia. Cada like = 10 pontos.
 
@@ -102,10 +102,10 @@ Escolhe tua classe abaixo!`,
 
 const auroraClasses: { id: AuroraClass; label: string; icon: React.ReactNode; desc: string; color: string }[] = [
   {
-    id: "aprendiz",
-    label: "Aprendiz",
+    id: "alquimista",
+    label: "Alquimista",
     icon: <GraduationCap className="w-5 h-5" />,
-    desc: "Rotina rígida: exercício, fruta, inglês, colégio. 3 anos = prêmio final.",
+    desc: "Plantas medicinais, poções, chás e cura natural. Transforma a terra em saúde.",
     color: "border-secondary/40 hover:bg-secondary/10",
   },
   {

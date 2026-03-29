@@ -47,7 +47,7 @@ import futureAnaoM from "@/assets/future-anao-m.png";
 import futureAnaoF from "@/assets/future-anao-f.png";
 
 export type EraId = "present" | "past" | "future";
-export type ClassId = "guerreiro" | "mago" | "aprendiz" | "sabio" | "anciao" | "desbravador" | "anao";
+export type ClassId = "guerreiro" | "mago" | "alquimista" | "sabio" | "anciao" | "desbravador" | "anao";
 
 interface EraAvatars {
   m: string;
@@ -60,7 +60,7 @@ export const eraAvatars: AvatarMap = {
   present: {
     guerreiro: { m: presentGuerreiroM, f: presentGuerreiroF },
     mago: { m: presentMagoM, f: presentMagoF },
-    aprendiz: { m: presentAprendizM, f: presentAprendizF },
+    alquimista: { m: presentAprendizM, f: presentAprendizF },
     sabio: { m: presentSabioM, f: presentSabioF },
     anciao: { m: presentAnciaoM, f: presentAnciaoF },
     desbravador: { m: presentDesbravadorM, f: presentDesbravadorF },
@@ -69,7 +69,7 @@ export const eraAvatars: AvatarMap = {
   past: {
     guerreiro: { m: pastGuerreiroM, f: pastGuerreiroF },
     mago: { m: pastMagoM, f: pastMagoF },
-    aprendiz: { m: pastAprendizM, f: pastAprendizF },
+    alquimista: { m: pastAprendizM, f: pastAprendizF },
     sabio: { m: pastSabioM, f: pastSabioF },
     anciao: { m: pastAnciaoM, f: pastAnciaoF },
     desbravador: { m: pastDesbravadorM, f: pastDesbravadorF },
@@ -78,7 +78,7 @@ export const eraAvatars: AvatarMap = {
   future: {
     guerreiro: { m: futureGuerreiroM, f: futureGuerreiroF },
     mago: { m: futureMagoM, f: futureMagoF },
-    aprendiz: { m: futureAprendizM, f: futureAprendizF },
+    alquimista: { m: futureAprendizM, f: futureAprendizF },
     sabio: { m: futureSabioM, f: futureSabioF },
     anciao: { m: futureAnciaoM, f: futureAnciaoF },
     desbravador: { m: futureDesbravadorM, f: futureDesbravadorF },
@@ -90,7 +90,7 @@ export const eraClassNames: Record<EraId, Record<ClassId, string>> = {
   present: {
     guerreiro: "Fighter Urbano",
     mago: "Mago Tech",
-    aprendiz: "Aprendiz Street",
+    alquimista: "Alquimista Urbano",
     sabio: "Sábio Moderno",
     anciao: "Ancião Elegante",
     desbravador: "Desbravador Urban",
@@ -99,7 +99,7 @@ export const eraClassNames: Record<EraId, Record<ClassId, string>> = {
   past: {
     guerreiro: "Cavaleiro",
     mago: "Feiticeiro",
-    aprendiz: "Escudeiro",
+    alquimista: "Alquimista Real",
     sabio: "Monge Sábio",
     anciao: "Rei Ancião",
     desbravador: "Patrulheiro",
@@ -108,7 +108,7 @@ export const eraClassNames: Record<EraId, Record<ClassId, string>> = {
   future: {
     guerreiro: "Soldado Cibernético",
     mago: "Mago Cibernético",
-    aprendiz: "Cadete Neon",
+    alquimista: "Bio-Alquimista",
     sabio: "Professor IA",
     anciao: "Android Ancião",
     desbravador: "Explorador Jet",

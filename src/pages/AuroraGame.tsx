@@ -96,9 +96,9 @@ const classes: ClassInfo[] = [
     glowColor: "shadow-blue-500/60", ringColor: "ring-blue-500",
   },
   {
-    id: "aprendiz", label: "Aprendiz", emoji: "🎒", image: classAprendiz, imageF: classAprendizF, face: faceAprendiz, faceF: faceAprendizF,
-    desc: "Começo da jornada, cheio de potencial e vontade de aprender.",
-    buffs: "+10% XP geral", quest: "Completar tutorial do bairro",
+    id: "alquimista" as ClassId, label: "Alquimista", emoji: "🧪", image: classAprendiz, imageF: classAprendizF, face: faceAprendiz, faceF: faceAprendizF,
+    desc: "Mestre das plantas medicinais, poções, chás e cura natural.",
+    buffs: "+20% Cura natural", quest: "Criar 3 poções de ervas",
     glowColor: "shadow-yellow-400/60", ringColor: "ring-yellow-400",
   },
   {

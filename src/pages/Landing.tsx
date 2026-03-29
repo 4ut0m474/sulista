@@ -49,11 +49,6 @@ const Landing = () => {
   const textSizeClass = fontSize === "large" ? "text-base" : fontSize === "extra-large" ? "text-lg" : "text-sm";
 
   const handleAgentClick = (agent: AgentType) => {
-    if (!isPersistent) {
-      toast("Crie sua persistência para conversar com as IAs", { icon: "🔒" });
-      navigate("/ativar-persistencia");
-      return;
-    }
     navigateToAgent(agent);
   };
 

@@ -451,6 +451,13 @@ const AuroraGame = () => {
         </div>
       </div>
       </div>
+      </div>
+      {/* Zoom buttons */}
+      <div className="fixed bottom-24 right-3 z-40 flex flex-col gap-2">
+        <button onClick={() => setMapScale(s => Math.min(3, s + 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">+</button>
+        <button onClick={() => setMapScale(s => Math.max(0.15, s - 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">−</button>
+        <button onClick={() => setMapScale(0.35)} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-[9px] shadow-lg">FIT</button>
+      </div>
     </div>
   );
 };

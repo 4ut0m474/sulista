@@ -36,7 +36,7 @@ const Landing = () => {
   const [introAgent, setIntroAgent] = useState<AgentType | null>(null);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
-  const { pinVerified, confirmPin } = useAuth();
+  
 
   const { states, citiesByState } = useLocalidades();
   const { isAurora } = useAurora();

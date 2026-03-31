@@ -304,7 +304,7 @@ const Landing = () => {
             </button>
 
             {/* SulCoins banner when persistent and verified */}
-            {isPersistent && pinVerified && selectedState && (
+            {isPersistent && selectedState && (
               <SulCoinsBanner onGoToWallet={() => {
                 // Navigate to first city wallet if a city is selected
                 const firstCity = cities[0];

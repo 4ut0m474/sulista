@@ -384,7 +384,7 @@ const Landing = () => {
           setPersistOpen(false);
           setIsPersistent(true);
           setPersistenceStatus("pending");
-          confirmPin();
+          
           if (userId) {
             syncPersistenceLocalState({ userId, status: "pending", verified: true });
           }

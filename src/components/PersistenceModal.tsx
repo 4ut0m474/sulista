@@ -165,9 +165,6 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
 
     setLoading(true);
     try {
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingPin, pin);
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingEmail, normalizedEmail);
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingPersist, "true");
 
       const { error } = await supabase.auth.signInWithOtp({
         email: normalizedEmail,

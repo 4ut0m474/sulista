@@ -143,8 +143,11 @@ const AuroraGame = () => {
   const [isListening, setIsListening] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
   const [mapEra, setMapEra] = useState<"present" | "past" | "future">("present");
+  const [mapScale, setMapScale] = useState(1);
   const recognitionRef = useRef<any>(null);
   const micTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
 
   const mapBg = mapEra === "past" ? rpgMapPast : mapEra === "future" ? rpgMapFuture : rpgMapPresent;
 

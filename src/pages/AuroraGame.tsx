@@ -164,6 +164,27 @@ const AuroraGame = () => {
     }
   }, []); // eslint-disable-line
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = { startDist: Math.hypot(dx, dy), startScale: mapScale };
+    }
+  }, [mapScale]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const newScale = Math.max(0.15, Math.min(3, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
+      setMapScale(newScale);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => { pinchRef.current = null; }, []);
+
   const stopListening = useCallback(() => {
     if (micTimerRef.current) { clearTimeout(micTimerRef.current); micTimerRef.current = null; }
     if (recognitionRef.current) { recognitionRef.current.stop(); recognitionRef.current = null; }

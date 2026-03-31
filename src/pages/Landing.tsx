@@ -315,7 +315,7 @@ const Landing = () => {
             )}
 
             {/* LGPD Delete button */}
-            {isPersistent && pinVerified && (
+            {isPersistent && (
               <button
                 onClick={() => setDeleteOpen(true)}
                 className="w-full rounded-2xl border border-destructive/30 bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-destructive/10"

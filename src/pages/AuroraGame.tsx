@@ -143,8 +143,11 @@ const AuroraGame = () => {
   const [isListening, setIsListening] = useState(false);
   const [classDropdownOpen, setClassDropdownOpen] = useState(false);
   const [mapEra, setMapEra] = useState<"present" | "past" | "future">("present");
+  const [mapScale, setMapScale] = useState(1);
   const recognitionRef = useRef<any>(null);
   const micTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
 
   const mapBg = mapEra === "past" ? rpgMapPast : mapEra === "future" ? rpgMapFuture : rpgMapPresent;
 
@@ -160,6 +163,27 @@ const AuroraGame = () => {
       setTimeout(() => startListening(15000), 600);
     }
   }, []); // eslint-disable-line
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = { startDist: Math.hypot(dx, dy), startScale: mapScale };
+    }
+  }, [mapScale]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const newScale = Math.max(0.15, Math.min(3, pinchRef.current.startScale * (dist / pinchRef.current.startDist)));
+      setMapScale(newScale);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => { pinchRef.current = null; }, []);
 
   const stopListening = useCallback(() => {
     if (micTimerRef.current) { clearTimeout(micTimerRef.current); micTimerRef.current = null; }
@@ -235,8 +259,11 @@ const AuroraGame = () => {
   const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
-    <div className="h-screen w-full overflow-auto relative" style={{ touchAction: "pan-x pan-y pinch-zoom" }}>
-      <div className="relative w-full" style={{ minHeight: "180vh", minWidth: "min(1100px, 300vw)" }}>
+    <div className="h-screen w-full overflow-auto relative" style={{ touchAction: "none" }}
+      onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+      ref={mapContainerRef}>
+      <div className="relative w-full" style={{ minHeight: `calc(180vh * ${mapScale})`, minWidth: `calc(min(1100px, 300vw) * ${mapScale})` }}>
+        <div style={{ transform: `scale(${mapScale})`, transformOrigin: "top left", minHeight: "180vh", minWidth: "min(1100px, 300vw)", position: "relative" }}>
         <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 
@@ -423,6 +450,13 @@ const AuroraGame = () => {
           </div>
         </div>
       </div>
+      </div>
+      </div>
+      {/* Zoom buttons */}
+      <div className="fixed bottom-24 right-3 z-40 flex flex-col gap-2">
+        <button onClick={() => setMapScale(s => Math.min(3, s + 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">+</button>
+        <button onClick={() => setMapScale(s => Math.max(0.15, s - 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">−</button>
+        <button onClick={() => setMapScale(0.35)} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-[9px] shadow-lg">FIT</button>
       </div>
     </div>
   );

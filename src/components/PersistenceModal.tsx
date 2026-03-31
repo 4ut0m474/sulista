@@ -89,9 +89,6 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
     // If not yet done/active, clear all persistence state
     if (step !== "done" && !isActive) {
       clearPersistenceLocalState();
-      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPin);
-      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingEmail);
-      sessionStorage.removeItem(PERSISTENCE_KEYS.pendingPersist);
     }
     resetState();
     onClose();
@@ -168,9 +165,6 @@ const PersistenceModal = ({ open, onClose, onSuccess }: PersistenceModalProps) =
 
     setLoading(true);
     try {
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingPin, pin);
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingEmail, normalizedEmail);
-      sessionStorage.setItem(PERSISTENCE_KEYS.pendingPersist, "true");
 
       const { error } = await supabase.auth.signInWithOtp({
         email: normalizedEmail,

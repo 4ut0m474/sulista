@@ -36,7 +36,7 @@ const Landing = () => {
   const [introAgent, setIntroAgent] = useState<AgentType | null>(null);
   const [isPersistent, setIsPersistent] = useState(getLocalPersistenceActive());
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceVerificationStatus | null>(getLocalPersistenceStatus());
-  const { pinVerified, confirmPin } = useAuth();
+  
 
   const { states, citiesByState } = useLocalidades();
   const { isAurora } = useAurora();
@@ -304,7 +304,7 @@ const Landing = () => {
             </button>
 
             {/* SulCoins banner when persistent and verified */}
-            {isPersistent && pinVerified && selectedState && (
+            {isPersistent && selectedState && (
               <SulCoinsBanner onGoToWallet={() => {
                 // Navigate to first city wallet if a city is selected
                 const firstCity = cities[0];
@@ -315,7 +315,7 @@ const Landing = () => {
             )}
 
             {/* LGPD Delete button */}
-            {isPersistent && pinVerified && (
+            {isPersistent && (
               <button
                 onClick={() => setDeleteOpen(true)}
                 className="w-full rounded-2xl border border-destructive/30 bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-destructive/10"
@@ -384,7 +384,7 @@ const Landing = () => {
           setPersistOpen(false);
           setIsPersistent(true);
           setPersistenceStatus("pending");
-          confirmPin();
+          
           if (userId) {
             syncPersistenceLocalState({ userId, status: "pending", verified: true });
           }

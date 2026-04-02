@@ -32,6 +32,7 @@ import AuroraGame from "./pages/AuroraGame";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
 import AtivarPersistencia from "./pages/AtivarPersistencia";
+import ConfirmarPersistencia from "./pages/ConfirmarPersistencia";
 
 import ScrollToTop from "./components/ScrollToTop";
 

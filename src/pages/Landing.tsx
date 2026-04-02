@@ -277,27 +277,27 @@ const Landing = () => {
             </p>
 
             <button
-              onClick={() => {
-                if (isPersistent) {
-                  setPersistOpen(true);
-                } else {
-                  navigate("/ativar-persistencia");
-                }
-              }}
-              className="w-full rounded-2xl border border-border bg-card/85 px-4 py-3 shadow-lg backdrop-blur-md transition-all hover:bg-card"
+              onClick={() => setPersistOpen(true)}
+              className={`w-full rounded-2xl border px-4 py-3 shadow-lg backdrop-blur-md transition-all ${
+                isPersistent
+                  ? "border-success/30 bg-success/10 hover:bg-success/15"
+                  : "border-border bg-card/85 hover:bg-card"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPersistent ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
                   <Lock className="h-5 w-5" />
                 </div>
                 <div className="flex-1 text-left">
-                  <span className="block text-sm font-black text-foreground">{isPersistent ? "Ligado" : "Persistência"}</span>
+                  <span className={`block text-sm font-black ${isPersistent ? "text-success" : "text-foreground"}`}>
+                    {isPersistent ? "Persistência Ativa" : "Ativar Persistência"}
+                  </span>
                   <span className="text-[10px] text-muted-foreground">
                     {isPersistent
                       ? persistenceStatus === "approved"
-                        ? "Verificação aprovada"
-                        : "Recebi! Aprovo em minutos"
-                      : "Crie PIN, confirme o e-mail e envie sua identidade"}
+                        ? "Verificação aprovada ✓"
+                        : "Dados salvos — em análise"
+                      : "Confirme nome, CPF e e-mail"}
                   </span>
                 </div>
               </div>

@@ -74,6 +74,7 @@ const App = () => (
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
                 <Route path="/ativar-persistencia" element={<AtivarPersistencia />} />
+                <Route path="/confirmar-persistencia" element={<ConfirmarPersistencia />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

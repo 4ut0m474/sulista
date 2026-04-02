@@ -32,6 +32,7 @@ import AuroraGame from "./pages/AuroraGame";
 import Wallet from "./pages/Wallet";
 import NearbyOffers from "./pages/NearbyOffers";
 import AtivarPersistencia from "./pages/AtivarPersistencia";
+import ConfirmarPersistencia from "./pages/ConfirmarPersistencia";
 
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/city/:state/:city/wallet" element={<Wallet />} />
                 <Route path="/city/:state/:city/nearby" element={<NearbyOffers />} />
                 <Route path="/ativar-persistencia" element={<AtivarPersistencia />} />
+                <Route path="/confirmar-persistencia" element={<ConfirmarPersistencia />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

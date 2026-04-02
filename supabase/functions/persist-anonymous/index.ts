@@ -5,8 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PIN_CREATE_REGEX = /^\d{6}$/;
-const PIN_VERIFY_REGEX = /^\d{4,6}$/;
 const DOCUMENT_REGEX = /^[0-9A-Za-z.\-/\s]+$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_IMAGE_LENGTH = 2_500_000;
@@ -17,14 +15,6 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-
-async function hashPin(pin: string, salt: string): Promise<string> {
-  const data = TEXT_ENCODER.encode(pin + salt);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 function normalizeSecret(secret: string) {
   const secretBytes = TEXT_ENCODER.encode(secret);
@@ -66,6 +56,14 @@ async function decryptText(value: string | null) {
   const data = Uint8Array.from(atob(dataEncoded), (char) => char.charCodeAt(0));
   const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
   return new TextDecoder().decode(decrypted);
+}
+
+async function hashText(text: string): Promise<string> {
+  const data = TEXT_ENCODER.encode(text.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 async function getAuthenticatedClients(authHeader: string) {
@@ -112,18 +110,15 @@ Deno.serve(async (req) => {
     const { authedClient, adminClient, user } = await getAuthenticatedClients(authHeader);
 
     if (action === "create") {
-      const pin = typeof payload.pin === "string" ? payload.pin : "";
       const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : user.email?.toLowerCase();
-
-      if (!PIN_CREATE_REGEX.test(pin)) {
-        return jsonResponse({ error: "PIN deve ter exatamente 6 dígitos" }, 400);
-      }
+      const fullName = typeof payload.fullName === "string" ? payload.fullName.trim() : "";
+      const cpf = typeof payload.cpf === "string" ? payload.cpf.replace(/\D/g, "") : "";
 
       if (!email) {
         return jsonResponse({ error: "E-mail não encontrado" }, 400);
       }
 
-      const pinHash = await hashPin(pin, user.id);
+      // Check existing verification
       const { data: existingVerification } = await adminClient
         .from("persistence_verifications")
         .select("verification_status, verified")
@@ -134,15 +129,20 @@ Deno.serve(async (req) => {
         ? existingVerification.verification_status
         : "identity_pending";
 
+      // Hash CPF for storage
+      const cpfHash = cpf ? await hashText(cpf) : "";
+
       const { error: verificationError } = await adminClient
         .from("persistence_verifications")
         .upsert(
           {
             user_id: user.id,
             email,
-            pin_hash: pinHash,
+            pin_hash: cpfHash || "no-pin",
             verification_status: nextStatus,
             verified: existingVerification?.verified ?? false,
+            ...(fullName ? { full_name_encrypted: await encryptText(fullName) } : {}),
+            ...(cpf ? { document_id_encrypted: await encryptText(cpf), document_type: "cpf" } : {}),
           },
           { onConflict: "user_id" },
         );
@@ -152,11 +152,22 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Erro ao salvar persistência" }, 500);
       }
 
-      await adminClient.from("anonymous_profiles").upsert(
-        { user_id: user.id, pin_hash: pinHash, updated_at: new Date().toISOString() },
-        { onConflict: "user_id" },
-      );
+      // Save to usuarios table too
+      if (fullName && cpfHash) {
+        await adminClient.from("usuarios").upsert(
+          {
+            uid: user.id,
+            nome: fullName,
+            cpf_hash: cpfHash,
+            aceitou_termos: true,
+            aceitou_privacidade: true,
+            confirmado_email: true,
+          },
+          { onConflict: "uid" },
+        );
+      }
 
+      // Create wallet if not exists
       const { data: existingWallet } = await adminClient
         .from("sulcoins")
         .select("user_id")
@@ -174,7 +185,7 @@ Deno.serve(async (req) => {
           user_id: user.id,
           tipo: "bonus_persistencia",
           valor: 50,
-          descricao: "Bônus de persistência - 0,50 SulC",
+          descricao: "Bônus de persistência - 50 SulCoins",
         });
       }
 
@@ -218,41 +229,6 @@ Deno.serve(async (req) => {
       }
 
       return jsonResponse({ uuid: user.id, email: user.email, status: "email_pending", verified: false });
-    }
-
-    if (action === "verify") {
-      const pin = typeof payload.pin === "string" ? payload.pin : "";
-      if (!PIN_VERIFY_REGEX.test(pin)) {
-        return jsonResponse({ error: "PIN inválido" }, 400);
-      }
-
-      const pinHash = await hashPin(pin, user.id);
-      const { data: verification } = await adminClient
-        .from("persistence_verifications")
-        .select("pin_hash, verification_status, verified")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (verification?.pin_hash === pinHash) {
-        return jsonResponse({
-          success: true,
-          valid: true,
-          status: verification.verification_status,
-          verified: verification.verified,
-        });
-      }
-
-      const { data: legacyProfile } = await adminClient
-        .from("anonymous_profiles")
-        .select("pin_hash")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (legacyProfile?.pin_hash === pinHash) {
-        return jsonResponse({ success: true, valid: true, status: "approved", verified: true });
-      }
-
-      return jsonResponse({ error: "PIN incorreto" }, 403);
     }
 
     if (action === "submit-identity") {

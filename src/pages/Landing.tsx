@@ -57,7 +57,7 @@ const Landing = () => {
     const nextCity = selectedState ? citiesByState[selectedState]?.[0] || "Curitiba" : "Curitiba";
     const base = `/city/${nextState}/${encodeURIComponent(nextCity)}`;
     if (agent === "automata") navigate(`${base}/automata`);
-    else if (agent === "aurora") navigate(`${base}/aurora`);
+    else if (agent === "aurora") navigate(`${base}/aurora/game`);
     else navigate(`${base}/litoranea`);
   };
 

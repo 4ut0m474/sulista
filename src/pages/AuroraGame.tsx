@@ -159,7 +159,6 @@ const AuroraGame = () => {
     if (voiceEnabled) {
       speakText(msg, true);
     } else {
-      // Auto mic after 600ms if voice disabled
       setTimeout(() => startListening(15000), 600);
     }
   }, []); // eslint-disable-line
@@ -259,41 +258,28 @@ const AuroraGame = () => {
   const genderPickerClass = showGenderPicker ? classes.find(c => c.id === showGenderPicker) : null;
 
   return (
-    <div className="h-screen w-full overflow-auto relative" style={{ touchAction: "none" }}
-      onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
-      ref={mapContainerRef}>
-      <div className="relative w-full" style={{ minHeight: `calc(180vh * ${mapScale})`, minWidth: `calc(min(1100px, 300vw) * ${mapScale})` }}>
-        <div style={{ transform: `scale(${mapScale})`, transformOrigin: "top left", minHeight: "180vh", minWidth: "min(1100px, 300vw)", position: "relative" }}>
-        <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-black/15" />
-
-      {/* Header with back, class face icons, voice, and hide chat */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center gap-1.5 px-2 py-2 bg-black/20 backdrop-blur-sm">
+    <div className="h-screen w-full flex flex-col overflow-hidden">
+      {/* FIXED HEADER — z-1000, never moves with map zoom */}
+      <header className="fixed top-0 left-0 right-0 z-[1000] flex items-center gap-1.5 px-2 py-2 bg-black/20 backdrop-blur-sm">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-card/80 backdrop-blur-sm flex-shrink-0">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
 
-        {/* Era buttons + class selector + mic — centered */}
         <div className="flex-1 flex items-center justify-center gap-2">
-          {/* Passado */}
           <button onClick={() => { setMapEra("past"); setAuroraMsg("Mapa do passado — castelos e vilas antigas!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "past" ? "bg-amber-600 text-white" : "bg-card/80"}`} title="Passado">
             <Castle className="w-4 h-4" />
           </button>
-
-          {/* Presente */}
           <button onClick={() => { setMapEra("present"); setAuroraMsg("Mapa do presente — explore sua cidade!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "present" ? "bg-green-600 text-white" : "bg-card/80"}`} title="Presente">
             <Home className="w-4 h-4" />
           </button>
-
-          {/* Futuro */}
           <button onClick={() => { setMapEra("future"); setAuroraMsg("Mapa do futuro — cidades flutuantes e neon!"); }}
             className={`p-1.5 rounded-full backdrop-blur-sm ${mapEra === "future" ? "bg-cyan-500 text-white" : "bg-card/80"}`} title="Futuro">
             <Zap className="w-4 h-4" />
           </button>
 
-          {/* Central class selector */}
+          {/* Class selector */}
           <div className="relative">
             <button onClick={() => setClassDropdownOpen(!classDropdownOpen)}
               className="w-9 h-9 rounded-full border-2 border-dashed border-white/70 bg-card/60 backdrop-blur-sm flex items-center justify-center">
@@ -330,50 +316,76 @@ const AuroraGame = () => {
           </button>
         </div>
 
-        {/* X button to hide/show chat */}
         <button onClick={() => setShowChat(!showChat)}
           className="p-1.5 rounded-full bg-white/80 backdrop-blur-sm flex-shrink-0">
           {showChat ? <X className="w-3.5 h-3.5 text-black" /> : <ChevronUp className="w-3.5 h-3.5 text-black" />}
         </button>
       </header>
 
-      {/* Guild pins */}
-      {guildPins.map((pin) => (
-        <button key={pin.name} className="absolute z-20 group" style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-          onClick={() => {
-            const msg = `${pin.name} (${pin.state}) — ${pin.population > 300 ? "Guilda forte!" : "Precisa de heróis!"} ${pin.population}+ guerreiros.`;
-            setAuroraMsg(msg);
-            setShowChat(true);
-            if (voiceEnabled) speakText(msg);
-          }}>
-          <div className={`${getPinSize(pin.population)} ${getPinColor(pin.population)} rounded-full shadow-lg animate-pulse`} />
-          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] whitespace-nowrap opacity-80">
-            {pin.name}
-          </span>
-        </button>
-      ))}
+      {/* FIXED CHAT BUBBLE — never moves with map zoom */}
+      {auroraMsg && showChat && !showClassPopup && !showGenderPicker && (
+        <div className="fixed top-12 left-3 right-3 z-[999] flex gap-2 items-start">
+          <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
+            <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
+          </div>
+          <div className="bg-card/90 backdrop-blur-md rounded-2xl rounded-tl-sm px-3 py-2 text-xs text-card-foreground shadow-lg border border-border flex-1">
+            {auroraMsg}
+          </div>
+        </div>
+      )}
 
-      {/* Gender picker overlay */}
+      {/* MAP CONTAINER — scrolls independently, zoom only here */}
+      <div
+        className="flex-1 overflow-auto"
+        style={{ marginTop: "48px", height: "calc(100vh - 48px)", touchAction: "none" }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        ref={mapContainerRef}
+      >
+        <div className="relative" style={{ width: `calc(min(1100px, 300vw) * ${mapScale})`, height: `calc(180vh * ${mapScale})` }}>
+          <div style={{ transform: `scale(${mapScale})`, transformOrigin: "top left", width: "min(1100px, 300vw)", height: "180vh", position: "relative" }}>
+            <img src={mapBg} alt="Mapa RPG do Sul" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/15" />
+
+            {/* Guild pins */}
+            {guildPins.map((pin) => (
+              <button key={pin.name} className="absolute z-20 group" style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                onClick={() => {
+                  const msg = `${pin.name} (${pin.state}) — ${pin.population > 300 ? "Guilda forte!" : "Precisa de heróis!"} ${pin.population}+ guerreiros.`;
+                  setAuroraMsg(msg);
+                  setShowChat(true);
+                  if (voiceEnabled) speakText(msg);
+                }}>
+                <div className={`${getPinSize(pin.population)} ${getPinColor(pin.population)} rounded-full shadow-lg animate-pulse`} />
+                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] whitespace-nowrap opacity-80">
+                  {pin.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FIXED OVERLAYS — gender picker & class popup */}
       {genderPickerClass && !showClassPopup && (
-        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
+        <div className="fixed inset-0 z-[1001] flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowGenderPicker(null); }}>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-4 shadow-2xl">
             <h3 className="font-bold text-foreground text-base text-center mb-1">{genderPickerClass.label}</h3>
             <p className="text-xs text-muted-foreground text-center mb-4">Escolha a versão:</p>
             <div className="flex gap-4 justify-center">
-              {/* Male */}
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
                   <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
-                 </div>
-                 <span className="text-xs font-semibold text-foreground">Masculino</span>
-               </button>
-               {/* Female */}
-               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
-                 className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
-                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                   <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-xs font-semibold text-foreground">Masculino</span>
+              </button>
+              <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>
@@ -382,9 +394,8 @@ const AuroraGame = () => {
         </div>
       )}
 
-      {/* Full-body class popup (after gender chosen) */}
       {popupClass && (
-        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
+        <div className="fixed inset-0 z-[1001] flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
           <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
             {(() => {
@@ -412,20 +423,8 @@ const AuroraGame = () => {
         </div>
       )}
 
-      {/* Aurora floating message - hideable */}
-      {auroraMsg && showChat && !showClassPopup && !showGenderPicker && (
-        <div className="fixed top-16 left-3 right-3 z-30 flex gap-2 items-start">
-          <div className={`w-10 h-10 rounded-full border-2 border-secondary shadow-lg flex-shrink-0 overflow-hidden ${isSpeaking ? "animate-pulse ring-2 ring-secondary/50" : ""}`}>
-            <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
-          </div>
-          <div className="bg-card/90 backdrop-blur-md rounded-2xl rounded-tl-sm px-3 py-2 text-xs text-card-foreground shadow-lg border border-border flex-1">
-            {auroraMsg}
-          </div>
-        </div>
-      )}
-
-      {/* XP / Mana / Karma bars - 85% transparent */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
+      {/* FIXED XP bars — bottom, never moves with zoom */}
+      <div className="fixed bottom-0 left-0 right-0 z-[1000] px-4 py-2" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}>
         <div className="max-w-md mx-auto space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-yellow-300 w-12 drop-shadow">⚡ XP</span>
@@ -450,10 +449,9 @@ const AuroraGame = () => {
           </div>
         </div>
       </div>
-      </div>
-      </div>
-      {/* Zoom buttons */}
-      <div className="fixed bottom-24 right-3 z-40 flex flex-col gap-2">
+
+      {/* FIXED Zoom buttons — never moves with zoom */}
+      <div className="fixed bottom-24 right-3 z-[1000] flex flex-col gap-2">
         <button onClick={() => setMapScale(s => Math.min(3, s + 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">+</button>
         <button onClick={() => setMapScale(s => Math.max(0.15, s - 0.2))} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-xl shadow-lg">−</button>
         <button onClick={() => setMapScale(0.35)} className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm text-foreground font-bold text-[9px] shadow-lg">FIT</button>

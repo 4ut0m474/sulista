@@ -1,15 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon, MessageSquareOff, MessageSquare } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import automataAvatar from "@/assets/automata-avatar.png";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
 import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import ChatBackground from "@/components/chat/ChatBackground";
-import AutomataStatsPanel from "@/components/chat/AutomataStatsPanel";
 import AutomataChartsPanel from "@/components/chat/AutomataChartsPanel";
 
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
@@ -61,7 +59,6 @@ const AutomataChat = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
-  const [showChat, setShowChat] = useState(true);
   const [ttsSpeed, setTtsSpeed] = useState(() => {
     const saved = parseFloat(localStorage.getItem(TTS_SPEED_KEY) || "1.0");
     return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
@@ -95,12 +92,9 @@ const AutomataChat = () => {
     autoMicAfterSpeakRef.current = activateMicAfter;
     try {
       setIsSpeaking(true);
-      const synth = window.speechSynthesis;
-      synth.cancel();
+      const synth = window.speechSynthesis; synth.cancel();
       const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = "pt-BR";
-      utterance.rate = ttsSpeed;
-      utterance.pitch = 0.9;
+      utterance.lang = "pt-BR"; utterance.rate = ttsSpeed; utterance.pitch = 0.9;
       const voices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const ptVoices = voices.filter(v => v.lang.startsWith("pt-BR"));
       if (ptVoices[0]) utterance.voice = ptVoices[0];
@@ -150,34 +144,38 @@ const AutomataChat = () => {
   }, [clearAllMicTimers]);
 
   const handleMicButton = () => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    } else if (isListening) {
-      stopListening();
-    } else {
-      startListeningWithTimeout();
-    }
+    if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); }
+    else if (isListening) { stopListening(); }
+    else { startListeningWithTimeout(); }
   };
 
-  // Auto greet
+  const restartChat = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    stopListening();
+    setMessages([]);
+    setHasGreeted(false);
+    setInput("");
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     if (hasGreeted) return;
     setHasGreeted(true);
     const greeting: Msg = {
       role: "assistant",
-      content: "Automata online. Dados limpos, sem mentira. ⚙️\n\nO que você quer analisar?",
-      options: ["📊 Meu histórico", "🏘️ Dados do bairro", "🍎 Meu equilíbrio saúde", "📈 Previsão de impacto"],
+      content: "Automata online. Dados limpos, sem mentira. ⚙️\n\nSou especialista em números, orçamento, planejamento financeiro e imposto de renda. O que você quer analisar?",
+      options: ["📊 Meu orçamento", "💰 Imposto de renda", "🏘️ Dados do bairro", "📈 Planejamento financeiro"],
     };
     setMessages([greeting]);
-    setTimeout(() => speakText("Automata online. Dados limpos, sem mentira. O que você quer analisar?", true), 600);
-  }, []); // eslint-disable-line
+    setTimeout(() => speakText("Automata online. Dados limpos, sem mentira. Sou especialista em números e planejamento financeiro. O que você quer analisar?", true), 600);
+  }, [hasGreeted]); // eslint-disable-line
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
     const remaining = DAILY_LIMIT - getUsageCount();
     if (remaining <= 0) {
-      setMessages(prev => [...prev, { role: "user", content: text }, { role: "assistant", content: "Limite diário atingido. Assine um plano para continuar." }]);
+      setMessages(prev => [...prev, { role: "user", content: text }, { role: "assistant", content: "Limite diário atingido. Assine um plano para continuar.", options: ["Ver planos 📋"] }]);
       return;
     }
     const userMsg: Msg = { role: "user", content: text };
@@ -194,10 +192,8 @@ const AutomataChat = () => {
         }),
       });
       if (!resp.ok || !resp.body) throw new Error("Erro na conexão");
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let done = false;
+      const reader = resp.body.getReader(); const decoder = new TextDecoder();
+      let buf = ""; let done = false;
       while (!done) {
         const { done: d, value } = await reader.read();
         if (d) { done = true; break; }
@@ -242,54 +238,48 @@ const AutomataChat = () => {
     <div className="h-screen flex flex-col overflow-hidden relative">
       <ChatBackground agent="automata" />
 
-      {/* Header */}
-      <header className="flex-shrink-0 relative z-20 flex items-center gap-2 px-3 py-2 bg-card/90 backdrop-blur-md border-b border-border">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-muted transition-colors">
-          <ArrowLeft className="w-5 h-5 text-foreground" />
+      {/* Header with avatar center */}
+      <header className="flex-shrink-0 relative z-20 flex items-center gap-1 px-2 py-1.5 bg-card/90 backdrop-blur-md border-b border-border">
+        <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+          <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
 
-        <div className="flex-1 flex items-center justify-center">
-          <div className="relative">
-            <img
-              src={automataAvatar}
-              alt="Automata"
-              className={`w-10 h-10 rounded-full border-2 transition-all ${isSpeaking ? "border-secondary shadow-lg shadow-secondary/40 scale-110" : "border-border"}`}
-            />
-            {isSpeaking && (
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-secondary animate-pulse" />
-            )}
-          </div>
-        </div>
-
-        <button onClick={() => setShowChat(!showChat)} className="p-2 rounded-full hover:bg-muted transition-colors" title={showChat ? "Esconder chat" : "Mostrar chat"}>
-          {showChat ? <MessageSquareOff className="w-4 h-4 text-muted-foreground" /> : <MessageSquare className="w-4 h-4 text-muted-foreground" />}
-        </button>
-
-        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-muted transition-colors">
-          {theme === "light" ? <Moon className="w-4 h-4 text-foreground" /> : <Sun className="w-4 h-4 text-secondary" />}
+        <button onClick={toggleTheme} className="p-1.5 rounded-full hover:bg-muted transition-colors">
+          {theme === "light" ? <Moon className="w-3.5 h-3.5 text-foreground" /> : <Sun className="w-3.5 h-3.5 text-secondary" />}
         </button>
 
         <button onClick={() => { if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); } setVoiceEnabled(!voiceEnabled); }}
-          className={`p-2 rounded-full ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}>
-          {voiceEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          className={`p-1.5 rounded-full ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}>
+          {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
         </button>
 
-        <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-2 rounded-full hover:bg-muted">
-          <Gauge className="w-4 h-4 text-muted-foreground" />
+        <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-1.5 rounded-full hover:bg-muted">
+          <Gauge className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
+
+        {/* Avatar center - click to restart */}
+        <div className="flex-1 flex items-center justify-center">
+          <button onClick={restartChat} className="relative" title="Reiniciar conversa">
+            <img
+              src={automataAvatar}
+              alt="Automata"
+              className={`w-9 h-9 rounded-full border-2 transition-all ${isSpeaking ? "border-secondary shadow-lg shadow-secondary/40 scale-110" : isListening ? "border-green-500 shadow-md shadow-green-500/30" : "border-border"}`}
+            />
+            {isSpeaking && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />}
+            {isListening && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />}
+          </button>
+        </div>
 
         {/* Mic button */}
         <button
           onClick={handleMicButton}
-          className={`p-2 rounded-full transition-all ${
-            isListening
-              ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/40"
-              : isSpeaking
-              ? "bg-destructive text-white"
-              : "bg-destructive/80 text-white hover:bg-destructive"
+          className={`p-1.5 rounded-full transition-all ${
+            isListening ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/40"
+            : isSpeaking ? "bg-destructive text-white"
+            : "bg-destructive/80 text-white hover:bg-destructive"
           }`}
         >
-          <Mic className="w-5 h-5" />
+          <Mic className="w-4 h-4" />
         </button>
       </header>
 
@@ -302,62 +292,55 @@ const AutomataChat = () => {
         </div>
       )}
 
-      {/* Main content: charts + chat overlay */}
-      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto">
-        {/* Charts always visible */}
-        <div className="p-3">
-          <AutomataChartsPanel />
-        </div>
+      {/* Chat messages - always visible */}
+      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-3 py-3 space-y-3">
+        {/* Charts panel */}
+        <AutomataChartsPanel />
 
-        {/* Chat messages overlay */}
-        {showChat && (
-          <div className="px-3 pb-24 space-y-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 backdrop-blur-md shadow-md ${
-                  msg.role === "user"
-                    ? "bg-secondary/90 text-secondary-foreground rounded-br-sm"
-                    : "bg-card/90 text-card-foreground rounded-bl-sm border border-border/50"
-                }`}>
-                  <div className="text-sm leading-relaxed">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                  {/* Clickable options */}
-                  {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {msg.options.map((opt, j) => (
-                        <button
-                          key={j}
-                          onClick={() => sendMessage(opt)}
-                          className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95 transition-all"
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 backdrop-blur-md shadow-md ${
+              msg.role === "user"
+                ? "bg-secondary/90 text-secondary-foreground rounded-br-sm"
+                : "bg-card/90 text-card-foreground rounded-bl-sm border border-border/50"
+            }`}>
+              <div className="text-sm leading-relaxed">
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
               </div>
-            ))}
+              {/* Clickable option icons */}
+              {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {msg.options.map((opt, j) => (
+                    <button
+                      key={j}
+                      onClick={() => sendMessage(opt)}
+                      className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95 transition-all"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
 
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-card/90 backdrop-blur-md rounded-2xl rounded-bl-sm px-4 py-3 border border-border/50">
-                  <div className="flex gap-1.5">
-                    {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-secondary animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
-                  </div>
-                </div>
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-card/90 backdrop-blur-md rounded-2xl rounded-bl-sm px-4 py-3 border border-border/50">
+              <div className="flex gap-1.5">
+                {[0, 150, 300].map(d => <span key={d} className="w-2 h-2 rounded-full bg-secondary animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            {isListening && (
-              <div className="flex justify-center">
-                <div className="bg-green-500/10 backdrop-blur-md rounded-full px-5 py-2 border border-green-500/30 flex items-center gap-2">
-                  <Mic className="w-4 h-4 text-green-500 animate-pulse" />
-                  <span className="text-xs font-medium text-green-600 dark:text-green-400">Escutando...</span>
-                </div>
-              </div>
-            )}
+        {isListening && (
+          <div className="flex justify-center">
+            <div className="bg-green-500/10 backdrop-blur-md rounded-full px-5 py-2 border border-green-500/30 flex items-center gap-2">
+              <Mic className="w-4 h-4 text-green-500 animate-pulse" />
+              <span className="text-xs font-medium text-green-600 dark:text-green-400">Escutando...</span>
+            </div>
           </div>
         )}
       </div>

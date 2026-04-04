@@ -285,6 +285,19 @@ const AuroraChat = () => {
                   : "bg-card/80 text-card-foreground border border-border rounded-bl-sm"
               }`}>
                 <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0"><ReactMarkdown>{m.content}</ReactMarkdown></div>
+                {m.role === "assistant" && m.options && m.options.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {m.options.map((opt, j) => (
+                      <button
+                        key={j}
+                        onClick={() => sendMessage(opt)}
+                        className="text-xs px-3 py-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 active:scale-95 transition-all"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {m.role === "assistant" && (
                   <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/30">
                     <button onClick={() => speakText(m.content, false)} className="text-muted-foreground hover:text-destructive transition-colors">

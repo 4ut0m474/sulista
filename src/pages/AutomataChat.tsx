@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Mic, Volume2, VolumeX, Gauge, Sun, Moon, DollarSign, ShoppingCart, FileText, PiggyBank, TrendingDown, Calculator } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import automataAvatar from "@/assets/automata-avatar.png";
 import ReactMarkdown from "react-markdown";
@@ -33,19 +33,14 @@ const cleanTextForTTS = (text: string): string => {
     .replace(/\n{2,}/g, ". ").replace(/\n/g, ". ").replace(/\.\s*\.\s*/g, ". ").trim();
 };
 
-const extractOptions = (text: string): string[] => {
-  const opts: string[] = [];
-  const seen = new Set<string>();
-  const addOpt = (o: string) => { const c = o.trim(); if (c.length >= 3 && c.length <= 60 && !seen.has(c)) { seen.add(c); opts.push(c); } };
-  let match;
-  const num = /^\d+\.\s+(.+)$/gm;
-  while ((match = num.exec(text)) !== null) addOpt(match[1]);
-  const bul = /^[•\-\*]\s+(.+)$/gm;
-  while ((match = bul.exec(text)) !== null) addOpt(match[1]);
-  const btn = /"([^"]{3,40})"/g;
-  while ((match = btn.exec(text)) !== null) addOpt(match[1]);
-  return opts.slice(0, 5);
-};
+const QUICK_LINKS = [
+  { icon: Calculator, label: "Planejamento orçamentário", query: "Me ensine a fazer planejamento orçamentário pra minha casa" },
+  { icon: ShoppingCart, label: "Promoções e economia", query: "Dicas de promoções pra gastar menos no dia a dia" },
+  { icon: FileText, label: "Imposto de renda fácil", query: "Como fazer imposto de renda de forma simples" },
+  { icon: PiggyBank, label: "Guardar dinheiro", query: "Como guardar dinheiro no fim do mês" },
+  { icon: TrendingDown, label: "Compras inteligentes", query: "Compras inteligentes pra sobrar dinheiro" },
+  { icon: DollarSign, label: "Cortar gastos", query: "Como cortar gastos desnecessários e economizar" },
+];
 
 const AutomataChat = () => {
   const { theme, toggleTheme } = useTheme();
@@ -64,7 +59,7 @@ const AutomataChat = () => {
     return isNaN(saved) ? 1.0 : Math.max(0.8, Math.min(1.5, saved));
   });
   const [showSpeedControl, setShowSpeedControl] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,7 +77,7 @@ const AutomataChat = () => {
   }, []);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   const speakText = useCallback(async (text: string, activateMicAfter = true) => {
@@ -164,18 +159,17 @@ const AutomataChat = () => {
     setHasGreeted(true);
     const greeting: Msg = {
       role: "assistant",
-      content: "Automata online. Dados limpos, sem mentira. ⚙️\n\nSou especialista em números, orçamento, planejamento financeiro e imposto de renda. O que você quer analisar?",
-      options: ["📊 Meu orçamento", "💰 Imposto de renda", "🏘️ Dados do bairro", "📈 Planejamento financeiro"],
+      content: "Ei, quer planejar sua grana essa semana? 💰\n\nComo economizar no supermercado? Imposto de renda sem dor de cabeça? Ou dicas pra guardar dinheiro no fim do mês?",
     };
     setMessages([greeting]);
-    setTimeout(() => speakText("Automata online. Dados limpos, sem mentira. Sou especialista em números e planejamento financeiro. O que você quer analisar?", true), 600);
+    setTimeout(() => speakText("Ei, quer planejar sua grana essa semana? Como economizar no supermercado? Imposto de renda sem dor de cabeça? Ou dicas pra guardar dinheiro no fim do mês?", true), 600);
   }, [hasGreeted]); // eslint-disable-line
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
     const remaining = DAILY_LIMIT - getUsageCount();
     if (remaining <= 0) {
-      setMessages(prev => [...prev, { role: "user", content: text }, { role: "assistant", content: "Limite diário atingido. Assine um plano para continuar.", options: ["Ver planos 📋"] }]);
+      setMessages(prev => [...prev, { role: "user", content: text }, { role: "assistant", content: "Limite diário atingido. Assine um plano para continuar." }]);
       return;
     }
     const userMsg: Msg = { role: "user", content: text };
@@ -219,13 +213,12 @@ const AutomataChat = () => {
         }
       }
       if (fullResponse) {
-        const opts = extractOptions(fullResponse);
         setMessages(prev => {
           const last = prev[prev.length - 1];
-          if (last?.role === "assistant" && !last.options) return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: fullResponse, ...(opts.length > 0 ? { options: opts } : {}) } : m);
-          return [...prev, { role: "assistant", content: fullResponse, ...(opts.length > 0 ? { options: opts } : {}) }];
+          if (last?.role === "assistant" && !last.options) return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: fullResponse } : m);
+          return [...prev, { role: "assistant", content: fullResponse }];
         });
-        speakText(fullResponse, true);
+        speakText(fullResponse, false);
       }
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "assistant", content: `Erro: ${e.message}` }]);
@@ -238,53 +231,37 @@ const AutomataChat = () => {
     <div className="h-screen flex flex-col overflow-hidden relative">
       <ChatBackground agent="automata" />
 
-      {/* Header with avatar center */}
-      <header className="flex-shrink-0 relative z-20 flex items-center gap-1 px-2 py-1.5 bg-card/90 backdrop-blur-md border-b border-border">
+      {/* Header */}
+      <header className="flex-shrink-0 relative z-30 flex items-center gap-1 px-2 py-1.5 bg-card/90 backdrop-blur-md border-b border-border">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
-
         <button onClick={toggleTheme} className="p-1.5 rounded-full hover:bg-muted transition-colors">
           {theme === "light" ? <Moon className="w-3.5 h-3.5 text-foreground" /> : <Sun className="w-3.5 h-3.5 text-secondary" />}
         </button>
-
         <button onClick={() => { if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); } setVoiceEnabled(!voiceEnabled); }}
           className={`p-1.5 rounded-full ${voiceEnabled ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted"}`}>
           {voiceEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
         </button>
-
         <button onClick={() => setShowSpeedControl(!showSpeedControl)} className="p-1.5 rounded-full hover:bg-muted">
           <Gauge className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
-
-        {/* Avatar center - click to restart */}
         <div className="flex-1 flex items-center justify-center">
           <button onClick={restartChat} className="relative" title="Reiniciar conversa">
-            <img
-              src={automataAvatar}
-              alt="Automata"
-              className={`w-9 h-9 rounded-full border-2 transition-all ${isSpeaking ? "border-secondary shadow-lg shadow-secondary/40 scale-110" : isListening ? "border-green-500 shadow-md shadow-green-500/30" : "border-border"}`}
-            />
+            <img src={automataAvatar} alt="Automata"
+              className={`w-9 h-9 rounded-full border-2 transition-all ${isSpeaking ? "border-secondary shadow-lg shadow-secondary/40 scale-110" : isListening ? "border-green-500 shadow-md shadow-green-500/30" : "border-border"}`} />
             {isSpeaking && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />}
             {isListening && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />}
           </button>
         </div>
-
-        {/* Mic button */}
-        <button
-          onClick={handleMicButton}
-          className={`p-1.5 rounded-full transition-all ${
-            isListening ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/40"
-            : isSpeaking ? "bg-destructive text-white"
-            : "bg-destructive/80 text-white hover:bg-destructive"
-          }`}
-        >
+        <button onClick={handleMicButton}
+          className={`p-1.5 rounded-full transition-all ${isListening ? "bg-green-500 text-white animate-pulse shadow-lg shadow-green-500/40" : isSpeaking ? "bg-destructive text-white" : "bg-destructive/80 text-white hover:bg-destructive"}`}>
           <Mic className="w-4 h-4" />
         </button>
       </header>
 
       {showSpeedControl && (
-        <div className="flex-shrink-0 relative z-10 px-4 py-2 bg-card/90 backdrop-blur-md border-b border-border flex items-center gap-3">
+        <div className="flex-shrink-0 relative z-30 px-4 py-2 bg-card/90 backdrop-blur-md border-b border-border flex items-center gap-3">
           <span className="text-[10px] text-muted-foreground">🐢 0.8x</span>
           <Slider value={[ttsSpeed]} min={0.8} max={1.5} step={0.1} onValueChange={([v]) => { setTtsSpeed(v); localStorage.setItem(TTS_SPEED_KEY, String(v)); }} className="flex-1" />
           <span className="text-[10px] text-muted-foreground">1.5x ⚡</span>
@@ -292,35 +269,18 @@ const AutomataChat = () => {
         </div>
       )}
 
-      {/* Chat messages - always visible */}
-      <div ref={scrollRef} className="flex-1 relative z-10 overflow-y-auto px-3 py-3 space-y-3">
-        {/* Charts panel */}
-        <AutomataChartsPanel />
-
+      {/* Chat overlay - on top, z-20 */}
+      <div className="relative z-20 flex-shrink-0 max-h-[40vh] overflow-y-auto px-3 py-3 space-y-2" ref={chatScrollRef}>
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 backdrop-blur-md shadow-md ${
+            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-md ${
               msg.role === "user"
                 ? "bg-secondary/90 text-secondary-foreground rounded-br-sm"
-                : "bg-card/90 text-card-foreground rounded-bl-sm border border-border/50"
+                : "bg-card/95 text-card-foreground rounded-bl-sm border border-border/50"
             }`}>
               <div className="text-sm leading-relaxed">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
               </div>
-              {/* Clickable option icons */}
-              {msg.role === "assistant" && msg.options && msg.options.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {msg.options.map((opt, j) => (
-                    <button
-                      key={j}
-                      onClick={() => sendMessage(opt)}
-                      className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95 transition-all"
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         ))}
@@ -345,8 +305,32 @@ const AutomataChat = () => {
         )}
       </div>
 
+      {/* Quick action links - fixed below chat */}
+      <div className="flex-shrink-0 relative z-20 px-3 py-2">
+        <div className="grid grid-cols-2 gap-2">
+          {QUICK_LINKS.map((link, i) => (
+            <button
+              key={i}
+              onClick={() => sendMessage(link.query)}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-card/90 backdrop-blur-md border border-border/50 hover:bg-primary/10 hover:border-primary/30 active:scale-[0.97] transition-all text-left shadow-sm disabled:opacity-50"
+            >
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <link.icon className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-foreground leading-tight">{link.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Charts panel - behind, scrollable */}
+      <div className="flex-1 relative z-10 overflow-y-auto px-3 py-2">
+        <AutomataChartsPanel />
+      </div>
+
       {/* Input bar */}
-      <div className="flex-shrink-0 relative z-20 px-3 py-2 bg-card/90 backdrop-blur-md border-t border-border">
+      <div className="flex-shrink-0 relative z-30 px-3 py-2 bg-card/90 backdrop-blur-md border-t border-border">
         <div className="flex items-center gap-2">
           <input
             type="text"

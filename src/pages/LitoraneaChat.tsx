@@ -268,10 +268,10 @@ const LitoraneaChat = () => {
     setHasGreeted(true);
     const greetingText = isAurora
       ? `Oi, eu sou a Aurora. Não vim julgar. Vim lembrar quem você é. ✨🌅\n\nEu vejo o bem em você. Quer ver também?`
-      : `Oi, sou a Litorânea! Moro no app Vento Sul, uma brisa que traz conhecimento pro sul do Brasil. 🌬️💚\n\nMe conta: você é quem por aqui?`;
+      : `Bah, eita, tudo bem? 🌬️💚\n\nMe conta: tu veio aqui pra quê?`;
     const greetingOptions = isAurora
       ? ["✨ O que fiz de bom hoje", "🌅 Me conhecer melhor", "💛 Ver o bem ao redor", "🪞 Refletir um pouco"]
-      : ["🏖️ Turista", "🏡 Morador", "🏪 Comerciante", "📚 Estudante"];
+      : ["🏪 Comerciante", "📚 Estudante", "🏖️ Turista", "🏡 Morador"];
     setMessages([{ role: "assistant", content: greetingText, options: greetingOptions }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line
@@ -424,24 +424,32 @@ const LitoraneaChat = () => {
     const typeMap: Record<string, string> = { turista: 'turista', comerciante: 'comerciante', morador: 'morador_comum', estudante: 'estudante' };
     updateProfileInSupabase({ user_type: typeMap[role] || role } as any);
 
-    if (role === "estudante") {
-      setInput("");
-      setMessages(prev => [...prev, { role: "user", content: "📚 Estudante" }, {
-        role: "assistant",
-        content: `Bah, que tri! 📚 Sou tua parceira nos estudos!\n\nQuer ativar a persistência pra eu te ajudar com lição de casa, inglês, frações, história?`,
-        options: ["Sim, quero! ✅", "Depois, só bater papo 💬"],
-      }]);
-      speakText("Bah, que tri! Sou tua parceira nos estudos! Quer ativar a persistência?", true);
-      return;
+    const roleLabels: Record<string, string> = { turista: "🏖️ Turista", comerciante: "🏪 Comerciante", morador: "🏡 Morador", estudante: "📚 Estudante" };
+    const roleLabel = roleLabels[role] || role;
+
+    let responseText = "";
+    let responseOptions: string[] = [];
+
+    if (role === "comerciante") {
+      responseText = "Ah, legal! Tu vende o quê?";
+      responseOptions = ["🍔 Comida", "🎨 Artesanato", "👕 Roupa", "🔧 Outra coisa"];
+    } else if (role === "estudante") {
+      responseText = "Bah, estudante! Tu quer aprender matemática de grana?";
+      responseOptions = ["💰 Orçamento mensal", "🐷 Poupança", "📈 Investimento", "📚 Lição de casa"];
+    } else if (role === "turista") {
+      responseText = "Eita, turista! Quer gastar menos ou curtir mais?";
+      responseOptions = ["🔥 Promoções pra economizar", "🗺️ Dicas do que fazer", "🍽️ Onde comer bem e barato", "🏖️ Praias e trilhas"];
+    } else {
+      responseText = "Bah, morador! O que tu precisa?";
+      responseOptions = ["🛒 Compras coletivas", "🔥 Promoções perto", "📰 Eventos da cidade", "💬 Só bater papo"];
     }
 
-    const roleLabels: Record<string, string> = { turista: "Turista 🏖️", comerciante: "Comerciante 🏪", morador: "Morador 🏡" };
-    const roleLabel = roleLabels[role] || role;
-    setMessages(prev => [...prev, { role: "user", content: roleLabel }, {
-      role: "assistant",
-      content: `Beleza, ${roleLabel}! Que bom te ter aqui! 💚\n\nO que tu quer saber?`,
-      options: ["Explicação completa 📖", "Explique SulCoins 💰", "Ativar compras coletivas 🛒", "Só bater papo 💬"],
-    }]);
+    setInput("");
+    setMessages(prev => [...prev,
+      { role: "user", content: roleLabel },
+      { role: "assistant", content: responseText, options: responseOptions },
+    ]);
+    speakText(responseText, true);
   };
 
   const handleWalletAction = (action: string) => {

@@ -268,10 +268,10 @@ const LitoraneaChat = () => {
     setHasGreeted(true);
     const greetingText = isAurora
       ? `Oi, eu sou a Aurora. Não vim julgar. Vim lembrar quem você é. ✨🌅\n\nEu vejo o bem em você. Quer ver também?`
-      : `Oi, sou a Litorânea! Moro no app Vento Sul, uma brisa que traz conhecimento pro sul do Brasil. 🌬️💚\n\nMe conta: você é quem por aqui?`;
+      : `Bah, eita, tudo bem? 🌬️💚\n\nMe conta: tu veio aqui pra quê?`;
     const greetingOptions = isAurora
       ? ["✨ O que fiz de bom hoje", "🌅 Me conhecer melhor", "💛 Ver o bem ao redor", "🪞 Refletir um pouco"]
-      : ["🏖️ Turista", "🏡 Morador", "🏪 Comerciante", "📚 Estudante"];
+      : ["🏪 Comerciante", "📚 Estudante", "🏖️ Turista", "🏡 Morador"];
     setMessages([{ role: "assistant", content: greetingText, options: greetingOptions }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line

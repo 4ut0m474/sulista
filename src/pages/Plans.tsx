@@ -1,16 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Check, Star, Crown, Sparkles } from "lucide-react";
+import { ChevronLeft, Check, Star, Crown, Sparkles, HelpCircle } from "lucide-react";
 import FooterNav from "@/components/FooterNav";
 import { useState, useEffect } from "react";
 import { getAdminConfig, pageBackgrounds } from "@/lib/adminData";
 import PlanContractModal from "@/components/PlanContractModal";
 import { useCityPlans } from "@/hooks/useCityPlans";
+import AppExplainerModal from "@/components/AppExplainerModal";
 
 const Plans = () => {
   const { state, city } = useParams<{ state: string; city: string }>();
   const navigate = useNavigate();
   const [annual, setAnnual] = useState(true);
   const [contractModal, setContractModal] = useState<{ planName: string; displayPrice: string; priceDetail: string } | null>(null);
+  const [showExplainer, setShowExplainer] = useState(false);
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.plans;
   const cityName = decodeURIComponent(city || "");
@@ -37,6 +39,24 @@ const Plans = () => {
               <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
             <h1 className="font-display text-xl font-bold text-foreground drop-shadow-sm">Planos</h1>
+            <div className="flex-1" />
+            <button
+              onClick={() => setShowExplainer(true)}
+              className="p-2 rounded-full bg-primary/90 backdrop-blur-sm border border-primary/50 shadow-card animate-pulse hover:animate-none hover:scale-105 transition-transform"
+              aria-label="Como funciona o app"
+            >
+              <HelpCircle className="w-5 h-5 text-primary-foreground" />
+            </button>
+          </div>
+          {/* Explainer floating hint */}
+          <div className="max-w-md mx-auto mt-2">
+            <button
+              onClick={() => setShowExplainer(true)}
+              className="w-full flex items-center gap-2 p-2.5 rounded-xl bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-colors"
+            >
+              <HelpCircle className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-xs font-semibold text-foreground">Como o Vento Sul funciona? Ouça, leia ou veja em Libras!</span>
+            </button>
           </div>
         </header>
 
@@ -140,7 +160,7 @@ const Plans = () => {
           whatsappNumber={config.whatsappNumber || ""}
         />
       )}
-
+      <AppExplainerModal open={showExplainer} onClose={() => setShowExplainer(false)} />
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>
   );

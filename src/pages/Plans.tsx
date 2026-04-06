@@ -57,6 +57,7 @@ const Plans = () => {
               <HelpCircle className="w-4 h-4 text-primary shrink-0" />
               <span className="text-xs font-semibold text-foreground">Como o Vento Sul funciona? Ouça, leia ou veja em Libras!</span>
             </button>
+          </div>
         </header>
 
         <div className="max-w-md mx-auto px-4 py-4">

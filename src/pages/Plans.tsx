@@ -12,6 +12,7 @@ const Plans = () => {
   const navigate = useNavigate();
   const [annual, setAnnual] = useState(true);
   const [contractModal, setContractModal] = useState<{ planName: string; displayPrice: string; priceDetail: string } | null>(null);
+  const [showExplainer, setShowExplainer] = useState(false);
   const base = `/city/${state}/${city}`;
   const bgUrl = pageBackgrounds.plans;
   const cityName = decodeURIComponent(city || "");

@@ -160,7 +160,7 @@ const Plans = () => {
           whatsappNumber={config.whatsappNumber || ""}
         />
       )}
-
+      <AppExplainerModal open={showExplainer} onClose={() => setShowExplainer(false)} />
       <FooterNav stateAbbr={state || ""} cityName={city || ""} />
     </div>
   );

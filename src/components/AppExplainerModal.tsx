@@ -1,5 +1,12 @@
-import { useState, useRef, useCallback } from "react";
-import { X, Volume2, VolumeX, Hand, Eye, Ear, Play, Pause, Users, Sparkles, Heart, Coins } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { X, Hand, Eye, Ear, Play, Pause, Users, Sparkles, Heart, Coins, Volume2 } from "lucide-react";
+
+import librasAprende from "@/assets/libras/libras-aprende.png";
+import librasLitoranea from "@/assets/libras/libras-litoranea.png";
+import librasAutomata from "@/assets/libras/libras-automata.png";
+import librasAurora from "@/assets/libras/libras-aurora.png";
+import librasPlano from "@/assets/libras/libras-plano.png";
+import librasComunidade from "@/assets/libras/libras-comunidade.png";
 
 const EXPLAINER_TEXT = `Bah, tchê! Bem-vindo ao Vento Sul!
 
@@ -18,14 +25,50 @@ Quanto mais gente participa, mais forte fica a comunidade. É tu ajudando teu vi
 
 Bora, tchê? Vem pro Vento Sul!`;
 
-const EXPLAINER_SECTIONS = [
-  { icon: "👋", title: "O app aprende contigo", text: "Quanto mais tu ensina sobre ti, mais ele faz por ti. Promoções, dicas, economia — tudo personalizado." },
-  { icon: "🌊", title: "Litorânea", text: "Comércio, promoções, eventos e compras coletivas da tua região." },
-  { icon: "⚙️", title: "Autômata", text: "Planejamento financeiro, imposto de renda e dicas pra guardar dinheiro." },
-  { icon: "🌟", title: "Aurora", text: "Jogo educativo onde tu aprende e ganha recompensas de verdade." },
-  { icon: "💰", title: "R$ 1,00 pra entrar", text: "Por um real tu entra na integração completa: jogo, promoções, compras coletivas e mais." },
-  { icon: "🤝", title: "Comunidade", text: "Quanto mais gente participa, mais forte fica. Tu ajuda teu vizinho, teu bairro, tua cidade." },
+const LIBRAS_SECTIONS = [
+  {
+    image: librasAprende,
+    title: "O app aprende contigo",
+    text: "Quanto mais tu ensina sobre ti, mais ele faz por ti. Promoções, dicas, economia — tudo personalizado.",
+    narration: "Bah, olha só! Tu ensina o app sobre ti, e ele aprende contigo. Mostra promoções que fazem sentido pra ti, dicas de economia, tudo personalizado, tchê!",
+  },
+  {
+    image: librasLitoranea,
+    title: "Litorânea",
+    text: "Comércio, promoções, eventos e compras coletivas da tua região.",
+    narration: "A Litorânea é a guria que conhece todo o comércio da região! Promoções, eventos, compras coletivas — ela te ajuda a gastar menos e aproveitar mais!",
+  },
+  {
+    image: librasAutomata,
+    title: "Autômata",
+    text: "Planejamento financeiro, imposto de renda e dicas pra guardar dinheiro.",
+    narration: "A Autômata é fera em números! Te ajuda com planejamento financeiro, imposto de renda e dicas pra guardar dinheiro no fim do mês!",
+  },
+  {
+    image: librasAurora,
+    title: "Aurora",
+    text: "Jogo educativo onde tu aprende e ganha recompensas de verdade.",
+    narration: "A Aurora te leva pro jogo educativo! Tu aprende brincando e ainda ganha recompensas de verdade. Muito legal, tchê!",
+  },
+  {
+    image: librasPlano,
+    title: "R$ 1,00 pra entrar",
+    text: "Por um real tu entra na integração completa: jogo, promoções, compras coletivas e mais.",
+    narration: "E o melhor: por apenas um real tu entra na integração completa! Pode jogar, participar de promoções, compras coletivas e muito mais!",
+  },
+  {
+    image: librasComunidade,
+    title: "Comunidade",
+    text: "Quanto mais gente participa, mais forte fica. Tu ajuda teu vizinho, teu bairro, tua cidade.",
+    narration: "Quanto mais gente participa, mais forte fica a comunidade! É tu ajudando teu vizinho, teu bairro, tua cidade. Bora, tchê!",
+  },
 ];
+
+const EXPLAINER_SECTIONS = LIBRAS_SECTIONS.map(s => ({
+  icon: s === LIBRAS_SECTIONS[0] ? "👋" : s === LIBRAS_SECTIONS[1] ? "🌊" : s === LIBRAS_SECTIONS[2] ? "⚙️" : s === LIBRAS_SECTIONS[3] ? "🌟" : s === LIBRAS_SECTIONS[4] ? "💰" : "🤝",
+  title: s.title,
+  text: s.text,
+}));
 
 interface Props {
   open: boolean;
@@ -34,10 +77,11 @@ interface Props {
 
 const AppExplainerModal = ({ open, onClose }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showLibras, setShowLibras] = useState(false);
   const [activeTab, setActiveTab] = useState<"ouvir" | "ler" | "libras">("ler");
+  const [librasIndex, setLibrasIndex] = useState(0);
+  const [librasPlaying, setLibrasPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const librasTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stopAudio = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -45,18 +89,17 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
       audioRef.current.pause();
       audioRef.current = null;
     }
+    if (librasTimerRef.current) {
+      clearTimeout(librasTimerRef.current);
+      librasTimerRef.current = null;
+    }
     setIsPlaying(false);
+    setLibrasPlaying(false);
   }, []);
 
   const playTTS = useCallback(async () => {
-    if (isPlaying) {
-      stopAudio();
-      return;
-    }
-
+    if (isPlaying) { stopAudio(); return; }
     setIsPlaying(true);
-
-    // Try ElevenLabs first
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
       const res = await fetch(url, {
@@ -68,7 +111,6 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
         },
         body: JSON.stringify({ text: EXPLAINER_TEXT.slice(0, 500), speed: 0.9 }),
       });
-
       if (res.ok) {
         const blob = await res.blob();
         const audioUrl = URL.createObjectURL(blob);
@@ -78,18 +120,72 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
         await audio.play();
         return;
       }
-    } catch {
-      // fallback to browser TTS
-    }
-
-    // Browser TTS fallback
+    } catch { /* fallback */ }
     const utterance = new SpeechSynthesisUtterance(EXPLAINER_TEXT);
     utterance.lang = "pt-BR";
     utterance.rate = 0.9;
     utterance.onend = () => setIsPlaying(false);
-    synthRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   }, [isPlaying, stopAudio]);
+
+  // Libras slideshow with narration
+  const playLibrasSlideshow = useCallback(() => {
+    if (librasPlaying) { stopAudio(); return; }
+    setLibrasPlaying(true);
+    setLibrasIndex(0);
+
+    const narrateSection = (index: number) => {
+      if (index >= LIBRAS_SECTIONS.length) {
+        setLibrasPlaying(false);
+        return;
+      }
+      setLibrasIndex(index);
+      const section = LIBRAS_SECTIONS[index];
+
+      // Try ElevenLabs for narration
+      (async () => {
+        try {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ text: section.narration, speed: 0.9 }),
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            const audio = new Audio(audioUrl);
+            audioRef.current = audio;
+            audio.onended = () => {
+              librasTimerRef.current = setTimeout(() => narrateSection(index + 1), 800);
+            };
+            await audio.play();
+            return;
+          }
+        } catch { /* fallback */ }
+
+        // Browser TTS fallback
+        const utterance = new SpeechSynthesisUtterance(section.narration);
+        utterance.lang = "pt-BR";
+        utterance.rate = 0.9;
+        utterance.onend = () => {
+          librasTimerRef.current = setTimeout(() => narrateSection(index + 1), 800);
+        };
+        window.speechSynthesis.speak(utterance);
+      })();
+    };
+
+    narrateSection(0);
+  }, [librasPlaying, stopAudio]);
+
+  // Cleanup on close
+  useEffect(() => {
+    if (!open) stopAudio();
+  }, [open, stopAudio]);
 
   const handleClose = () => {
     stopAudio();
@@ -97,6 +193,8 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
   };
 
   if (!open) return null;
+
+  const currentLibras = LIBRAS_SECTIONS[librasIndex];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in">
@@ -114,33 +212,20 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
 
         {/* Accessibility Tabs */}
         <div className="flex gap-1 p-2 bg-muted/30">
-          <button
-            onClick={() => setActiveTab("ouvir")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "ouvir" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <Ear className="w-3.5 h-3.5" />
-            Ouvir
-          </button>
-          <button
-            onClick={() => setActiveTab("ler")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "ler" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            Ler
-          </button>
-          <button
-            onClick={() => setActiveTab("libras")}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "libras" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <Hand className="w-3.5 h-3.5" />
-            Libras
-          </button>
+          {(["ouvir", "ler", "libras"] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => { stopAudio(); setActiveTab(tab); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                activeTab === tab ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {tab === "ouvir" && <Ear className="w-3.5 h-3.5" />}
+              {tab === "ler" && <Eye className="w-3.5 h-3.5" />}
+              {tab === "libras" && <Hand className="w-3.5 h-3.5" />}
+              {tab === "ouvir" ? "Ouvir" : tab === "ler" ? "Ler" : "Libras"}
+            </button>
+          ))}
         </div>
 
         {/* Content */}
@@ -163,8 +248,6 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
                   {isPlaying ? "Tocando explicação... Clique pra pausar" : "Clique pra ouvir a explicação em português sulista"}
                 </p>
               </div>
-
-              {/* Visual cards while listening */}
               <div className="space-y-2">
                 {EXPLAINER_SECTIONS.map((s, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 border border-border/30">
@@ -194,39 +277,83 @@ const AppExplainerModal = ({ open, onClose }: Props) => {
             </div>
           )}
 
-          {/* Libras Tab */}
+          {/* Libras Tab — illustrated slideshow with narration */}
           {activeTab === "libras" && (
             <div className="space-y-4">
-              <div className="flex flex-col items-center gap-3 py-4">
-                <div className="w-24 h-24 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
-                  <Hand className="w-12 h-12 text-primary" />
-                </div>
-                <p className="text-sm font-bold text-foreground text-center">Linguagem Brasileira de Sinais</p>
-                <p className="text-xs text-muted-foreground text-center max-w-xs">
-                  Acessibilidade pra todos! Aqui vai a explicação em formato visual com Libras.
+              {/* Play/Pause button */}
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={playLibrasSlideshow}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-lg ${
+                    librasPlaying
+                      ? "bg-destructive text-destructive-foreground animate-pulse"
+                      : "bg-primary text-primary-foreground hover:scale-105"
+                  }`}
+                >
+                  {librasPlaying ? <Pause className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  {librasPlaying ? "Pausar narração" : "▶ Iniciar com narração"}
+                </button>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Ilustrações + áudio narrado para acessibilidade completa
                 </p>
               </div>
 
-              {/* Libras visual cards with gesture descriptions */}
-              {EXPLAINER_SECTIONS.map((s, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-accent/20 border border-accent/30">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-lg">{s.icon}</span>
+              {/* Current highlighted card (when playing) */}
+              {librasPlaying && (
+                <div className="rounded-2xl border-2 border-primary bg-primary/5 p-4 transition-all animate-in fade-in">
+                  <div className="flex justify-center mb-3">
+                    <img
+                      src={currentLibras.image}
+                      alt={currentLibras.title}
+                      className="w-40 h-40 object-contain rounded-xl"
+                      loading="lazy"
+                      width={160}
+                      height={160}
+                    />
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{s.title}</p>
-                    <p className="text-xs text-muted-foreground">{s.text}</p>
-                    <p className="text-[10px] text-primary mt-1 italic">
-                      {i === 0 && "🤟 Sinal: apontar pra si + mão aberta pro app"}
-                      {i === 1 && "🤟 Sinal: onda com a mão + carrinho de compras"}
-                      {i === 2 && "🤟 Sinal: engrenagem girando + dinheiro"}
-                      {i === 3 && "🤟 Sinal: estrela + jogar/brincar"}
-                      {i === 4 && "🤟 Sinal: moeda + número 1"}
-                      {i === 5 && "🤟 Sinal: duas mãos juntas + grupo"}
-                    </p>
+                  <h3 className="text-base font-bold text-foreground text-center mb-1">{currentLibras.title}</h3>
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed">{currentLibras.text}</p>
+                  {/* Progress dots */}
+                  <div className="flex justify-center gap-2 mt-3">
+                    {LIBRAS_SECTIONS.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          i === librasIndex ? "bg-primary scale-125" : i < librasIndex ? "bg-primary/40" : "bg-muted"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* All cards grid (always visible) */}
+              <div className="space-y-3">
+                {LIBRAS_SECTIONS.map((s, i) => (
+                  <div
+                    key={i}
+                    onClick={() => { stopAudio(); setLibrasIndex(i); }}
+                    className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      librasPlaying && i === librasIndex
+                        ? "border-primary bg-primary/10 ring-1 ring-primary"
+                        : "border-border/30 bg-muted/30 hover:bg-muted/50"
+                    }`}
+                  >
+                    <img
+                      src={s.image}
+                      alt={s.title}
+                      className="w-16 h-16 object-contain rounded-lg shrink-0"
+                      loading="lazy"
+                      width={64}
+                      height={64}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground">{s.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{s.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

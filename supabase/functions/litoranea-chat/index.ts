@@ -150,15 +150,17 @@ ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se vi
     // Build personalized system prompt with user profile
     let personalizedPrompt = adminMode
       ? ADMIN_SYSTEM_PROMPT
-      : auroraMode
-        ? AURORA_SYSTEM_PROMPT
-        : SYSTEM_PROMPT;
+      : automataMode
+        ? AUTOMATA_SYSTEM_PROMPT
+        : auroraMode
+          ? AURORA_SYSTEM_PROMPT
+          : SYSTEM_PROMPT;
     
     // Append protocol enforcement
     personalizedPrompt += protocolEnforcement;
 
     if (userProfile && !adminMode) {
-      personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a conversa. Se campos estão vazios, pergunte naturalmente.`;
+      personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a resposta. NÃO faça perguntas.`;
     }
     if (nearbyData && !adminMode) {
       personalizedPrompt += `\n\n=== DADOS DE LOCALIZAÇÃO E ESTABELECIMENTOS PRÓXIMOS ===\n${JSON.stringify(nearbyData)}\n=== FIM DOS DADOS DE LOCALIZAÇÃO ===\nUse esses dados para responder sobre o que tem perto do usuário, priorizando o que combina com o perfil dele.`;

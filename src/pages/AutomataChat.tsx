@@ -33,6 +33,8 @@ const cleanTextForTTS = (text: string): string => {
     .replace(/\n{2,}/g, ". ").replace(/\n/g, ". ").replace(/\.\s*\.\s*/g, ". ").trim();
 };
 
+const AUTOMATA_VISITED_KEY = "automata-has-visited";
+
 const QUICK_LINKS = [
   { icon: Calculator, label: "Planejamento orçamentário", query: "Me ensine a fazer planejamento orçamentário pra minha casa" },
   { icon: ShoppingCart, label: "Promoções e economia", query: "Dicas de promoções pra gastar menos no dia a dia" },
@@ -41,6 +43,21 @@ const QUICK_LINKS = [
   { icon: TrendingDown, label: "Compras inteligentes", query: "Compras inteligentes pra sobrar dinheiro" },
   { icon: DollarSign, label: "Cortar gastos", query: "Como cortar gastos desnecessários e economizar" },
 ];
+
+const playRecordingBeep = () => {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch {}
+};
 
 const AutomataChat = () => {
   const { theme, toggleTheme } = useTheme();
@@ -109,6 +126,7 @@ const AutomataChat = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return;
     window.speechSynthesis.cancel(); setIsSpeaking(false);
+    playRecordingBeep();
     const recognition = new SR();
     recognition.lang = "pt-BR"; recognition.interimResults = true; recognition.continuous = true;
     accumulatedTranscriptRef.current = "";
@@ -157,7 +175,14 @@ const AutomataChat = () => {
   useEffect(() => {
     if (hasGreeted) return;
     setHasGreeted(true);
-    const greetingText = `Bah, fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo.\n\nQuanto mais você me contar sobre sua grana, seus gastos, o que você quer comprar, quanto ganha, quanto gasta… mais eu consigo te ajudar a planejar e economizar de verdade.\n\nPode falar sobre seu salário, suas contas, seus planos de compra, qualquer coisa sobre sua vida financeira. Quanto mais você falar, melhor eu te ajudo.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
+    const hasVisited = localStorage.getItem(AUTOMATA_VISITED_KEY);
+    
+    const greetingText = hasVisited
+      ? `Bah, que bom que voltou! Atualize seu perfil financeiro. Fala pra mim como tá sua vida com dinheiro hoje.`
+      : `Bah, tudo bem? Aqui é super seguro, pode falar tranquilo. Tudo que você me contar fica só comigo, ninguém vê e ninguém vende seus dados.\n\nMeu trabalho é te ajudar com a matemática da tua vida — como organizar teu dinheiro, fazer teu imposto de renda mais fácil, entender onde tua grana tá indo e como fazer ela render mais.\n\nQuanto mais você me contar sobre sua vida financeira, melhor eu consigo te ajudar.\n\nPode falar sobre:\n\n• Quanto você e sua família ganham por mês\n• Quais são os maiores gastos e problemas que você tá tendo com dinheiro\n• Se você já faz imposto de renda e se tá com dificuldade\n• O que você quer melhorar na vida financeira da sua família\n\nAqui dentro, quanto mais você e sua família participarem, mais Sulcoins vocês ganham. Um real por mês é como um boleto de entrada pra essa rede. Esse dinheiro serve pra deixar todo mundo mais inteligente, mais autônomo e mais capaz de cuidar da própria vida.\n\nA rede social daqui é 100% de vocês. Tudo que a gente faz volta pra vocês em forma de desconto, promoção e inteligência financeira.\n\nPode falar tudo que quiser sobre sua vida, sobre seu dinheiro, sobre o que tá difícil e o que você quer melhorar. Eu tô te ouvindo.`;
+    
+    if (!hasVisited) localStorage.setItem(AUTOMATA_VISITED_KEY, "true");
+    
     setMessages([{ role: "assistant", content: greetingText }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line

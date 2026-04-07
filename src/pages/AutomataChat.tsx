@@ -33,6 +33,8 @@ const cleanTextForTTS = (text: string): string => {
     .replace(/\n{2,}/g, ". ").replace(/\n/g, ". ").replace(/\.\s*\.\s*/g, ". ").trim();
 };
 
+const AUTOMATA_VISITED_KEY = "automata-has-visited";
+
 const QUICK_LINKS = [
   { icon: Calculator, label: "Planejamento orçamentário", query: "Me ensine a fazer planejamento orçamentário pra minha casa" },
   { icon: ShoppingCart, label: "Promoções e economia", query: "Dicas de promoções pra gastar menos no dia a dia" },
@@ -41,6 +43,21 @@ const QUICK_LINKS = [
   { icon: TrendingDown, label: "Compras inteligentes", query: "Compras inteligentes pra sobrar dinheiro" },
   { icon: DollarSign, label: "Cortar gastos", query: "Como cortar gastos desnecessários e economizar" },
 ];
+
+const playRecordingBeep = () => {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch {}
+};
 
 const AutomataChat = () => {
   const { theme, toggleTheme } = useTheme();

@@ -152,8 +152,7 @@ const AuroraChat = () => {
   useEffect(() => {
     if (hasGreeted) return;
     setHasGreeted(true);
-    const classLabel = playerClass ? playerClass.charAt(0).toUpperCase() + playerClass.slice(1) : "Guerreiro";
-    const greetingText = `${classLabel}, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo.\n\nQuanto mais você me contar sobre seus objetivos, suas quests, o que você quer conquistar… mais eu consigo te guiar no caminho certo.\n\nPode falar sobre suas batalhas, seus planos, suas vitórias e derrotas. Eu tô te ouvindo, guerreiro.`;
+    const greetingText = `Bah, e aí, aventureiro! Bem-vindo ao jogo.\n\nMe conta um pouco sobre você dentro do Vento Sul. Qual sua classe? Você já escolheu se é Mago, Guerreiro, Mercador, Explorador ou outra?\n\nFala pra mim também: onde fica tua guilda? Em qual cidade ou bairro você joga?\n\nQuanto mais você me contar sobre seu personagem e o que você gosta de fazer no jogo — se você curte ensinar os outros, explorar, negociar, ajudar em missões coletivas ou treinar habilidades — mais eu consigo te dar as melhores missões, recompensas e oportunidades dentro do jogo.\n\nAqui você pode usar suas habilidades do jogo pra ajudar o aplicativo também. Por exemplo, se você for Mago, pode ajudar a ensinar outras pessoas a usar o app melhor.\n\nPode falar tudo que quiser sobre seu personagem, sobre sua guilda, o que você gosta de fazer e como quer jogar. Eu tô te ouvindo.`;
     setMessages([{ role: "assistant", content: greetingText }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line

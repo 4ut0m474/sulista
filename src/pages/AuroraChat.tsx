@@ -153,13 +153,9 @@ const AuroraChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
     const classLabel = playerClass ? playerClass.charAt(0).toUpperCase() + playerClass.slice(1) : "Guerreiro";
-    const greeting: Msg = {
-      role: "assistant",
-      content: `Eu sou Aurora, o primeiro raio do sol! ⚔️🔥\n\n${classLabel}, o campo de batalha te espera. Que quest você aceita hoje?`,
-      options: ["⚔️ Quest do dia", "🏰 Ver meu progresso", "🗺️ Mapa do bairro", "👑 Ranking de heróis"],
-    };
-    setMessages([greeting]);
-    setTimeout(() => speakText(`Eu sou Aurora! ${classLabel}, o campo de batalha te espera. Que quest você aceita hoje?`, true), 600);
+    const greetingText = `${classLabel}, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo.\n\nQuanto mais você me contar sobre seus objetivos, suas quests, o que você quer conquistar… mais eu consigo te guiar no caminho certo.\n\nPode falar sobre suas batalhas, seus planos, suas vitórias e derrotas. Eu tô te ouvindo, guerreiro.`;
+    setMessages([{ role: "assistant", content: greetingText }]);
+    setTimeout(() => speakText(greetingText, true), 600);
   }, []); // eslint-disable-line
 
   const sendMessage = async (text: string) => {

@@ -157,12 +157,9 @@ const AutomataChat = () => {
   useEffect(() => {
     if (hasGreeted) return;
     setHasGreeted(true);
-    const greeting: Msg = {
-      role: "assistant",
-      content: "Ei, quer planejar sua grana essa semana? 💰\n\nComo economizar no supermercado? Imposto de renda sem dor de cabeça? Ou dicas pra guardar dinheiro no fim do mês?",
-    };
-    setMessages([greeting]);
-    setTimeout(() => speakText("Ei, quer planejar sua grana essa semana? Como economizar no supermercado? Imposto de renda sem dor de cabeça? Ou dicas pra guardar dinheiro no fim do mês?", true), 600);
+    const greetingText = `Bah, fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo.\n\nQuanto mais você me contar sobre sua grana, seus gastos, o que você quer comprar, quanto ganha, quanto gasta… mais eu consigo te ajudar a planejar e economizar de verdade.\n\nPode falar sobre seu salário, suas contas, seus planos de compra, qualquer coisa sobre sua vida financeira. Quanto mais você falar, melhor eu te ajudo.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
+    setMessages([{ role: "assistant", content: greetingText }]);
+    setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line
 
   const sendMessage = async (text: string) => {

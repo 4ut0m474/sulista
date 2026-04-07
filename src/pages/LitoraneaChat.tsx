@@ -267,12 +267,9 @@ const LitoraneaChat = () => {
     if (hasGreeted) return;
     setHasGreeted(true);
     const greetingText = isAurora
-      ? `Oi, eu sou a Aurora. Não vim julgar. Vim lembrar quem você é. ✨🌅\n\nEu vejo o bem em você. Quer ver também?`
-      : `Bah, eita, tudo bem? 🌬️💚\n\nMe conta: tu veio aqui pra quê?`;
-    const greetingOptions = isAurora
-      ? ["✨ O que fiz de bom hoje", "🌅 Me conhecer melhor", "💛 Ver o bem ao redor", "🪞 Refletir um pouco"]
-      : ["🏪 Comerciante", "📚 Estudante", "🏖️ Turista", "🏡 Morador"];
-    setMessages([{ role: "assistant", content: greetingText, options: greetingOptions }]);
+      ? `Oi, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo, ninguém mais vê e nada é compartilhado.\n\nQuanto mais você falar sobre sua vida, sobre o que sente, o que te faz bem, o que te preocupa… mais eu consigo te ajudar de verdade.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`
+      : `Bah, fica tranquilo, aqui é bem seguro. Tudo que você falar fica só comigo, ninguém vê e ninguém vende seus dados.\n\nQuanto mais você me contar sobre o que você quer comprar, mais eu consigo te ajudar a economizar.\n\nOlha só como funciona aqui:\n\nVocê pode falar coisas pra comprar hoje ou daqui a pouco — tipo "tô com fome, quero um lanche agora" ou "daqui uma hora quero comer uma pizza". Eu vejo se tem gente perto querendo a mesma coisa e consigo desconto pra você.\n\nVocê pode falar coisas pro mês — tipo o que você costuma comprar todo mês, arroz, feijão, carne, produto de limpeza.\n\nVocê pode falar coisas pra comprar em grande quantidade — tipo tênis, celular, bicicleta, geladeira, qualquer coisa que não precisa comprar hoje. Quanto mais gente quiser a mesma coisa, mais barato fica.\n\nPode falar de tudo: o que você quer comer hoje, o que sua família consome no mês, ou o que você quer comprar em lote pra ficar mais barato.\n\nQuanto mais você falar, mais eu consigo te juntar com outras pessoas, te dar desconto e te dar Sulcoins. Quanto mais você usa, mais Sulcoins você ganha e mais barato tudo fica.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
+    setMessages([{ role: "assistant", content: greetingText }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line
 

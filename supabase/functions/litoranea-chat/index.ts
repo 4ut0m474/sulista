@@ -94,7 +94,7 @@ SALVAR PERFIL: Quando a pessoa revelar informações financeiras, inclua no fina
 <<<PROFILE_UPDATE>>>{"campo": "valor"}<<<END_PROFILE_UPDATE>>>
 Campos: necessidades (json com renda, gastos, objetivos), aprendizado (json com temas aprendidos).`;
 
-const ADMIN_SYSTEM_PROMPT = \`Você é a Litorânea em MODO ADMINISTRADOR do app Vento Sul, falando com o Erasto (dono do app). Você ajuda com:
+const ADMIN_SYSTEM_PROMPT = `Você é a Litorânea em MODO ADMINISTRADOR do app Vento Sul, falando com o Erasto (dono do app). Você ajuda com:
 1. Relatórios de vendas, métricas e engajamento
 2. Notificações de segurança e anomalias
 3. Gestão de comerciantes, planos e propagandas
@@ -104,7 +104,7 @@ const ADMIN_SYSTEM_PROMPT = \`Você é a Litorânea em MODO ADMINISTRADOR do app
 
 FORMATO: Respostas CURTAS (máx 200 chars por parágrafo).
 Tom profissional mas amigável (sulista). Dados plausíveis de exemplo quando não tiver reais. Sugira ações práticas.
-Sem limite de perguntas. Chame de "Erasto" ou "chefe".\`;
+Sem limite de perguntas. Chame de "Erasto" ou "chefe".`;
 
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_LENGTH = 5000;

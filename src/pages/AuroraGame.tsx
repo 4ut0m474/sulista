@@ -399,11 +399,11 @@ const AuroraGame = () => {
       {popupClass && (
         <div className="fixed inset-0 z-[1001] flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
-          <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
+          <div className="relative flex-shrink-0 animate-hero-entrance" style={{ height: "60vh" }}>
             {(() => {
               const eraAvatar = eraAvatars[mapEra]?.[popupClass.id as keyof typeof eraAvatars["present"]];
               const avatarSrc = eraAvatar ? (selectedGender === "F" ? eraAvatar.f : eraAvatar.m) : (selectedGender === "F" ? popupClass.imageF : popupClass.image);
-              return <img src={avatarSrc} alt={popupClass.label} className="h-full w-auto object-contain drop-shadow-2xl" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />;
+              return <img src={avatarSrc} alt={popupClass.label} className="h-full w-auto object-contain drop-shadow-2xl animate-hero-idle" style={{ filter: "drop-shadow(0 0 30px rgba(255,215,0,0.3))" }} />;
             })()}
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">

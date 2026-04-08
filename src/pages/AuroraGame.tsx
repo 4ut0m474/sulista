@@ -238,17 +238,23 @@ const AuroraGame = () => {
     }
   }, [isSpeaking, isListening, stopListening, startListening]);
 
+  const [selectingAnimation, setSelectingAnimation] = useState(false);
+
   const handleSelectClass = (cls: ClassId, gender: Gender) => {
-    setClassState(cls);
-    setSelectedGender(gender);
-    if (cls !== "anao") setSelectedClass(cls as AuroraClass);
-    setShowClassPopup(null);
-    setShowGenderPicker(null);
-    const c = classes.find(c => c.id === cls);
-    const gLabel = gender === "M" ? "Masculino" : "Feminino";
-    const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
-    setAuroraMsg(msg);
-    if (voiceEnabled) speakText(msg);
+    setSelectingAnimation(true);
+    setTimeout(() => {
+      setClassState(cls);
+      setSelectedGender(gender);
+      if (cls !== "anao") setSelectedClass(cls as AuroraClass);
+      setShowClassPopup(null);
+      setShowGenderPicker(null);
+      setSelectingAnimation(false);
+      const c = classes.find(c => c.id === cls);
+      const gLabel = gender === "M" ? "Masculino" : "Feminino";
+      const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
+      setAuroraMsg(msg);
+      if (voiceEnabled) speakText(msg);
+    }, 600);
   };
 
   const getPinColor = (pop: number) => pop >= 300 ? "bg-green-500 shadow-green-500/50" : "bg-destructive shadow-destructive/50";

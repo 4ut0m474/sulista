@@ -376,16 +376,18 @@ const AuroraGame = () => {
             <p className="text-xs text-muted-foreground text-center mb-4">Escolha a versão:</p>
             <div className="flex gap-4 justify-center">
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
+                className="animate-gender-card flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32"
+                style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border animate-hero-aura">
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover animate-hero-idle" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Masculino</span>
               </button>
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
-                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
+                className="animate-gender-card flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32"
+                style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border animate-hero-aura">
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover animate-hero-idle" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>

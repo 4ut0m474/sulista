@@ -188,3 +188,25 @@
   0%, 100% { transform: translateY(0) scaleX(1); opacity: 0.08; }
   50% { transform: translateY(-40px) scaleX(1.2); opacity: 0.15; }
 }
+
+@keyframes litoranea-glow {
+  0%   { box-shadow: 0 0 18px 6px hsla(340, 80%, 60%, 0.45); border-color: hsla(340, 80%, 60%, 0.5); }
+  14%  { box-shadow: 0 0 18px 6px hsla(38, 90%, 60%, 0.45); border-color: hsla(38, 90%, 60%, 0.5); }
+  28%  { box-shadow: 0 0 18px 6px hsla(160, 70%, 50%, 0.45); border-color: hsla(160, 70%, 50%, 0.5); }
+  42%  { box-shadow: 0 0 18px 6px hsla(270, 70%, 60%, 0.45); border-color: hsla(270, 70%, 60%, 0.5); }
+  57%  { box-shadow: 0 0 18px 6px hsla(200, 80%, 55%, 0.45); border-color: hsla(200, 80%, 55%, 0.5); }
+  71%  { box-shadow: 0 0 18px 6px hsla(50, 90%, 55%, 0.45); border-color: hsla(50, 90%, 55%, 0.5); }
+  85%  { box-shadow: 0 0 18px 6px hsla(10, 85%, 58%, 0.45); border-color: hsla(10, 85%, 58%, 0.5); }
+  100% { box-shadow: 0 0 18px 6px hsla(340, 80%, 60%, 0.45); border-color: hsla(340, 80%, 60%, 0.5); }
+}
+
+@keyframes litoranea-ping {
+  0%   { background-color: hsla(340, 80%, 60%, 0.35); transform: scale(1); opacity: 1; }
+  14%  { background-color: hsla(38, 90%, 60%, 0.35); }
+  28%  { background-color: hsla(160, 70%, 50%, 0.35); }
+  42%  { background-color: hsla(270, 70%, 60%, 0.35); }
+  57%  { background-color: hsla(200, 80%, 55%, 0.35); }
+  71%  { background-color: hsla(50, 90%, 55%, 0.35); }
+  85%  { background-color: hsla(10, 85%, 58%, 0.35); transform: scale(1.6); opacity: 0; }
+  100% { background-color: hsla(340, 80%, 60%, 0.35); transform: scale(1.8); opacity: 0; }
+}

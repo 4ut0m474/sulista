@@ -238,23 +238,17 @@ const AuroraGame = () => {
     }
   }, [isSpeaking, isListening, stopListening, startListening]);
 
-  const [selectingAnimation, setSelectingAnimation] = useState(false);
-
   const handleSelectClass = (cls: ClassId, gender: Gender) => {
-    setSelectingAnimation(true);
-    setTimeout(() => {
-      setClassState(cls);
-      setSelectedGender(gender);
-      if (cls !== "anao") setSelectedClass(cls as AuroraClass);
-      setShowClassPopup(null);
-      setShowGenderPicker(null);
-      setSelectingAnimation(false);
-      const c = classes.find(c => c.id === cls);
-      const gLabel = gender === "M" ? "Masculino" : "Feminino";
-      const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
-      setAuroraMsg(msg);
-      if (voiceEnabled) speakText(msg);
-    }, 600);
+    setClassState(cls);
+    setSelectedGender(gender);
+    if (cls !== "anao") setSelectedClass(cls as AuroraClass);
+    setShowClassPopup(null);
+    setShowGenderPicker(null);
+    const c = classes.find(c => c.id === cls);
+    const gLabel = gender === "M" ? "Masculino" : "Feminino";
+    const msg = `${c?.label} (${gLabel}) escolhido! ${c?.buffs}. Sua primeira quest: ${c?.quest}`;
+    setAuroraMsg(msg);
+    if (voiceEnabled) speakText(msg);
   };
 
   const getPinColor = (pop: number) => pop >= 300 ? "bg-green-500 shadow-green-500/50" : "bg-destructive shadow-destructive/50";
@@ -382,18 +376,16 @@ const AuroraGame = () => {
             <p className="text-xs text-muted-foreground text-center mb-4">Escolha a versão:</p>
             <div className="flex gap-4 justify-center">
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("M"); }}
-                className="animate-gender-card flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32"
-                style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border animate-hero-aura">
-                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover animate-hero-idle" />
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.m || genderPickerClass.face} alt="Masculino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Masculino</span>
               </button>
               <button onClick={() => { setShowGenderPicker(null); setShowClassPopup(genderPickerClass.id); setSelectedGender("F"); }}
-                className="animate-gender-card flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32"
-                style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border animate-hero-aura">
-                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover animate-hero-idle" />
+                className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:border-primary hover:bg-accent/50 transition-colors w-32">
+                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                  <img src={eraAvatars[mapEra]?.[genderPickerClass.id as keyof typeof eraAvatars["present"]]?.f || genderPickerClass.faceF} alt="Feminino" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold text-foreground">Feminino</span>
               </button>
@@ -405,11 +397,11 @@ const AuroraGame = () => {
       {popupClass && (
         <div className="fixed inset-0 z-[1001] flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowClassPopup(null); }}>
-          <div className={`relative flex-shrink-0 ${selectingAnimation ? 'animate-hero-selected' : 'animate-hero-entrance'}`} style={{ height: "60vh" }}>
+          <div className="relative flex-shrink-0" style={{ height: "60vh" }}>
             {(() => {
               const eraAvatar = eraAvatars[mapEra]?.[popupClass.id as keyof typeof eraAvatars["present"]];
               const avatarSrc = eraAvatar ? (selectedGender === "F" ? eraAvatar.f : eraAvatar.m) : (selectedGender === "F" ? popupClass.imageF : popupClass.image);
-              return <img src={avatarSrc} alt={popupClass.label} className={`h-full w-auto object-contain drop-shadow-2xl ${selectingAnimation ? '' : 'animate-hero-idle'}`} style={{ filter: `drop-shadow(0 0 ${selectingAnimation ? '50px rgba(255,215,0,0.6)' : '30px rgba(255,215,0,0.3)'})` }} />;
+              return <img src={avatarSrc} alt={popupClass.label} className="h-full w-auto object-contain drop-shadow-2xl" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.15))" }} />;
             })()}
           </div>
           <div className="w-[90vw] max-w-sm bg-card/95 backdrop-blur-xl rounded-xl border border-border p-3 mt-2 shadow-2xl">

@@ -42,23 +42,14 @@ const FooterNav = ({ stateAbbr, cityName }: FooterNavProps) => {
         {items.map(item => {
           const isActive = location.pathname === item.path;
           if (item.isCenter) {
-            const isLitoranea = activeAgent === "litoranea";
             return (
               <RouterNavLink
                 key={item.label}
                 to={item.path}
                 className="flex flex-col items-center gap-0.5 -mt-5"
               >
-                <div className="relative">
-                  {isLitoranea && (
-                    <>
-                      <div className="absolute inset-0 rounded-full animate-ping bg-primary/30" />
-                      <div className="absolute -inset-1 rounded-full animate-pulse bg-primary/20 blur-sm" />
-                    </>
-                  )}
-                  <div className={`relative w-14 h-14 rounded-full border-4 border-card bg-primary/10 flex items-center justify-center shadow-lg transition-transform hover:scale-110 ${isActive ? "ring-2 ring-primary" : ""}`}>
-                    <img src={agent.avatar} alt={agent.label} className="w-11 h-11 rounded-full" />
-                  </div>
+                <div className={`w-14 h-14 rounded-full border-4 border-card bg-primary/10 flex items-center justify-center shadow-lg transition-transform hover:scale-110 ${isActive ? "ring-2 ring-primary" : ""}`}>
+                  <img src={agent.avatar} alt={agent.label} className="w-11 h-11 rounded-full" />
                 </div>
                 <span className="text-[9px] font-bold text-primary">{agent.label}</span>
               </RouterNavLink>

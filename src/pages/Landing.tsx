@@ -101,25 +101,23 @@ const Landing = () => {
               onClick={() => handleAgentClick("automata")}
               className="flex flex-col items-center gap-1.5 group"
             >
-              <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-muted-foreground/30 bg-transparent overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">
+              <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-muted-foreground/30 bg-muted overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">
                 <img src={automataAvatar} alt="Automata" className="w-full h-full object-cover" />
               </div>
               <span className="text-primary-foreground text-[10px] font-black tracking-wide drop-shadow">Automata</span>
             </button>
 
-            {/* Litorânea — center (bigger) + pulse */}
+            {/* Litorânea — center (bigger) */}
             <button
               onClick={() => handleAgentClick("litoranea")}
               className="flex flex-col items-center gap-1.5 group"
             >
-              <div className="relative">
-                <div className="absolute inset-0 rounded-full animate-ping bg-primary/40" />
-                <div className="absolute inset-0 rounded-full animate-pulse bg-primary/20" />
-                <div className={`relative w-20 h-20 rounded-full shadow-lg flex items-center justify-center border-4 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden bg-transparent ${
-                  isAurora ? "border-secondary/40 shadow-gold" : "border-primary-foreground/30 shadow-primary/40"
-                }`}>
-                  <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
-                </div>
+              <div className={`w-20 h-20 rounded-full shadow-lg flex items-center justify-center border-4 transition-transform group-hover:scale-105 group-active:scale-95 overflow-hidden ${
+                isAurora
+                  ? "bg-secondary shadow-gold border-secondary/40"
+                  : "bg-primary shadow-primary/40 border-primary-foreground/30"
+              }`}>
+                <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
               </div>
               <span className="text-primary-foreground text-xs font-black tracking-wide drop-shadow">Litorânea</span>
             </button>
@@ -129,7 +127,7 @@ const Landing = () => {
               onClick={() => handleAgentClick("aurora")}
               className="flex flex-col items-center gap-1.5 group"
             >
-              <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-destructive/40 bg-transparent overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">
+              <div className="w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-2 border-destructive/40 bg-destructive/10 overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95">
                 <img src={auroraWarriorAvatar} alt="Aurora" className="w-full h-full object-cover" />
               </div>
               <span className="text-primary-foreground text-[10px] font-black tracking-wide drop-shadow">Aurora</span>

@@ -113,9 +113,12 @@ const Landing = () => {
               className="flex flex-col items-center gap-1.5 group relative"
             >
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-24 h-24 rounded-full" style={{ animation: 'litoranea-ping 2s ease-out infinite' }} />
+                <div className="w-24 h-24 rounded-full animate-ping bg-secondary/40" style={{ animationDuration: '1.5s' }} />
               </div>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center border-4 bg-transparent overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95 relative z-10" style={{ animation: 'litoranea-glow 2.5s linear infinite' }}>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-22 h-22 rounded-full animate-pulse shadow-[0_0_20px_6px_hsl(var(--secondary))]" style={{ animationDuration: '1s' }} />
+              </div>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center border-4 border-secondary/60 bg-transparent overflow-hidden transition-transform group-hover:scale-105 group-active:scale-95 relative z-10 shadow-[0_0_15px_4px_hsl(var(--secondary)/0.5)]">
                 <img src={litoraneaAvatar} alt="Litorânea" className="w-full h-full object-cover" />
               </div>
               <span className="text-primary-foreground text-xs font-black tracking-wide drop-shadow relative z-10">Litorânea</span>

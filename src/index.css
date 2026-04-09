@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes multicolor-glow {
+  0%, 100% { box-shadow: 0 0 18px 6px hsla(120, 70%, 50%, 0.45); border-color: hsla(120, 70%, 50%, 0.5); }
+  25% { box-shadow: 0 0 18px 6px hsla(210, 80%, 55%, 0.45); border-color: hsla(210, 80%, 55%, 0.5); }
+  50% { box-shadow: 0 0 18px 6px hsla(45, 90%, 55%, 0.45); border-color: hsla(45, 90%, 55%, 0.5); }
+  75% { box-shadow: 0 0 18px 6px hsla(0, 75%, 55%, 0.45); border-color: hsla(0, 75%, 55%, 0.5); }
+}
+
+@keyframes multicolor-ping {
+  0% { transform: scale(1); opacity: 0.5; background: hsla(120, 70%, 50%, 0.3); }
+  25% { background: hsla(210, 80%, 55%, 0.25); }
+  50% { background: hsla(45, 90%, 55%, 0.25); }
+  75% { background: hsla(0, 75%, 55%, 0.2); transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; background: hsla(120, 70%, 50%, 0.1); }
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 @layer base {

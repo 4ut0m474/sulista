@@ -14,7 +14,7 @@ import { getSelectedClass } from "@/components/AgentIntroModal";
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-ai`;
 const MIC_MAX_OPEN_MS = 30000;
 const SILENCE_CANCEL_MS = 15000;
 const SPEECH_PAUSE_MS = 5000;
@@ -173,39 +173,13 @@ const AuroraChat = () => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          adminMode: false, auroraMode: true, automataMode: false,
-          userProfile: {}, playerClass: playerClass || "guerreiro",
+          agent: "aurora", userId: null, userProfile: {},
         }),
       });
-      if (!resp.ok || !resp.body) throw new Error("Erro na conexão");
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let done = false;
-      while (!done) {
-        const { done: d, value } = await reader.read();
-        if (d) { done = true; break; }
-        buf += decoder.decode(value, { stream: true });
-        let nl;
-        while ((nl = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, nl); buf = buf.slice(nl + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const js = line.slice(6).trim();
-          if (js === "[DONE]") { done = true; break; }
-          try {
-            const c = JSON.parse(js).choices?.[0]?.delta?.content;
-            if (c) {
-              fullResponse += c;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant" && !last.options) return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: fullResponse } : m);
-                return [...prev, { role: "assistant", content: fullResponse }];
-              });
-            }
-          } catch { buf = line + "\n" + buf; break; }
-        }
-      }
+      if (!resp.ok) throw new Error("Erro na conexão");
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      fullResponse = data.reply || "";
       if (fullResponse) {
         const opts = extractOptions(fullResponse);
         setMessages(prev => {

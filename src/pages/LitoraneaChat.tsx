@@ -365,38 +365,13 @@ const LitoraneaChat = () => {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, auroraMode: isAurora, userProfile: userProfile || {}, nearbyData }),
+        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), agent: isAurora ? "aurora" : "litoranea", userId: null, userProfile: userProfile || {}, nearbyData }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Erro na conexão");
-      const reader = resp.body.getReader(); const decoder = new TextDecoder();
-      let sseBuffer = ""; let streamDone = false;
-
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) { streamDone = true; break; }
-        sseBuffer += decoder.decode(value, { stream: true });
-        let nl;
-        while ((nl = sseBuffer.indexOf("\n")) !== -1) {
-          let line = sseBuffer.slice(0, nl); sseBuffer = sseBuffer.slice(nl + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") { streamDone = true; break; }
-          try {
-            const content = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
-            if (content) {
-              fullResponse += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant" && !last.options) return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: fullResponse } : m);
-                return [...prev, { role: "assistant", content: fullResponse }];
-              });
-            }
-          } catch { sseBuffer = line + "\n" + sseBuffer; break; }
-        }
-      }
+      if (!resp.ok) throw new Error("Erro na conexão");
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      fullResponse = data.reply || "";
 
       if (fullResponse) {
         extractAndApplyProfileUpdates(fullResponse);

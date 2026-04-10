@@ -13,7 +13,7 @@ import AutomataChartsPanel from "@/components/chat/AutomataChartsPanel";
 type Msg = { role: "user" | "assistant"; content: string; options?: string[] };
 
 const DAILY_LIMIT = 5;
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/litoranea-ai`;
 const MIC_MAX_OPEN_MS = 30000;
 const SILENCE_CANCEL_MS = 15000;
 const SPEECH_PAUSE_MS = 5000;

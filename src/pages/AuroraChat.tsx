@@ -297,6 +297,27 @@ const AuroraChat = () => {
         </div>
       )}
 
+      {/* Input bar */}
+      <div className="flex-shrink-0 relative z-20 px-3 py-2 bg-card/90 backdrop-blur-md border-t border-border">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && input.trim()) sendMessage(input); }}
+            placeholder="Digite ou fale..."
+            className="flex-1 bg-muted/50 border border-border rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <button
+            onClick={() => input.trim() && sendMessage(input)}
+            disabled={!input.trim() || isLoading}
+            className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 hover:bg-primary/90 active:scale-95 transition-all"
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
+
       {/* Footer with Aurora icon center */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border">
         <div className="max-w-md mx-auto flex items-center justify-around py-2 relative">

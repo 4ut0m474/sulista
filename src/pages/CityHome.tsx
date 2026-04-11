@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield, Compass } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
+import automataAvatar from "@/assets/automata-avatar.png";
+import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import NotificationModal from "@/components/NotificationModal";
 import { getCityData, type CityData } from "@/data/cities";
 

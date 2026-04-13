@@ -3,8 +3,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Store, Tag, Calendar, Map, TreePine, Phone, Mail, Moon, Sun, Star, ShoppingCart, Crown, Sparkles, Shield, Compass } from "lucide-react";
 import litoraneaAvatar from "@/assets/litoranea-avatar.png";
-import automataAvatar from "@/assets/automata-avatar.png";
-import auroraWarriorAvatar from "@/assets/aurora-warrior-avatar.png";
 import NotificationModal from "@/components/NotificationModal";
 import { getCityData, type CityData } from "@/data/cities";
 
@@ -208,26 +206,6 @@ const CityHome = () => {
             </div>
             <div className="flex items-center justify-between bg-card/90 backdrop-blur-sm rounded-2xl p-4 border border-border/50 shadow-card">
               <CityStateSwitcher currentState={state || ""} currentCity={city || ""} />
-            </div>
-
-            {/* AI Agents */}
-            <div className="flex items-center justify-center gap-6 mt-3">
-              {[
-                { avatar: litoraneaAvatar, label: "Litorânea", path: "litoranea" },
-                { avatar: auroraWarriorAvatar, label: "Aurora", path: "aurora" },
-                { avatar: automataAvatar, label: "Automata", path: "automata" },
-              ].map(agent => (
-                <button
-                  key={agent.path}
-                  onClick={() => navigate(`/city/${state}/${city}/${agent.path}`)}
-                  className="flex flex-col items-center gap-1 group"
-                >
-                  <div className="w-12 h-12 rounded-full border-2 border-primary/40 overflow-hidden bg-card/80 backdrop-blur-sm shadow-card group-hover:scale-110 group-active:scale-95 transition-all">
-                    <img src={agent.avatar} alt={agent.label} className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-[10px] font-bold text-foreground">{agent.label}</span>
-                </button>
-              ))}
             </div>
           </div>
         </header>

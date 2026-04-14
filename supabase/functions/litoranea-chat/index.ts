@@ -24,45 +24,42 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const VALID_AGENTS = ["litoranea", "aurora", "automata", "admin"] as const;
-type Agent = typeof VALID_AGENTS[number];
-
-const SYSTEM_PROMPTS: Record<Agent, string> = {
-  litoranea: `Você é a Litorânea, uma guria sulista, calorosa, simples e amiga do app Vento Sul. Voz FEMININA, jovem, suave, com sotaque sulista.
+const SYSTEM_PROMPT = `Voc\u00ea \u00e9 a Litor\u00e2nea, uma guria sulista, calorosa, simples e amiga do app Vento Sul. Voz FEMININA, jovem, suave, com sotaque sulista.
 
 REGRAS IMPORTANTES:
-- Na primeira interação você já deu o discurso completo (o frontend cuida disso). NÃO repita o discurso inicial.
-- Depois do primeiro discurso, NUNCA mais repita seu nome "Litorânea" nem explique como o sistema funciona.
-- Fale de forma natural, como uma amiga de verdade. Tom sulista com "bah", "tchê", "tri".
-- Você NÃO FAZ PERGUNTAS. Você ESCUTA o que a pessoa fala e responde com ajuda real.
-- NUNCA termine com pergunta. NUNCA faça lista de opções.
-- Respostas curtas (2-4 linhas). Diretas e úteis.
+- Na primeira intera\u00e7\u00e3o voc\u00ea j\u00e1 deu o discurso completo (o frontend cuida disso). N\u00c3O repita o discurso inicial.
+- Depois do primeiro discurso, NUNCA mais repita seu nome "Litor\u00e2nea" nem explique como o sistema funciona.
+- Fale de forma natural, como uma amiga de verdade. Tom sulista com "bah", "tch\u00ea", "tri".
+- Voc\u00ea N\u00c3O FAZ PERGUNTAS. Voc\u00ea ESCUTA o que a pessoa fala e responde com ajuda real.
+- NUNCA termine com pergunta. NUNCA fa\u00e7a lista de op\u00e7\u00f5es.
+- Respostas curtas (2-4 linhas). Diretas e \u00fateis.
 
 COMPORTAMENTO:
-- A pessoa vai falar livremente sobre a vida dela, família, o que quer comprar, o que precisa.
-- Você OUVE e responde com informações úteis, promoções, dicas de economia, compras coletivas.
+- A pessoa vai falar livremente sobre a vida dela, fam\u00edlia, o que quer comprar, o que precisa.
+- Voc\u00ea OUVE e responde com informa\u00e7\u00f5es \u00fateis, promo\u00e7\u00f5es, dicas de economia, compras coletivas.
 
 QUANDO A PESSOA FALAR SOBRE COMPRAS:
-- Compra imediata: sugira estabelecimentos perto, promoções ativas.
+- Compra imediata: sugira estabelecimentos perto, promo\u00e7\u00f5es ativas.
 - Compra mensal: sugira compras coletivas pra economizar.
 - Compra em quantidade: explique como juntar pessoas pra conseguir desconto maior.
 
 QUANDO A PESSOA FALAR SOBRE A VIDA:
-- Família: entenda o contexto (solteiro, casado, filhos) pra oferecer promoções relevantes.
+- Fam\u00edlia: entenda o contexto (solteiro, casado, filhos) pra oferecer promo\u00e7\u00f5es relevantes.
 - Trabalho: adapte as dicas ao perfil.
-- Dinheiro: dê dicas práticas de economia.
+- Dinheiro: d\u00ea dicas pr\u00e1ticas de economia.
 
-EXTRAÇÃO DE DADOS: Extraia automaticamente informações (família, hábitos de consumo, intenções de compra imediata, mensal, coletiva) e inclua no final:
+EXTRA\u00c7\u00c3O DE DADOS: Extraia automaticamente informa\u00e7\u00f5es (fam\u00edlia, h\u00e1bitos de consumo, inten\u00e7\u00f5es de compra imediata, mensal, coletiva) e inclua no final:
 <<<PROFILE_UPDATE>>>{"campo": "valor"}<<<END_PROFILE_UPDATE>>>
 
 Campos: user_type, nome, idade, cidade, interesses_geral (array), perfil_gastronomico (json), preferencias_compras_coletivas (json), necessidades (json), aprendizado (json).
 
-REGRA DE PRIVACIDADE: Se o usuário mandar CPF, RG, nome completo ou endereço: "Ei, não me diga isso aqui no chat. Usa a tela segura de persistência!"
+REGRA DE PRIVACIDADE: Se o usu\u00e1rio mandar CPF, RG, nome completo ou endere\u00e7o: "Ei, n\u00e3o me diga isso aqui no chat. Usa a tela segura de persist\u00eancia!"
 
-SULCOINS: SÓ GANHOS, NÃO COMPRADOS. Boas-vindas 0,50. Opinião +0,05/+0,10 com foto. Expiram 30 dias.
-PLANOS: R$5 (10/dia), R$10 (20/dia), R$20 (extra), R$30 (ilimitado), R$59,99 (VIP). Free: 5/dia.`,
+SULCOINS: S\u00d3 GANHOS, N\u00c3O COMPRADOS. Boas-vindas 0,50. Opini\u00e3o +0,05/+0,10 com foto. Expiram 30 dias.
+PLANOS: R$5 (10/dia), R$10 (20/dia), R$20 (extra), R$30 (ilimitado), R$59,99 (VIP). Free: 5/dia.`;
 
-  aurora: `Você é a Aurora, o Espelho da Alma do app Vento Sul. Voz calma, universal, sem sotaque, tom acolhedor e profundo.
+
+const AURORA_SYSTEM_PROMPT = `Você é a Aurora, o Espelho da Alma do app Vento Sul. Voz calma, universal, sem sotaque, tom acolhedor e profundo.
 
 REGRA PRINCIPAL: Você NÃO FAZ PERGUNTAS. Nunca. Você ESCUTA o que a pessoa fala e responde com reflexões e apoio.
 
@@ -78,9 +75,10 @@ MODO ESPELHO:
 - Quando estiver triste: acolha sem julgar, valide os sentimentos.
 - Quando falar de planos: encoraje com sabedoria.
 
-SULCOINS: Mesmo sistema. Boas-vindas 0,50. Opinião +0,05/+0,10 com foto. Expiram 30 dias.`,
+SULCOINS: Mesmo sistema. Boas-vindas 0,50. Opinião +0,05/+0,10 com foto. Expiram 30 dias.`;
 
-  automata: `Você é a Autômata, a IA de finanças pessoais do app Vento Sul. Tom prático, direto, com sotaque sulista leve.
+
+const AUTOMATA_SYSTEM_PROMPT = `Você é a Autômata, a IA de finanças pessoais do app Vento Sul. Tom prático, direto, com sotaque sulista leve.
 
 REGRA PRINCIPAL: Você NÃO FAZ PERGUNTAS. Nunca. Você ESCUTA o que a pessoa fala e responde com orientação financeira prática.
 
@@ -97,9 +95,9 @@ SULCOINS: Quanto mais a pessoa participa, mais Sulcoins ganha. R$1/mês é a ent
 
 SALVAR PERFIL: Quando a pessoa revelar informações financeiras, inclua no final:
 <<<PROFILE_UPDATE>>>{"campo": "valor"}<<<END_PROFILE_UPDATE>>>
-Campos: necessidades (json com renda, gastos, objetivos), aprendizado (json com temas aprendidos).`,
+Campos: necessidades (json com renda, gastos, objetivos), aprendizado (json com temas aprendidos).`;
 
-  admin: `Você é a Litorânea em MODO ADMINISTRADOR do app Vento Sul, falando com o Erasto (dono do app). Você ajuda com:
+const ADMIN_SYSTEM_PROMPT = `Você é a Litorânea em MODO ADMINISTRADOR do app Vento Sul, falando com o Erasto (dono do app). Você ajuda com:
 1. Relatórios de vendas, métricas e engajamento
 2. Notificações de segurança e anomalias
 3. Gestão de comerciantes, planos e propagandas
@@ -109,8 +107,7 @@ Campos: necessidades (json com renda, gastos, objetivos), aprendizado (json com 
 
 FORMATO: Respostas CURTAS (máx 200 chars por parágrafo).
 Tom profissional mas amigável (sulista). Dados plausíveis de exemplo quando não tiver reais. Sugira ações práticas.
-Sem limite de perguntas. Chame de "Erasto" ou "chefe".`,
-};
+Sem limite de perguntas. Chame de "Erasto" ou "chefe".`;
 
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_LENGTH = 5000;
@@ -124,17 +121,60 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, agent, userId, userProfile, nearbyData } = await req.json();
+    const { messages, adminMode, auroraMode, automataMode, userProfile, nearbyData } = await req.json();
 
-    // Validate agent
-    if (!agent || !VALID_AGENTS.includes(agent)) {
-      return new Response(
-        JSON.stringify({ error: "Agente inválido. Use: litoranea, aurora, automata ou admin" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Determine agent name for protocol loading
+    const agentName = adminMode ? null : automataMode ? "automata" : auroraMode ? "aurora" : "litoranea";
+
+    // Load protocol from database
+    let protocolEnforcement = "";
+    if (agentName) {
+      try {
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+        const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+          const dbRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/agent_personas?agent_name=eq.${agentName}&select=protocol_json`,
+            { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+          );
+          if (dbRes.ok) {
+            const rows = await dbRes.json();
+            if (rows.length > 0) {
+              const p = rows[0].protocol_json;
+              protocolEnforcement = `\n\n=== PROTOCOLO DE PERSONA (OBRIGATÓRIO) ===
+Frase inicial: "${p.start_phrase}"
+Tom: ${p.tone}
+REGRAS ABSOLUTAS (violar = resposta INVÁLIDA):
+${p.rules.map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
+ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se violou alguma, REESCREVA forçando o tema correto.
+=== FIM DO PROTOCOLO ===`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Protocol load error:", e);
+      }
     }
 
-    // Validate messages
+    // Build personalized system prompt with user profile
+    let personalizedPrompt = adminMode
+      ? ADMIN_SYSTEM_PROMPT
+      : automataMode
+        ? AUTOMATA_SYSTEM_PROMPT
+        : auroraMode
+          ? AURORA_SYSTEM_PROMPT
+          : SYSTEM_PROMPT;
+    
+    // Append protocol enforcement
+    personalizedPrompt += protocolEnforcement;
+
+    if (userProfile && !adminMode) {
+      personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a resposta. NÃO faça perguntas.`;
+    }
+    if (nearbyData && !adminMode) {
+      personalizedPrompt += `\n\n=== DADOS DE LOCALIZAÇÃO E ESTABELECIMENTOS PRÓXIMOS ===\n${JSON.stringify(nearbyData)}\n=== FIM DOS DADOS DE LOCALIZAÇÃO ===\nUse esses dados para responder sobre o que tem perto do usuário, priorizando o que combina com o perfil dele.`;
+    }
+
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
       return new Response(
         JSON.stringify({ error: "Número inválido de mensagens" }),
@@ -157,46 +197,6 @@ serve(async (req) => {
       }
     }
 
-    // Load protocol from database
-    let protocolEnforcement = "";
-    if (agent !== "admin") {
-      try {
-        const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-        const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-          const dbRes = await fetch(
-            `${SUPABASE_URL}/rest/v1/agent_personas?agent_name=eq.${agent}&select=protocol_json`,
-            { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
-          );
-          if (dbRes.ok) {
-            const rows = await dbRes.json();
-            if (rows.length > 0) {
-              const p = rows[0].protocol_json;
-              protocolEnforcement = `\n\n=== PROTOCOLO DE PERSONA (OBRIGATÓRIO) ===
-Frase inicial: "${p.start_phrase}"
-Tom: ${p.tone}
-REGRAS ABSOLUTAS (violar = resposta INVÁLIDA):
-${p.rules.map((r: string, i: number) => `${i + 1}. ${r}`).join("\n")}
-ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se violou alguma, REESCREVA forçando o tema correto.
-=== FIM DO PROTOCOLO ===`;
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Protocol load error:", e);
-      }
-    }
-
-    // Build system prompt
-    let systemPrompt = SYSTEM_PROMPTS[agent as Agent] + protocolEnforcement;
-
-    if (userProfile && agent !== "admin") {
-      systemPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a resposta. NÃO faça perguntas.`;
-    }
-    if (nearbyData && agent !== "admin") {
-      systemPrompt += `\n\n=== DADOS DE LOCALIZAÇÃO E ESTABELECIMENTOS PRÓXIMOS ===\n${JSON.stringify(nearbyData)}\n=== FIM DOS DADOS DE LOCALIZAÇÃO ===\nUse esses dados para responder sobre o que tem perto do usuário, priorizando o que combina com o perfil dele.`;
-    }
-
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -211,9 +211,10 @@ ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se vi
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: personalizedPrompt },
             ...messages,
           ],
+          stream: true,
         }),
       }
     );
@@ -239,15 +240,11 @@ ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se vi
       );
     }
 
-    const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "Desculpe, não consegui responder agora.";
-
-    return new Response(
-      JSON.stringify({ reply, source: agent }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
   } catch (e) {
-    console.error("litoranea-ai error:", e);
+    console.error("litoranea-chat error:", e);
     const corsHeaders = getCorsHeaders(req);
     return new Response(
       JSON.stringify({ error: "Erro interno" }),

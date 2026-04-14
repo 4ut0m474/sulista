@@ -3,7 +3,7 @@ project_id = "dgvqfawipufxoxklpnyn"
 [functions.verify-merchant-code]
 verify_jwt = false
 
-[functions.litoranea-ai]
+[functions.litoranea-chat]
 verify_jwt = false
 
 [functions.litoranea-security-review]

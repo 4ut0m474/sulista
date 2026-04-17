@@ -263,24 +263,36 @@ const LitoraneaChat = () => {
     setShowInlineInvite(false);
   };
 
+  const getInitialGreeting = useCallback((forceFirst = false): string => {
+    if (isAurora) {
+      return `Oi, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo, ninguém mais vê e nada é compartilhado.\n\nQuanto mais você falar sobre sua vida, sobre o que sente, o que te faz bem, o que te preocupa… mais eu consigo te ajudar de verdade.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
+    }
+    const LITORANEA_VISITED_KEY = "litoranea-has-visited";
+    const isFirstVisit = forceFirst || !localStorage.getItem(LITORANEA_VISITED_KEY);
+    if (isFirstVisit) {
+      return `Bah, tudo bem contigo? Eu tô aqui pra te ajudar a economizar de verdade no dia a dia.\n\nFunciona assim: quanto mais você me contar sobre sua vida e o que você costuma comprar ou quer comprar, mais eu consigo te juntar com outras pessoas e com os comerciantes pra fazer promoções e compras coletivas que deixam tudo mais barato pra você.\n\nPode me falar com calma:\n\nComo é sua família (se você é solteiro, casado, tem filhos, quantas pessoas moram junto...)\n\nO que vocês costumam comprar todo dia (lanche, almoço, janta, café...)\n\nO que não pode faltar no mês (arroz, carne, leite, produtos de limpeza, remédio...)\n\nCoisas que você pensa em comprar mais pra frente (tênis, celular, geladeira, bicicleta, móveis...)\n\nPode falar tudo que quiser. Quanto mais detalhes você me der, melhor eu consigo te ajudar. Se você não falar, eu não vou saber o que você precisa e não vou conseguir te incluir nas promoções e compras em grupo que estão rolando.\n\nFica tranquilo: tudo que você me conta fica protegido. Não vendo seus dados pra ninguém. Uso só pra te oferecer as melhores oportunidades.\n\nAgora é contigo. Pode falar bastante sobre sua rotina e o que você costuma comprar ou quer comprar. Eu tô te ouvindo de coração aberto.`;
+    }
+    return `E aí, vamos atualizar? Me conta o que mudou ou o que você tá pensando em comprar agora — pode ser pra hoje, pra essa semana, pro mês ou pra comprar junto com mais gente.`;
+  }, [isAurora]);
+
+  const playInitialGreeting = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    stopListening();
+    const fullGreeting = getInitialGreeting(true);
+    setMessages(prev => [...prev, { role: "assistant", content: fullGreeting }]);
+    setTimeout(() => speakText(fullGreeting, true), 300);
+  }, [getInitialGreeting, speakText, stopListening]);
+
   useEffect(() => {
     if (hasGreeted) return;
     setHasGreeted(true);
 
     const LITORANEA_VISITED_KEY = "litoranea-has-visited";
     const isFirstVisit = !localStorage.getItem(LITORANEA_VISITED_KEY);
+    if (!isAurora && isFirstVisit) localStorage.setItem(LITORANEA_VISITED_KEY, "1");
 
-    let greetingText: string;
-
-    if (isAurora) {
-      greetingText = `Oi, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo, ninguém mais vê e nada é compartilhado.\n\nQuanto mais você falar sobre sua vida, sobre o que sente, o que te faz bem, o que te preocupa… mais eu consigo te ajudar de verdade.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
-    } else if (isFirstVisit) {
-      localStorage.setItem(LITORANEA_VISITED_KEY, "1");
-      greetingText = `Bah, tudo bem contigo? Eu tô aqui pra te ajudar a economizar de verdade no dia a dia.\n\nFunciona assim: quanto mais você me contar sobre sua vida e o que você costuma comprar ou quer comprar, mais eu consigo te juntar com outras pessoas e com os comerciantes pra fazer promoções e compras coletivas que deixam tudo mais barato pra você.\n\nPode me falar com calma:\n\nComo é sua família (se você é solteiro, casado, tem filhos, quantas pessoas moram junto...)\n\nO que vocês costumam comprar todo dia (lanche, almoço, janta, café...)\n\nO que não pode faltar no mês (arroz, carne, leite, produtos de limpeza, remédio...)\n\nCoisas que você pensa em comprar mais pra frente (tênis, celular, geladeira, bicicleta, móveis...)\n\nPode falar tudo que quiser. Quanto mais detalhes você me der, melhor eu consigo te ajudar. Se você não falar, eu não vou saber o que você precisa e não vou conseguir te incluir nas promoções e compras em grupo que estão rolando.\n\nFica tranquilo: tudo que você me conta fica protegido. Não vendo seus dados pra ninguém. Uso só pra te oferecer as melhores oportunidades.\n\nAgora é contigo. Pode falar bastante sobre sua rotina e o que você costuma comprar ou quer comprar. Eu tô te ouvindo de coração aberto.`;
-    } else {
-      greetingText = `E aí, vamos atualizar? Me conta o que mudou ou o que você tá pensando em comprar agora — pode ser pra hoje, pra essa semana, pro mês ou pra comprar junto com mais gente.`;
-    }
-
+    const greetingText = getInitialGreeting(false);
     setMessages([{ role: "assistant", content: greetingText }]);
     setTimeout(() => speakText(greetingText, true), 600);
   }, [hasGreeted]); // eslint-disable-line

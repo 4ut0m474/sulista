@@ -530,6 +530,18 @@ const LitoraneaChat = () => {
           </button>
         </div>
 
+        {/* Replay initial greeting button (only Litorânea) */}
+        {!isAurora && (
+          <button
+            onClick={playInitialGreeting}
+            title="Ouvir discurso inicial"
+            aria-label="Ouvir discurso inicial"
+            className="p-1.5 rounded-full bg-primary/80 text-primary-foreground hover:bg-primary transition-all"
+          >
+            <Volume1 className="w-4 h-4" />
+          </button>
+        )}
+
         {/* Mic button */}
         <button
           onClick={handleMicButton}

@@ -267,13 +267,19 @@ const LitoraneaChat = () => {
     if (isAurora) {
       return `Oi, eu sou a Aurora. Fica tranquilo que aqui é bem seguro. Tudo que você falar fica só comigo, ninguém mais vê e nada é compartilhado.\n\nQuanto mais você falar sobre sua vida, sobre o que sente, o que te faz bem, o que te preocupa… mais eu consigo te ajudar de verdade.\n\nPode falar tudo que quiser, do jeito que quiser. Eu tô te ouvindo.`;
     }
+    const cityName = city ? decodeURIComponent(city) : "";
     const LITORANEA_VISITED_KEY = "litoranea-has-visited";
     const isFirstVisit = forceFirst || !localStorage.getItem(LITORANEA_VISITED_KEY);
+    const cityIntro = cityName
+      ? `Bah, tudo bem contigo? Aqui é a Litorânea de ${cityName}! Que bom te ver por aqui. 🌊\n\n`
+      : `Bah, tudo bem contigo? `;
     if (isFirstVisit) {
-      return `Bah, tudo bem contigo? Eu tô aqui pra te ajudar a economizar de verdade no dia a dia.\n\nFunciona assim: quanto mais você me contar sobre sua vida e o que você costuma comprar ou quer comprar, mais eu consigo te juntar com outras pessoas e com os comerciantes pra fazer promoções e compras coletivas que deixam tudo mais barato pra você.\n\nPode me falar com calma:\n\nComo é sua família (se você é solteiro, casado, tem filhos, quantas pessoas moram junto...)\n\nO que vocês costumam comprar todo dia (lanche, almoço, janta, café...)\n\nO que não pode faltar no mês (arroz, carne, leite, produtos de limpeza, remédio...)\n\nCoisas que você pensa em comprar mais pra frente (tênis, celular, geladeira, bicicleta, móveis...)\n\nPode falar tudo que quiser. Quanto mais detalhes você me der, melhor eu consigo te ajudar. Se você não falar, eu não vou saber o que você precisa e não vou conseguir te incluir nas promoções e compras em grupo que estão rolando.\n\nFica tranquilo: tudo que você me conta fica protegido. Não vendo seus dados pra ninguém. Uso só pra te oferecer as melhores oportunidades.\n\nAgora é contigo. Pode falar bastante sobre sua rotina e o que você costuma comprar ou quer comprar. Eu tô te ouvindo de coração aberto.`;
+      return `${cityIntro}Eu tô aqui pra te ajudar a economizar de verdade no dia a dia${cityName ? `, com tudo o que rola aqui em ${cityName}` : ""}.\n\nFunciona assim: quanto mais você me contar sobre sua vida e o que você costuma comprar ou quer comprar, mais eu consigo te juntar com outras pessoas e com os comerciantes daqui pra fazer promoções e compras coletivas que deixam tudo mais barato pra você.\n\nPode me falar com calma:\n\nComo é sua família (se você é solteiro, casado, tem filhos, quantas pessoas moram junto...)\n\nO que vocês costumam comprar todo dia (lanche, almoço, janta, café...)\n\nO que não pode faltar no mês (arroz, carne, leite, produtos de limpeza, remédio...)\n\nCoisas que você pensa em comprar mais pra frente (tênis, celular, geladeira, bicicleta, móveis...)\n\nPode falar tudo que quiser. Quanto mais detalhes você me der, melhor eu consigo te ajudar${cityName ? ` aqui em ${cityName}` : ""}. Fica tranquilo: tudo que você me conta fica protegido.\n\nAgora é contigo. Eu tô te ouvindo de coração aberto.`;
     }
-    return `E aí, vamos atualizar? Me conta o que mudou ou o que você tá pensando em comprar agora — pode ser pra hoje, pra essa semana, pro mês ou pra comprar junto com mais gente.`;
-  }, [isAurora]);
+    return cityName
+      ? `E aí, de volta em ${cityName}! Me conta o que mudou ou o que tu tá pensando em comprar agora — pode ser pra hoje, pra essa semana, pro mês ou pra juntar com mais gente daqui.`
+      : `E aí, vamos atualizar? Me conta o que mudou ou o que você tá pensando em comprar agora.`;
+  }, [isAurora, city]);
 
   const playInitialGreeting = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -377,7 +383,14 @@ const LitoraneaChat = () => {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, auroraMode: isAurora, userProfile: userProfile || {}, nearbyData }),
+        body: JSON.stringify({
+          messages: allMessages.map(m => ({ role: m.role, content: m.content })),
+          adminMode: false,
+          auroraMode: isAurora,
+          userProfile: userProfile || {},
+          nearbyData,
+          cityContext: { state: state || "", city: city ? decodeURIComponent(city) : "" },
+        }),
       });
 
       if (!resp.ok || !resp.body) throw new Error("Erro na conexão");

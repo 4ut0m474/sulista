@@ -168,6 +168,9 @@ ANTES DE RESPONDER: verifique se sua resposta segue TODAS as regras acima. Se vi
     // Append protocol enforcement
     personalizedPrompt += protocolEnforcement;
 
+    if (cityContext && cityContext.city && !adminMode) {
+      personalizedPrompt += `\n\n=== CONTEXTO DE LOCALIZAÇÃO (OBRIGATÓRIO) ===\nO usuário está agora na página da cidade: ${cityContext.city}${cityContext.state ? ` (${cityContext.state})` : ""}.\nVocê DEVE saber automaticamente que está conversando com alguém em ${cityContext.city}. NUNCA pergunte em qual cidade ele está. Se for a primeira mensagem dele, mencione ${cityContext.city} de forma calorosa e natural. Use referências locais quando fizer sentido.\n=== FIM DO CONTEXTO DE LOCALIZAÇÃO ===`;
+    }
     if (userProfile && !adminMode) {
       personalizedPrompt += `\n\n=== PERFIL ATUAL DO USUÁRIO (JSON) ===\n${JSON.stringify(userProfile)}\n=== FIM DO PERFIL ===\nUse esses dados para personalizar a resposta. NÃO faça perguntas.`;
     }

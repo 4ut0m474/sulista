@@ -383,7 +383,14 @@ const LitoraneaChat = () => {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ messages: allMessages.map(m => ({ role: m.role, content: m.content })), adminMode: false, auroraMode: isAurora, userProfile: userProfile || {}, nearbyData }),
+        body: JSON.stringify({
+          messages: allMessages.map(m => ({ role: m.role, content: m.content })),
+          adminMode: false,
+          auroraMode: isAurora,
+          userProfile: userProfile || {},
+          nearbyData,
+          cityContext: { state: state || "", city: city ? decodeURIComponent(city) : "" },
+        }),
       });
 
       if (!resp.ok || !resp.body) throw new Error("Erro na conexão");

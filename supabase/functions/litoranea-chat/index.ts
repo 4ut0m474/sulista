@@ -121,7 +121,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, adminMode, auroraMode, automataMode, userProfile, nearbyData } = await req.json();
+    const { messages, adminMode, auroraMode, automataMode, userProfile, nearbyData, cityContext } = await req.json();
 
     // Determine agent name for protocol loading
     const agentName = adminMode ? null : automataMode ? "automata" : auroraMode ? "aurora" : "litoranea";
